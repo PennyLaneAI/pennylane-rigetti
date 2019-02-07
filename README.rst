@@ -36,7 +36,7 @@ PennyLane-Forest requires both PennyLane and pyQuil. It can be installed via ``p
 Getting started
 ===============
 
-Once the PennyLane-Forest plugin is installed, the two provided pyQuil devices can be accessed straight away in PennyLane.
+Once the PennyLane-Forest plugin is installed, the three provided pyQuil devices can be accessed straight away in PennyLane.
 
 You can instantiate these devices for PennyLane as follows:
 
@@ -44,7 +44,7 @@ You can instantiate these devices for PennyLane as follows:
 
     import pennylane as qml
     dev_simulator = qml.device('forest.wavefunction', wires=2)
-    dev_qvm = qml.device('forest.qvm', device='complete', wires=2, shots=1000)
+    dev_qvm = qml.device('forest.qvm', device='2q-qvm', wires=2, shots=1000)
     dev_qpu = qml.device('forest.qpu', device='Aspen-0-12Q-A', shots=1000)
 
 These devices can then be used just like other devices for the definition and evaluation of QNodes within PennyLane. For more details, see the `plugin usage guide <https://pennylane-forest.readthedocs.io/en/latest/usage.html>`_ and refer to the PennyLane documentation.
