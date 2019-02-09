@@ -15,10 +15,10 @@ requirements = [
 info = {
     'name': 'PennyLane-Forest',
     'version': version,
-    'maintainer': 'Xanadu Inc.',
-    'maintainer_email': 'josh@xanadu.ai',
-    'url': 'http://xanadu.ai',
-    'license': 'Apache License 2.0',
+    'maintainer': 'Rigetti Computing Inc.',
+    'maintainer_email': 'sohaib@rigetti.com',
+    'url': 'http://rigetti.com',
+    'license': 'BSD 3-Clause',
     'packages': [
                     'pennylane_forest'
                 ],
@@ -29,7 +29,7 @@ info = {
             'forest.wavefunction = pennylane_forest:WavefunctionDevice',
             ],
         },
-    'description': 'Open source library for continuous-variable quantum computation',
+    'description': 'Rigetti backend for the PennyLane library',
     'long_description': open('README.rst').read(),
     'provides': ["pennylane_forest"],
     'install_requires': requirements,
