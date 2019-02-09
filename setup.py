@@ -44,7 +44,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: POSIX",
     "Operating System :: MacOS :: MacOS X",
