@@ -3,11 +3,13 @@
 Plugin usage
 ############
 
-PennyLane-Forest provides three Forest devices for PennyLane:
+PennyLane-Forest provides four Forest devices for PennyLane:
 
-* :class:`forest.wavefunction <~WavefunctionDevice>`: provides a PennyLane device for the PyQuil wavefunction simulator
+* :class:`forest.numpy <~NumpyWavefunctionDevice>`: provides a PennyLane device for the pyQVM Numpy wavefunction simulator
 
-* :class:`forest.qvm <~QVMDevice>`: provides a PennyLane device for the Forest QVM simulator
+* :class:`forest.wavefunction <~WavefunctionDevice>`: provides a PennyLane device for the Forest wavefunction simulator
+
+* :class:`forest.qvm <~QVMDevice>`: provides a PennyLane device for the Forest QVM and pyQuil pyQVM simulator
 
 * :class:`forest.qpu <~QPUDevice>`: provides a PennyLane device for Forest QPU hardware devices
 
@@ -20,9 +22,12 @@ Once PyQuil and the PennyLane plugin are installed, the three Forest devices can
 You can instantiate these devices in PennyLane as follows:
 
 >>> import pennylane as qml
->>> dev_sim = qml.device('forest.wavefunction', wires=4)
->>> dev_qvm = qml.device('forest.qvm', device='complete', wires=2)
->>> dev_qpu = qml.device('forest.qpu', device='Aspen-1-16Q-A')
+>>> dev_numpy = qml.device('forest.numpy', wires=2)
+>>> dev_simulator = qml.device('forest.wavefunction', wires=2)
+>>> dev_pyqvm = qml.device('forest.qvm', device='2q-pyqvm', shots=1000)
+>>> dev_qvm = qml.device('forest.qvm', device='2q-qvm', shots=1000)
+>>> dev_qpu = qml.device('forest.qpu', device='Aspen-0-12Q-A', shots=1000)
+
 
 
 These devices can then be used just like other devices for the definition and evaluation of QNodes within PennyLane.
@@ -62,7 +67,7 @@ It is also easy to perform abstract calculations on a physical Forest QPU:
 
 Note that:
 
-1. We import NumPy from PennyLane. This is a requirement, so that PennyLane can perform backpropagation in hybrid quantum-classical models.
+1. We import NumPy from PennyLane. This is a requirement, so that PennyLane can perform backpropagation in hybrid quantum-classical models. Alternatively, you may use the experimental PennyLane `PyTorch <https://pennylane.readthedocs.io/en/latest/code/interfaces/torch.html>`_ and `TensorFlow <https://pennylane.readthedocs.io/en/latest/code/interfaces/tfe.html>`_ interfaces.
 
 2. Additional Quil gates not provided directly in PennyLane are importable from :mod:`~.ops`. In this case, we import the :class:`~.PSWAP` gate.
 
@@ -109,6 +114,37 @@ On initialization, the PennyLane-Forest devices accept additional keyword argume
     on a provided QMI, these environment variables are set automatically and will also
     not need to be passed in PennyLane.
 
+.. note::
+
+    If using the pyQuil built-in pyQVM, you will still need to have an accessible Forest Quil compiler
+    server. This must be launched with the command ``quilc -S -P``, where the ``-P`` flag restricts
+    the input/output of the compiler to protoquil.
+
+
+The ``forest.numpy`` device
+===========================
+
+The ``forest.numpy`` device provides an interface between PennyLane and the pyQuil `NumPy wavefunction simulator <http://docs.rigetti.com/en/stable/wavefunction_simulator.html>`_. Because the NumPy wavefunction simulator allows access and manipulation of the underlying quantum state vector, ``forest.numpy`` is able to support the full suite of PennyLane and Quil quantum operations and expectation values.
+
+In addition, it is generally faster than running equivalent simulations on the QVM, as the final state can be inspected and the expectation value calculated analytically, rather than by sampling measurements.
+
+
+.. note::
+
+    Since the NumPy wavefunction simulator is written entirely in NumPy, no external
+    Quil compiler is required.
+
+
+.. note::
+
+    By default, ``forest.numpy`` is initialized with ``shots=0``, indicating
+    that the exact analytic expectation value is to be returned.
+
+    If the number of trials or shots provided to the ``forest.numpy`` is
+    instead non-zero, a spectral decomposition is performed and a Bernoulli distribution
+    is constructed and sampled. This allows the ``forest.numpy`` device to
+    'approximate' the effect of sampling the expectation value.
+
 
 The ``forest.wavefunction`` device
 ==================================
@@ -131,7 +167,7 @@ In addition, it is generally faster than running equivalent simulations on the Q
 The ``forest.qvm`` device
 =========================
 
-The ``forest.qvm`` device provides an interface between PennyLane and the Forest SDK `quantum virtual machine <http://docs.rigetti.com/en/stable/qvm.html>`_. The QVM is used to simulate various quantum abstract machines, ranging from simulations of physical QPUs to completely connected lattices.
+The ``forest.qvm`` device provides an interface between PennyLane and the Forest SDK `quantum virtual machine <http://docs.rigetti.com/en/stable/qvm.html>`_ or the pyQuil built-in pyQVM. The QVM is used to simulate various quantum abstract machines, ranging from simulations of physical QPUs to completely connected lattices.
 
 Note that, unlike ``forest.wavefunction``, you do not pass the number of wires - this is inferred automatically from the requested quantum computer topology.
 
@@ -145,6 +181,11 @@ In addition, you may also request a QVM with noise models to better simulate a p
 
 Note that only the `default noise models <http://docs.rigetti.com/en/stable/noise.html>`_ provided by pyQuil are currently supported.
 
+To specify the pyQVM, simply append ``pyqvm`` to the end of the device name instead of ``qvm``:
+
+>>> dev = qml.device('forest.qvm', device='4q-pyqvm')
+
+
 Choosing the quantum computer
 -----------------------------
 
@@ -155,6 +196,8 @@ When initializing the ``forest.qvm`` device, the following required keyword argu
 
     * ``Nq-qvm``: for a fully connected/unrestricted N-qubit QVM
     * ``9q-qvm-square``: a :math:`9\times 9` lattice.
+    * ``Nq-pyqvm`` or ``9q-pyqvm-square``, for the same as the above but run
+       via the built-in pyQuil pyQVM device.
     * Any other supported Rigetti device architecture, for
       example a QPU lattice such as ``'Aspen-1-16Q-A'``.
     * Graph topology (as a ``networkx.Graph`` object) representing the device architecture.

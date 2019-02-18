@@ -234,7 +234,7 @@ class ForestDevice(Device):
             self.active_wires = set(range(self.num_wires))
 
     @abc.abstractmethod
-    def pre_expval(self):
+    def pre_expval(self): #pragma no cover
         """Run the QVM or QPU"""
         raise NotImplementedError
 

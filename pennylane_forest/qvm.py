@@ -35,11 +35,17 @@ from ._version import __version__
 class QVMDevice(ForestDevice):
     r"""Forest QVM device for PennyLane.
 
+    This device supports both the Rigetti Lisp QVM, as well as the built-in pyQuil pyQVM.
+    If using the pyQVM, the ``qvm_url`` QVM server url keyword argument does not need to
+    be set.
+
     Args:
         device (Union[str, nx.Graph]): the name or topology of the device to initialise.
 
             * ``Nq-qvm``: for a fully connected/unrestricted N-qubit QVM
             * ``9q-qvm-square``: a :math:`9\times 9` lattice.
+            * ``Nq-pyqvm`` or ``9q-pyqvm-square``, for the same as the above but run
+              via the built-in pyQuil pyQVM device.
             * Any other supported Rigetti device architecture.
             * Graph topology representing the device architecture.
 

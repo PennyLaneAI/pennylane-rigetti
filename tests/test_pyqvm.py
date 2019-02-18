@@ -1,5 +1,5 @@
 """
-Unit tests for the QVM simulator device.
+Unit tests for the pyQVM simulator device.
 """
 import logging
 
@@ -18,16 +18,16 @@ import pennylane_forest as plf
 log = logging.getLogger(__name__)
 
 
-class TestQVMBasic(BaseTest):
-    """Unit tests for the QVM simulator."""
+class TestPyQVMBasic(BaseTest):
+    """Unit tests for the pyQVM simulator."""
     # pylint: disable=protected-access
 
-    def test_identity_expectation(self, shots, qvm, compiler):
+    def test_identity_expectation(self, shots, compiler):
         """Test that identity expectation value (i.e. the trace) is 1"""
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device='2q-qvm', shots=shots)
+        dev = plf.QVMDevice(device='2q-pyqvm', shots=shots)
         dev.apply('RX', wires=[0], par=[theta])
         dev.apply('RX', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
@@ -43,12 +43,12 @@ class TestQVMBasic(BaseTest):
         # below are the analytic expectation values for this circuit (trace should always be 1)
         self.assertAllAlmostEqual(res, np.array([1, 1]), delta=3/np.sqrt(shots))
 
-    def test_pauliz_expectation(self, shots, qvm, compiler):
+    def test_pauliz_expectation(self, shots, compiler):
         """Test that PauliZ expectation value is correct"""
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device='2q-qvm', shots=shots)
+        dev = plf.QVMDevice(device='2q-pyqvm', shots=shots)
         dev.apply('RX', wires=[0], par=[theta])
         dev.apply('RX', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
@@ -64,12 +64,12 @@ class TestQVMBasic(BaseTest):
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(res, np.array([np.cos(theta), np.cos(theta)*np.cos(phi)]), delta=3/np.sqrt(shots))
 
-    def test_paulix_expectation(self, shots, qvm, compiler):
+    def test_paulix_expectation(self, shots, compiler):
         """Test that PauliX expectation value is correct"""
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device='2q-qvm', shots=shots)
+        dev = plf.QVMDevice(device='2q-pyqvm', shots=shots)
         dev.apply('RY', wires=[0], par=[theta])
         dev.apply('RY', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
@@ -84,12 +84,12 @@ class TestQVMBasic(BaseTest):
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(res, np.array([np.sin(theta)*np.sin(phi), np.sin(phi)]), delta=3/np.sqrt(shots))
 
-    def test_pauliy_expectation(self, shots, qvm, compiler):
+    def test_pauliy_expectation(self, shots, compiler):
         """Test that PauliY expectation value is correct"""
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device='2q-qvm', shots=shots)
+        dev = plf.QVMDevice(device='2q-pyqvm', shots=shots)
         dev.apply('RX', wires=[0], par=[theta])
         dev.apply('RX', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
@@ -104,12 +104,12 @@ class TestQVMBasic(BaseTest):
         res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
         self.assertAllAlmostEqual(res, np.array([0, -np.cos(theta)*np.sin(phi)]), delta=3/np.sqrt(shots))
 
-    def test_hadamard_expectation(self, shots, qvm, compiler):
+    def test_hadamard_expectation(self, shots, compiler):
         """Test that Hadamard expectation value is correct"""
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device='2q-qvm', shots=shots)
+        dev = plf.QVMDevice(device='2q-pyqvm', shots=shots)
         dev.apply('RY', wires=[0], par=[theta])
         dev.apply('RY', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
@@ -125,12 +125,12 @@ class TestQVMBasic(BaseTest):
         expected = np.array([np.sin(theta)*np.sin(phi)+np.cos(theta), np.cos(theta)*np.cos(phi)+np.sin(phi)])/np.sqrt(2)
         self.assertAllAlmostEqual(res, expected, delta=3/np.sqrt(shots))
 
-    def test_hermitian_expectation(self, shots, qvm, compiler):
+    def test_hermitian_expectation(self, shots, compiler):
         """Test that arbitrary Hermitian expectation values are correct"""
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device='2q-qvm', shots=shots)
+        dev = plf.QVMDevice(device='2q-pyqvm', shots=shots)
         dev.apply('RY', wires=[0], par=[theta])
         dev.apply('RY', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
@@ -155,9 +155,9 @@ class TestQVMBasic(BaseTest):
         self.assertAllAlmostEqual(res, expected, delta=3/np.sqrt(shots))
 
     @pytest.mark.parametrize("gate", plf.QVMDevice._operation_map) #pylint: disable=protected-access
-    def test_apply(self, gate, apply_unitary, shots, qvm, compiler):
+    def test_apply(self, gate, apply_unitary, shots, compiler):
         """Test the application of gates"""
-        dev = plf.QVMDevice(device='3q-qvm', shots=shots)
+        dev = plf.QVMDevice(device='3q-pyqvm', shots=shots)
 
         try:
             # get the equivalent pennylane operation class
@@ -207,50 +207,13 @@ class TestQVMBasic(BaseTest):
 
 
 class TestQVMIntegration(BaseTest):
-    """Test the QVM simulator works correctly from the PennyLane frontend."""
+    """Test the pyQVM simulator works correctly from the PennyLane frontend."""
     #pylint: disable=no-self-use
 
-    def test_load_qvm_device(self):
-        """Test that the QVM device loads correctly"""
-        dev = qml.device('forest.qvm', device='2q-qvm')
-        self.assertEqual(dev.num_wires, 2)
-        self.assertEqual(dev.shots, 1024)
-        self.assertEqual(dev.short_name, 'forest.qvm')
-
-    def test_load_qvm_device_from_topology(self):
-        """Test that the QVM device, from an input topology, loads correctly"""
-        topology = nx.complete_graph(2)
-        dev = qml.device('forest.qvm', device=topology)
-        self.assertEqual(dev.num_wires, 2)
-        self.assertEqual(dev.shots, 1024)
-        self.assertEqual(dev.short_name, 'forest.qvm')
-
-    def test_load_virtual_qpu_device(self):
-        """Test that the QPU simulators load correctly"""
-        qml.device('forest.qvm', device='Aspen-1-2Q-B')
-
-    def test_incorrect_qc_name(self):
-        """Test that exception is raised if name is incorrect"""
-        with pytest.raises(ValueError, message="QVM device string does not indicate the number of qubits"):
-            qml.device('forest.qvm', device='Aspen-1-B')
-
-    def test_incorrect_qc_type(self):
-        """Test that exception is raised device is not a string or graph"""
-        with pytest.raises(ValueError, message="Required argument device must be a string"):
-            qml.device('forest.qvm', device=3)
-
-    def test_qvm_args(self):
-        """Test that the QVM plugin requires correct arguments"""
-        with pytest.raises(TypeError, message="missing 2 required positional arguments: 'device' and 'wires'"):
-            qml.device('forest.qvm')
-
-        with pytest.raises(ValueError, message="Number of shots must be a postive integer"):
-            qml.device('forest.qvm', '2q-qvm', shots=0)
-
-    def test_qubit_unitary(self, shots, qvm, compiler):
+    def test_qubit_unitary(self, shots, compiler):
         """Test that an arbitrary unitary operation works"""
-        dev1 = qml.device('forest.qvm', device='3q-qvm', shots=shots)
-        dev2 = qml.device('forest.qvm', device='9q-square-qvm', shots=shots)
+        dev1 = qml.device('forest.qvm', device='3q-pyqvm', shots=shots)
+        dev2 = qml.device('forest.qvm', device='9q-square-pyqvm', shots=shots)
 
         def circuit():
             """Reference QNode"""
@@ -268,8 +231,8 @@ class TestQVMIntegration(BaseTest):
         self.assertAllAlmostEqual(circuit1(), np.vdot(out_state, obs @ out_state), delta=3/np.sqrt(shots))
         self.assertAllAlmostEqual(circuit2(), np.vdot(out_state, obs @ out_state), delta=3/np.sqrt(shots))
 
-    @pytest.mark.parametrize('device', ['2q-qvm', 'Aspen-1-2Q-B'])
-    def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
+    @pytest.mark.parametrize('device', ['2q-pyqvm'])
+    def test_one_qubit_wavefunction_circuit(self, device, compiler):
         """Test that the wavefunction plugin provides correct result for simple circuit"""
         shots = 100000
         dev = qml.device('forest.qvm', device=device, shots=shots)

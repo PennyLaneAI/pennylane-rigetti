@@ -8,7 +8,7 @@ with open("pennylane_forest/_version.py") as f:
 
 
 requirements = [
-    "pyquil>=2.3",
+    "pyquil>=2.4",
     "pennylane>=0.2"
 ]
 
@@ -27,6 +27,7 @@ info = {
             'forest.qpu = pennylane_forest:QPUDevice',
             'forest.qvm = pennylane_forest:QVMDevice',
             'forest.wavefunction = pennylane_forest:WavefunctionDevice',
+            'forest.numpy = pennylane_forest:NumpyWavefunctionDevice'
             ],
         },
     'description': 'Rigetti backend for the PennyLane library',
