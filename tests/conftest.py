@@ -10,7 +10,7 @@ from scipy.linalg import expm, block_diag
 
 from pyquil import get_qc, Program
 from pyquil.gates import I as Id
-from pyquil.api import QVMConnection, QVMCompiler, local_qvm
+from pyquil.api import QVMConnection, LocalQVMCompiler, local_qvm
 from pyquil.api._config import PyquilConfig
 from pyquil.api._errors import UnknownApiError
 
@@ -139,7 +139,7 @@ def compiler():
     try:
         config = PyquilConfig()
         device = get_qc('3q-qvm').device
-        compiler = QVMCompiler(endpoint=config.compiler_url, device=device)
+        compiler = LocalQVMCompiler(endpoint=config.compiler_url, device=device)
         compiler.quil_to_native_quil(Program(Id(0)))
         return compiler
     except (RequestException, UnknownApiError, TypeError) as e:
