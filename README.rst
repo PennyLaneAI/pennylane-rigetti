@@ -1,6 +1,13 @@
 PennyLane Forest Plugin
 #######################
 
+.. image:: https://semaphoreci.com/api/v1/rigetti/pennylane-forest/branches/master/badge.svg
+    :alt: Build Status
+    :target: https://semaphoreci.com/rigetti/pennylane-forest
+
+.. image:: https://readthedocs.org/projects/pennylane-forest/badge/?version=latest
+    :alt: Documentation Status
+    :target: http://pennylane-forest.readthedocs.io/en/latest/?badge=latest
 
 Contains the PennyLane Forest plugin. This plugin allows three Rigetti devices to work with PennyLane - the wavefunction simulator, the Quantum Virtual Machine (QVM), and Quantum Processing Units (QPUs).
 
