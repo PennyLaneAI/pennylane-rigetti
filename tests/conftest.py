@@ -139,7 +139,7 @@ def compiler():
     try:
         config = PyquilConfig()
         device = get_qc('3q-qvm').device
-        compiler = QVMCompiler(endpoint=config.compiler_url, device=device)
+        compiler = QVMCompiler(endpoint=config.quilc_url, device=device)
         compiler.quil_to_native_quil(Program(Id(0)))
         return compiler
     except (RequestException, UnknownApiError, TypeError) as e:
