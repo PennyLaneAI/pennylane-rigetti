@@ -124,14 +124,14 @@ class TestWavefunctionIntegration(BaseTest):
 
     def test_load_wavefunction_device(self):
         """Test that the wavefunction device loads correctly"""
-        dev = qml.device('forest.numpy', wires=2)
+        dev = qml.device('forest.numpy_wavefunction', wires=2)
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 0)
-        self.assertEqual(dev.short_name, 'forest.numpy')
+        self.assertEqual(dev.short_name, 'forest.numpy_wavefunction')
 
     def test_program_property(self):
         """Test that the program property works as expected"""
-        dev = qml.device('forest.numpy', wires=2)
+        dev = qml.device('forest.numpy_wavefunction', wires=2)
 
         @qml.qnode(dev)
         def circuit():
@@ -150,11 +150,11 @@ class TestWavefunctionIntegration(BaseTest):
     def test_wavefunction_args(self):
         """Test that the wavefunction plugin requires correct arguments"""
         with pytest.raises(TypeError, message="missing 1 required positional argument: 'wires'"):
-            qml.device('forest.numpy')
+            qml.device('forest.numpy_wavefunction')
 
     def test_hermitian_expectation(self, tol):
         """Test that an arbitrary Hermitian expectation value works"""
-        dev = qml.device('forest.numpy', wires=1)
+        dev = qml.device('forest.numpy_wavefunction', wires=1)
 
         @qml.qnode(dev)
         def circuit():
@@ -168,7 +168,7 @@ class TestWavefunctionIntegration(BaseTest):
 
     def test_qubit_unitary(self, tol):
         """Test that an arbitrary unitary operation works"""
-        dev = qml.device('forest.numpy', wires=3)
+        dev = qml.device('forest.numpy_wavefunction', wires=3)
 
         @qml.qnode(dev)
         def circuit():
@@ -184,7 +184,7 @@ class TestWavefunctionIntegration(BaseTest):
 
     def test_invalid_qubit_unitary(self):
         """Test that an invalid unitary operation is not allowed"""
-        dev = qml.device('forest.numpy', wires=3)
+        dev = qml.device('forest.numpy_wavefunction', wires=3)
 
         def circuit(Umat):
             """Test QNode"""
@@ -205,7 +205,7 @@ class TestWavefunctionIntegration(BaseTest):
 
     def test_one_qubit_wavefunction_circuit(self, tol):
         """Test that the wavefunction plugin provides correct result for simple circuit"""
-        dev = qml.device('forest.numpy', wires=1)
+        dev = qml.device('forest.numpy_wavefunction', wires=1)
 
         a = 0.543
         b = 0.123
@@ -225,7 +225,7 @@ class TestWavefunctionIntegration(BaseTest):
     def test_two_qubit_wavefunction_circuit(self, tol):
         """Test that the wavefunction plugin provides correct result for simple 2-qubit circuit,
         even when the number of wires > number of qubits."""
-        dev = qml.device('forest.numpy', wires=3)
+        dev = qml.device('forest.numpy_wavefunction', wires=3)
 
         a = 0.543
         b = 0.123
@@ -248,7 +248,7 @@ class TestWavefunctionIntegration(BaseTest):
     def test_nonzero_shots(self):
         """Test that the wavefunction plugin provides correct result for high shot number"""
         shots = 10**2
-        dev = qml.device('forest.numpy', wires=1, shots=shots)
+        dev = qml.device('forest.numpy_wavefunction', wires=1, shots=shots)
 
         a = 0.543
         b = 0.123

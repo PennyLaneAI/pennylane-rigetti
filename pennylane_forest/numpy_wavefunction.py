@@ -38,7 +38,7 @@ class NumpyWavefunctionDevice(ForestDevice):
             to estimate expectation values of expectations.
     """
     name = 'pyQVM NumpyWavefunction Simulator Device'
-    short_name = 'forest.numpy'
+    short_name = 'forest.numpy_wavefunction'
 
     expectations = {'PauliX', 'PauliY', 'PauliZ', 'Hadamard', 'Hermitian', 'Identity'}
 
@@ -52,6 +52,11 @@ class NumpyWavefunctionDevice(ForestDevice):
         self.qc.wf_simulator.reset()
 
     def pre_expval(self):
+        # TODO: currently, the PyQVM considers qubit 0 as the leftmost bit and therefore
+        # returns amplitudes in the opposite of the Rigetti Lisp QVM (which considers qubit
+        # 0 as the rightmost bit). This may change in the future, so in the future this
+        # might need to get udpated to be similar to the pre_expval function of
+        #pennylane_forest/wavefunction.py
         self.state = self.qc.execute(self.prog).wf_simulator.wf.flatten()
 
     def expval(self, expectation, wires, par):

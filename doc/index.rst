@@ -16,7 +16,7 @@ This PennyLane plugin allows the Rigetti Forest and pyQuil simulators to be used
 Features
 ========
 
-* Provides four devices to be used with PennyLane: ``forest.numpy``, ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the pyQVM Numpy wavefunction simulator, Forest wavefunction simulator, quantum virtual machine (QVM), and quantum processing unit (QPU) respectively.
+* Provides four devices to be used with PennyLane: ``forest.numpy_wavefunction``, ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the pyQVM Numpy wavefunction simulator, Forest wavefunction simulator, quantum virtual machine (QVM), and quantum processing unit (QPU) respectively.
 
 
 * All provided devices support all core qubit PennyLane operations and expectation values.

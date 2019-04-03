@@ -27,7 +27,7 @@ info = {
             'forest.qpu = pennylane_forest:QPUDevice',
             'forest.qvm = pennylane_forest:QVMDevice',
             'forest.wavefunction = pennylane_forest:WavefunctionDevice',
-            'forest.numpy = pennylane_forest:NumpyWavefunctionDevice'
+            'forest.numpy_wavefunction = pennylane_forest:NumpyWavefunctionDevice'
             ],
         },
     'description': 'Rigetti backend for the PennyLane library',

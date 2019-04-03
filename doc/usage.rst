@@ -5,7 +5,7 @@ Plugin usage
 
 PennyLane-Forest provides four Forest devices for PennyLane:
 
-* :class:`forest.numpy <~NumpyWavefunctionDevice>`: provides a PennyLane device for the pyQVM Numpy wavefunction simulator
+* :class:`forest.numpy_wavefunction <~NumpyWavefunctionDevice>`: provides a PennyLane device for the pyQVM Numpy wavefunction simulator
 
 * :class:`forest.wavefunction <~WavefunctionDevice>`: provides a PennyLane device for the Forest wavefunction simulator
 
@@ -22,7 +22,7 @@ Once PyQuil and the PennyLane plugin are installed, the three Forest devices can
 You can instantiate these devices in PennyLane as follows:
 
 >>> import pennylane as qml
->>> dev_numpy = qml.device('forest.numpy', wires=2)
+>>> dev_numpy = qml.device('forest.numpy_wavefunction', wires=2)
 >>> dev_simulator = qml.device('forest.wavefunction', wires=2)
 >>> dev_pyqvm = qml.device('forest.qvm', device='2q-pyqvm', shots=1000)
 >>> dev_qvm = qml.device('forest.qvm', device='2q-qvm', shots=1000)
@@ -121,10 +121,10 @@ On initialization, the PennyLane-Forest devices accept additional keyword argume
     the input/output of the compiler to protoquil.
 
 
-The ``forest.numpy`` device
-===========================
+The ``forest.numpy_wavefunction`` device
+========================================
 
-The ``forest.numpy`` device provides an interface between PennyLane and the pyQuil `NumPy wavefunction simulator <http://docs.rigetti.com/en/stable/wavefunction_simulator.html>`_. Because the NumPy wavefunction simulator allows access and manipulation of the underlying quantum state vector, ``forest.numpy`` is able to support the full suite of PennyLane and Quil quantum operations and expectation values.
+The ``forest.numpy_wavefunction`` device provides an interface between PennyLane and the pyQuil `NumPy wavefunction simulator <http://docs.rigetti.com/en/stable/wavefunction_simulator.html>`_. Because the NumPy wavefunction simulator allows access and manipulation of the underlying quantum state vector, ``forest.numpy_wavefunction`` is able to support the full suite of PennyLane and Quil quantum operations and expectation values.
 
 In addition, it is generally faster than running equivalent simulations on the QVM, as the final state can be inspected and the expectation value calculated analytically, rather than by sampling measurements.
 
@@ -137,12 +137,12 @@ In addition, it is generally faster than running equivalent simulations on the Q
 
 .. note::
 
-    By default, ``forest.numpy`` is initialized with ``shots=0``, indicating
+    By default, ``forest.numpy_wavefunction`` is initialized with ``shots=0``, indicating
     that the exact analytic expectation value is to be returned.
 
-    If the number of trials or shots provided to the ``forest.numpy`` is
+    If the number of trials or shots provided to the ``forest.numpy_wavefunction`` is
     instead non-zero, a spectral decomposition is performed and a Bernoulli distribution
-    is constructed and sampled. This allows the ``forest.numpy`` device to
+    is constructed and sampled. This allows the ``forest.numpy_wavefunction`` device to
     'approximate' the effect of sampling the expectation value.
 
 
