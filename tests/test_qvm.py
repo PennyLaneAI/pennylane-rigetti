@@ -227,7 +227,7 @@ class TestQVMIntegration(BaseTest):
 
     def test_load_virtual_qpu_device(self):
         """Test that the QPU simulators load correctly"""
-        qml.device('forest.qvm', device='Aspen-1-2Q-B')
+        qml.device('forest.qvm', device='Aspen-3-2Q-C')
 
     def test_incorrect_qc_name(self):
         """Test that exception is raised if name is incorrect"""
@@ -268,7 +268,7 @@ class TestQVMIntegration(BaseTest):
         self.assertAllAlmostEqual(circuit1(), np.vdot(out_state, obs @ out_state), delta=3/np.sqrt(shots))
         self.assertAllAlmostEqual(circuit2(), np.vdot(out_state, obs @ out_state), delta=3/np.sqrt(shots))
 
-    @pytest.mark.parametrize('device', ['2q-qvm', 'Aspen-1-2Q-B'])
+    @pytest.mark.parametrize('device', ['2q-qvm', 'Aspen-3-2Q-C'])
     def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
         """Test that the wavefunction plugin provides correct result for simple circuit"""
         shots = 100000

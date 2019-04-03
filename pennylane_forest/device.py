@@ -169,13 +169,13 @@ class ForestDevice(Device):
 
     Keyword args:
         forest_url (str): the Forest URL server. Can also be set by
-            the environment variable ``FOREST_SERVER_URL``, or in the ``~/.qcs_config``
+            the environment variable ``FOREST_URL``, or in the ``~/.qcs_config``
             configuration file. Default value is ``"https://forest-server.qcs.rigetti.com"``.
         qvm_url (str): the QVM server URL. Can also be set by the environment
             variable ``QVM_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:5000"``.
-        compiler_url (str): the compiler server URL. Can also be set by the environment
-            variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
+        quilc_url (str): the compiler server URL. Can also be set by the environment
+            variable ``QUILC_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
     """
     pennylane_requires = '>=0.2'
@@ -186,9 +186,9 @@ class ForestDevice(Device):
 
     def __init__(self, wires, shots, **kwargs):
         super().__init__(wires, shots)
-        self.forest_url = kwargs.get('forest_url', pyquil_config.compiler_url)
+        self.forest_url = kwargs.get('forest_url', pyquil_config.forest_url)
         self.qvm_url = kwargs.get('qvm_url', pyquil_config.qvm_url)
-        self.compiler_url = kwargs.get('compiler_url', pyquil_config.compiler_url)
+        self.compiler_url = kwargs.get('compiler_url', pyquil_config.quilc_url)
 
         self.connection = ForestConnection(
             sync_endpoint=self.qvm_url,
