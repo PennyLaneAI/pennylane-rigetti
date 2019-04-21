@@ -22,7 +22,7 @@ class TestPyQVMBasic(BaseTest):
     """Unit tests for the pyQVM simulator."""
     # pylint: disable=protected-access
 
-    def test_identity_expectation(self, shots, compiler):
+    def test_identity_expectation(self, shots):
         """Test that identity expectation value (i.e. the trace) is 1"""
         theta = 0.432
         phi = 0.123
@@ -43,7 +43,7 @@ class TestPyQVMBasic(BaseTest):
         # below are the analytic expectation values for this circuit (trace should always be 1)
         self.assertAllAlmostEqual(res, np.array([1, 1]), delta=3/np.sqrt(shots))
 
-    def test_pauliz_expectation(self, shots, compiler):
+    def test_pauliz_expectation(self, shots):
         """Test that PauliZ expectation value is correct"""
         theta = 0.432
         phi = 0.123
@@ -64,7 +64,7 @@ class TestPyQVMBasic(BaseTest):
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(res, np.array([np.cos(theta), np.cos(theta)*np.cos(phi)]), delta=3/np.sqrt(shots))
 
-    def test_paulix_expectation(self, shots, compiler):
+    def test_paulix_expectation(self, shots):
         """Test that PauliX expectation value is correct"""
         theta = 0.432
         phi = 0.123
@@ -84,7 +84,7 @@ class TestPyQVMBasic(BaseTest):
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(res, np.array([np.sin(theta)*np.sin(phi), np.sin(phi)]), delta=3/np.sqrt(shots))
 
-    def test_pauliy_expectation(self, shots, compiler):
+    def test_pauliy_expectation(self, shots):
         """Test that PauliY expectation value is correct"""
         theta = 0.432
         phi = 0.123
@@ -104,7 +104,7 @@ class TestPyQVMBasic(BaseTest):
         res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
         self.assertAllAlmostEqual(res, np.array([0, -np.cos(theta)*np.sin(phi)]), delta=3/np.sqrt(shots))
 
-    def test_hadamard_expectation(self, shots, compiler):
+    def test_hadamard_expectation(self, shots):
         """Test that Hadamard expectation value is correct"""
         theta = 0.432
         phi = 0.123
@@ -125,7 +125,7 @@ class TestPyQVMBasic(BaseTest):
         expected = np.array([np.sin(theta)*np.sin(phi)+np.cos(theta), np.cos(theta)*np.cos(phi)+np.sin(phi)])/np.sqrt(2)
         self.assertAllAlmostEqual(res, expected, delta=3/np.sqrt(shots))
 
-    def test_hermitian_expectation(self, shots, compiler):
+    def test_hermitian_expectation(self, shots):
         """Test that arbitrary Hermitian expectation values are correct"""
         theta = 0.432
         phi = 0.123
@@ -155,7 +155,7 @@ class TestPyQVMBasic(BaseTest):
         self.assertAllAlmostEqual(res, expected, delta=3/np.sqrt(shots))
 
     @pytest.mark.parametrize("gate", plf.QVMDevice._operation_map) #pylint: disable=protected-access
-    def test_apply(self, gate, apply_unitary, shots, compiler):
+    def test_apply(self, gate, apply_unitary, shots):
         """Test the application of gates"""
         dev = plf.QVMDevice(device='3q-pyqvm', shots=shots)
 
@@ -210,7 +210,7 @@ class TestQVMIntegration(BaseTest):
     """Test the pyQVM simulator works correctly from the PennyLane frontend."""
     #pylint: disable=no-self-use
 
-    def test_qubit_unitary(self, shots, compiler):
+    def test_qubit_unitary(self, shots):
         """Test that an arbitrary unitary operation works"""
         dev1 = qml.device('forest.qvm', device='3q-pyqvm', shots=shots)
         dev2 = qml.device('forest.qvm', device='9q-square-pyqvm', shots=shots)
@@ -232,7 +232,7 @@ class TestQVMIntegration(BaseTest):
         self.assertAllAlmostEqual(circuit2(), np.vdot(out_state, obs @ out_state), delta=3/np.sqrt(shots))
 
     @pytest.mark.parametrize('device', ['2q-pyqvm'])
-    def test_one_qubit_wavefunction_circuit(self, device, compiler):
+    def test_one_qubit_wavefunction_circuit(self, device):
         """Test that the wavefunction plugin provides correct result for simple circuit"""
         shots = 100000
         dev = qml.device('forest.qvm', device=device, shots=shots)

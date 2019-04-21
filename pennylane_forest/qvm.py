@@ -158,9 +158,13 @@ class QVMDevice(ForestDevice):
             self.prog.inst(MEASURE(q, ro[i]))
 
         self.prog.wrap_in_numshots_loop(self.shots)
-        executable = self.qc.compile(self.prog)
 
-        bitstring_array = self.qc.run(executable=executable)
+        if "pyqvm" in self.qc.name:
+            bitstring_array = self.qc.run(self.prog)
+        else:
+            executable = self.qc.compile(self.prog)
+            bitstring_array = self.qc.run(executable=executable)
+
         self.state = {}
         for i, q in enumerate(qubits):
             self.state[q] = bitstring_array[:, i]

@@ -114,12 +114,6 @@ On initialization, the PennyLane-Forest devices accept additional keyword argume
     on a provided QMI, these environment variables are set automatically and will also
     not need to be passed in PennyLane.
 
-.. note::
-
-    If using the pyQuil built-in pyQVM, you will still need to have an accessible Forest Quil compiler
-    server. This must be launched with the command ``quilc -S -P``, where the ``-P`` flag restricts
-    the input/output of the compiler to protoquil.
-
 
 The ``forest.numpy_wavefunction`` device
 ========================================
