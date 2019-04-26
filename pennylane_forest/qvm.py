@@ -35,11 +35,17 @@ from ._version import __version__
 class QVMDevice(ForestDevice):
     r"""Forest QVM device for PennyLane.
 
+    This device supports both the Rigetti Lisp QVM, as well as the built-in pyQuil pyQVM.
+    If using the pyQVM, the ``qvm_url`` QVM server url keyword argument does not need to
+    be set.
+
     Args:
         device (Union[str, nx.Graph]): the name or topology of the device to initialise.
 
             * ``Nq-qvm``: for a fully connected/unrestricted N-qubit QVM
             * ``9q-qvm-square``: a :math:`9\times 9` lattice.
+            * ``Nq-pyqvm`` or ``9q-pyqvm-square``, for the same as the above but run
+              via the built-in pyQuil pyQVM device.
             * Any other supported Rigetti device architecture.
             * Graph topology representing the device architecture.
 
@@ -152,9 +158,13 @@ class QVMDevice(ForestDevice):
             self.prog.inst(MEASURE(q, ro[i]))
 
         self.prog.wrap_in_numshots_loop(self.shots)
-        executable = self.qc.compile(self.prog)
 
-        bitstring_array = self.qc.run(executable=executable)
+        if "pyqvm" in self.qc.name:
+            bitstring_array = self.qc.run(self.prog)
+        else:
+            executable = self.qc.compile(self.prog)
+            bitstring_array = self.qc.run(executable=executable)
+
         self.state = {}
         for i, q in enumerate(qubits):
             self.state[q] = bitstring_array[:, i]

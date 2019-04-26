@@ -19,11 +19,11 @@ Contains the PennyLane Forest plugin. This plugin allows three Rigetti devices t
 Features
 ========
 
-* Provides three devices to be used with PennyLane: ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the Forest wavefunction simulator, quantum virtual machine (QVM), and quantum processing unit (QPU) respectively.
+* Provides four devices to be used with PennyLane: ``forest.numpy_wavefunction``, ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the pyQVM Numpy wavefunction simulator, Forest wavefunction simulator, quantum virtual machine (QVM), and quantum processing unit (QPU) respectively.
 
-* All provided devices support all core qubit PennyLane operations.
 
-* In addition, ``forest.wavefunction`` supports all core qubit PennyLane expectation values. ``forest.qvm`` and ``forest.qpu`` only support ``PauliZ`` expectation values.
+* All provided devices support all core qubit PennyLane operations and expectation values.
+
 
 * Provides custom PennyLane operations to cover additional pyQuil operations: ``T``, ``S``, ``ISWAP``, ``CCNOT``, ``PSWAP``, and many more. Every custom operation supports analytic differentiation.
 
@@ -50,8 +50,10 @@ You can instantiate these devices for PennyLane as follows:
 .. code-block:: python
 
     import pennylane as qml
+    dev_numpy = qml.device('forest.numpy_wavefunction', wires=2)
     dev_simulator = qml.device('forest.wavefunction', wires=2)
-    dev_qvm = qml.device('forest.qvm', device='2q-qvm', wires=2, shots=1000)
+    dev_pyqvm = qml.device('forest.qvm', device='2q-pyqvm', shots=1000)
+    dev_qvm = qml.device('forest.qvm', device='2q-qvm', shots=1000)
     dev_qpu = qml.device('forest.qpu', device='Aspen-0-12Q-A', shots=1000)
 
 These devices can then be used just like other devices for the definition and evaluation of QNodes within PennyLane. For more details, see the `plugin usage guide <https://pennylane-forest.readthedocs.io/en/latest/usage.html>`_ and refer to the PennyLane documentation.
