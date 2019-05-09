@@ -14,8 +14,12 @@ from conftest import I, Z, H, U, U2, test_operation_map
 
 import pennylane_forest as plf
 
+import pyquil
+
 
 log = logging.getLogger(__name__)
+
+VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if 'qvm' not in qc]
 
 
 class TestQVMBasic(BaseTest):
@@ -227,7 +231,7 @@ class TestQVMIntegration(BaseTest):
 
     def test_load_virtual_qpu_device(self):
         """Test that the QPU simulators load correctly"""
-        qml.device('forest.qvm', device='Aspen-3-2Q-C')
+        qml.device('forest.qvm', device=np.random.choice(VALID_QPU_LATTICES))
 
     def test_incorrect_qc_name(self):
         """Test that exception is raised if name is incorrect"""
@@ -268,7 +272,7 @@ class TestQVMIntegration(BaseTest):
         self.assertAllAlmostEqual(circuit1(), np.vdot(out_state, obs @ out_state), delta=3/np.sqrt(shots))
         self.assertAllAlmostEqual(circuit2(), np.vdot(out_state, obs @ out_state), delta=3/np.sqrt(shots))
 
-    @pytest.mark.parametrize('device', ['2q-qvm', 'Aspen-3-2Q-C'])
+    @pytest.mark.parametrize('device', ['2q-qvm', np.random.choice(VALID_QPU_LATTICES)])
     def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
         """Test that the wavefunction plugin provides correct result for simple circuit"""
         shots = 100000
