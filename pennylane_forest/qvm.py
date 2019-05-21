@@ -168,7 +168,6 @@ class QVMDevice(ForestDevice):
         self.state = {}
         for i, q in enumerate(qubits):
             self.state[q] = bitstring_array[:, i]
-
     def expval(self, expectation, wires, par):
         if len(wires) == 1:
             # 1 qubit observable
@@ -199,6 +198,27 @@ class QVMDevice(ForestDevice):
         # Eventually, we will also support tensor products of Pauli
         # matrices in the PennyLane UI.
 
+        probs = self.probabilities(wires)
+
+        if expectation == 'Hermitian':
+            Hkey = tuple(par[0].flatten().tolist())
+            w = self._eigs[Hkey]['eigval']
+            # <A> = \sum_i w_i p_i
+            return w @ probs
+
+    def probabilities(self, wires):
+        """Returns the (marginal) probabilities of the quantum state.
+
+        Args:
+            wires (Sequence[int]): sequence of wires to return
+                marginal probabilities for. Wires not provided
+                are traced out of the system.
+
+        Returns:
+            array: array of shape ``[2**len(wires)]`` containing
+            the probabilities of each computational basis state
+        """
+
         # create an array of size [2^len(wires), 2] to store
         # the resulting probability of each computational basis state
         probs = np.zeros([2**len(wires), 2])
@@ -219,8 +239,4 @@ class QVMDevice(ForestDevice):
         probs = probs[probs[:, 0].argsort()] / self.shots
         probs = probs[:, 1]
 
-        if expectation == 'Hermitian':
-            Hkey = tuple(par[0].flatten().tolist())
-            w = self._eigs[Hkey]['eigval']
-            # <A> = \sum_i w_i p_i
-            return w @ probs
+        return probs
