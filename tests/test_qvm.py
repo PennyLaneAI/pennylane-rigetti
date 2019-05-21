@@ -163,7 +163,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device='2q-qvm', shots=shots)
+        dev = plf.QVMDevice(device='2q-qvm', shots=10*shots)
         dev.apply('RY', wires=[0], par=[theta])
         dev.apply('RY', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
@@ -185,8 +185,6 @@ class TestQVMBasic(BaseTest):
         # Hermitian observable A
         expected = 0.5*(6*np.cos(theta)*np.sin(phi)-np.sin(theta)*(8*np.sin(phi)+7*np.cos(phi)+3) \
                     -2*np.sin(phi)-6*np.cos(phi)-6)
-
-        print(res, expected)
 
         self.assertAllAlmostEqual(res, expected, delta=4/np.sqrt(shots))
 
