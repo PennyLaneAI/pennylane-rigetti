@@ -234,7 +234,7 @@ class TestQVMBasic(BaseTest):
         expected = 0.5*(2*np.sin(2*theta)*np.cos(phi)**2+24*np.sin(phi)\
                     *np.cos(phi)*(np.sin(theta)-np.cos(theta))+35*np.cos(2*phi)+39)
 
-        self.assertAlmostEqual(var, expected, delta=0.1)
+        self.assertAlmostEqual(var, expected, delta=0.2)
 
     @pytest.mark.parametrize("gate", plf.QVMDevice._operation_map) #pylint: disable=protected-access
     def test_apply(self, gate, apply_unitary, shots, qvm, compiler):
