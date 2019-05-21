@@ -186,8 +186,6 @@ class TestQVMBasic(BaseTest):
         expected = 0.5*(6*np.cos(theta)*np.sin(phi)-np.sin(theta)*(8*np.sin(phi)+7*np.cos(phi)+3) \
                     -2*np.sin(phi)-6*np.cos(phi)-6)
 
-        print(res, expected)
-
         self.assertAllAlmostEqual(res, expected, delta=4/np.sqrt(shots))
 
     def test_var(self, shots):

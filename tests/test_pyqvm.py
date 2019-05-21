@@ -154,6 +154,36 @@ class TestPyQVMBasic(BaseTest):
 
         self.assertAllAlmostEqual(res, expected, delta=3/np.sqrt(shots))
 
+    def test_multi_mode_hermitian_expectation(self, shots, qvm, compiler):
+        """Test that arbitrary multi-mode Hermitian expectation values are correct"""
+        theta = 0.432
+        phi = 0.123
+
+        dev = plf.QVMDevice(device='2q-pyqvm', shots=10*shots)
+        dev.apply('RY', wires=[0], par=[theta])
+        dev.apply('RY', wires=[1], par=[phi])
+        dev.apply('CNOT', wires=[0, 1], par=[])
+
+        O = qml.expval.qubit.Hermitian
+        name = 'Hermitian'
+
+        A = np.array([[-6, 2+1j, -3, -5+2j],
+                      [2-1j, 0, 2-1j, -5+4j],
+                      [-3, 2+1j, 0, -4+3j],
+                      [-5-2j, -5-4j, -4-3j, -6]])
+
+        dev._expval_queue = [O(A, wires=[0, 1], do_queue=False)]
+        dev.pre_expval()
+
+        res = np.array([dev.expval(name, [0, 1], [A])])
+
+        # below is the analytic expectation value for this circuit with arbitrary
+        # Hermitian observable A
+        expected = 0.5*(6*np.cos(theta)*np.sin(phi)-np.sin(theta)*(8*np.sin(phi)+7*np.cos(phi)+3) \
+                    -2*np.sin(phi)-6*np.cos(phi)-6)
+
+        self.assertAllAlmostEqual(res, expected, delta=4/np.sqrt(shots))
+
     def test_var(self, shots):
         """Tests for variance calculation"""
         dev = plf.QVMDevice(device='2q-pyqvm', shots=shots)
