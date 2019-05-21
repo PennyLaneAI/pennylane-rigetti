@@ -168,6 +168,7 @@ class QVMDevice(ForestDevice):
         self.state = {}
         for i, q in enumerate(qubits):
             self.state[q] = bitstring_array[:, i]
+
     def expval(self, expectation, wires, par):
         if len(wires) == 1:
             # 1 qubit observable
