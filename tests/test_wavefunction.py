@@ -145,6 +145,32 @@ class TestWavefunctionBasic(BaseTest):
         # verify the device is now in the expected state
         self.assertAllAlmostEqual(dev.state, expected_out, delta=tol)
 
+    def test_var(self, tol):
+        """Tests for variance calculation"""
+        dev = plf.NumpyWavefunctionDevice(wires=2)
+
+        # test correct variance for <Z> of a rotated state
+        phi = 0.543
+        theta = 0.6543
+        dev.apply('RX', wires=[0], par=[phi])
+        dev.apply('RY', wires=[0], par=[theta])
+
+        var = dev.var('PauliZ', [0], [])
+        expected = 0.25*(3-np.cos(2*theta)-2*np.cos(theta)**2*np.cos(2*phi))
+
+        self.assertAlmostEqual(var, expected, delta=tol)
+
+        # test correct variance for <H> of a rotated state
+        H = np.array([[4, -1+6j], [-1-6j, 2]])
+        dev.apply('RX', wires=[0], par=[phi])
+        dev.apply('RY', wires=[0], par=[theta])
+
+        var = dev.var('Hermitian', [0], [H])
+        expected = 0.5*(2*np.sin(2*theta)*np.cos(phi)**2+24*np.sin(phi)\
+                    *np.cos(phi)*(np.sin(theta)-np.cos(theta))+35*np.cos(2*phi)+39)
+
+        self.assertAlmostEqual(var, expected, delta=tol)
+
 
 class TestWavefunctionIntegration(BaseTest):
     """Test the wavefunction simulator works correctly from the PennyLane frontend."""

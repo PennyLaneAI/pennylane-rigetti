@@ -79,6 +79,16 @@ class NumpyWavefunctionDevice(ForestDevice):
 
         return ev
 
+    def var(self, expectation, wires, par):
+        # variance of the expectation value <psi|A|psi>
+        if expectation == 'Hermitian':
+            A = par[0]
+        else:
+            A = expectation_map[expectation]
+
+        var = self.ev(A@A, wires) - self.ev(A, wires)**2
+        return var
+
     def ev(self, A, wires):
         r"""Evaluates a one-qubit expectation in the current state.
 

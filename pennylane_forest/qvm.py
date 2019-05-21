@@ -188,3 +188,30 @@ class QVMDevice(ForestDevice):
             return w[0]*p0 + w[1]*p1
 
         return evZ
+
+    def var(self, expectation, wires, par):
+        if expectation == 'Identity':
+            return 0
+
+        varZ = np.var(1-2*self.state[wires[0]])
+
+        if expectation in {'PauliX', 'PauliY', 'PauliZ', 'Hadamard'}:
+            return varZ
+
+        # for single qubit state probabilities |psi|^2 = (p0, p1),
+        # we know that p0+p1=1 and that <Z>=p0-p1
+        evZ = np.mean(1-2*self.state[wires[0]])
+        p0 = (1+evZ)/2
+        p1 = (1-evZ)/2
+
+        if expectation == 'Identity':
+            # <I> = \sum_i p_i
+            return p0+p1
+
+        if expectation == 'Hermitian':
+            # <H> = \sum_i w_i p_i
+            Hkey = tuple(par[0].flatten().tolist())
+            w = self._eigs[Hkey]['eigval']
+            return w[0]*p0 + w[1]*p1
+
+        return evZ
