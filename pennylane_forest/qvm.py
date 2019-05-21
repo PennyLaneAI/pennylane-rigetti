@@ -110,21 +110,21 @@ class QVMDevice(ForestDevice):
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
         for e in self.expval_queue:
-            wire = [e.wires[0]]
+            wires = e.wires
 
             if e.name == 'PauliX':
                 # X = H.Z.H
-                self.apply('Hadamard', wire, [])
+                self.apply('Hadamard', wires, [])
 
             elif e.name == 'PauliY':
                 # Y = (HS^)^.Z.(HS^) and S^=SZ
-                self.apply('PauliZ', wire, [])
-                self.apply('S', wire, [])
-                self.apply('Hadamard', wire, [])
+                self.apply('PauliZ', wires, [])
+                self.apply('S', wires, [])
+                self.apply('Hadamard', wires, [])
 
             elif e.name == 'Hadamard':
                 # H = Ry(-pi/4)^.Z.Ry(-pi/4)
-                self.apply('RY', wire, [-np.pi/4])
+                self.apply('RY', wires, [-np.pi/4])
 
             elif e.name == 'Hermitian':
                 # For arbitrary Hermitian matrix H, let U be the unitary matrix
@@ -143,7 +143,7 @@ class QVMDevice(ForestDevice):
                     self._eigs[Hkey] = {'eigval': w, 'eigvec': U}
 
                 # Perform a change of basis before measuring by applying U^ to the circuit
-                self.apply('QubitUnitary', wire, [U.conj().T])
+                self.apply('QubitUnitary', wires, [U.conj().T])
 
         prag = Program(Pragma('INITIAL_REWIRING', ['"PARTIAL"']))
 
@@ -170,24 +170,60 @@ class QVMDevice(ForestDevice):
             self.state[q] = bitstring_array[:, i]
 
     def expval(self, expectation, wires, par):
-        evZ = np.mean(1-2*self.state[wires[0]])
+        if len(wires) == 1:
+            # 1 qubit observable
+            evZ = np.mean(1-2*self.state[wires[0]])
 
-        # for single qubit state probabilities |psi|^2 = (p0, p1),
-        # we know that p0+p1=1 and that <Z>=p0-p1
-        p0 = (1+evZ)/2
-        p1 = (1-evZ)/2
+            # for single qubit state probabilities |psi|^2 = (p0, p1),
+            # we know that p0+p1=1 and that <Z>=p0-p1
+            p0 = (1+evZ)/2
+            p1 = (1-evZ)/2
 
-        if expectation == 'Identity':
-            # <I> = \sum_i p_i
-            return p0+p1
+            if expectation == 'Identity':
+                # <I> = \sum_i p_i
+                return p0+p1
+
+            if expectation == 'Hermitian':
+                # <H> = \sum_i w_i p_i
+                Hkey = tuple(par[0].flatten().tolist())
+                w = self._eigs[Hkey]['eigval']
+                return w[0]*p0 + w[1]*p1
+
+            return evZ
+
+        # Multi-qubit observable
+        # ----------------------
+        # Currently, we only support qml.expval.Hermitian(A, wires),
+        # where A is a 2^N x 2^N matrix acting on N wires.
+        #
+        # Eventually, we will also support tensor products of Pauli
+        # matrices in the PennyLane UI.
+
+        # create an array of size [2^len(wires), 2] to store
+        # the resulting probability of each computational basis state
+        probs = np.zeros([2**len(wires), 2])
+        probs[:, 0] = np.arange(2**len(wires))
+
+        # extract the measured samples
+        res = np.array([self.state[w] for w in wires]).T
+        for i in res:
+            # for each sample, calculate which
+            # computational basis state it corresponds to
+            cb = np.sum(2**np.arange(len(wires)-1, -1, -1)*i)
+            # add a tally for this computational basis state
+            # to our array of basis probabilities
+            probs[cb, 1] += 1
+
+        # sort the probabilities by the first column,
+        # and divide by the number of shots
+        probs = probs[probs[:, 0].argsort()] / self.shots
+        probs = probs[:, 1]
 
         if expectation == 'Hermitian':
-            # <H> = \sum_i w_i p_i
             Hkey = tuple(par[0].flatten().tolist())
             w = self._eigs[Hkey]['eigval']
-            return w[0]*p0 + w[1]*p1
-
-        return evZ
+            # <A> = \sum_i w_i p_i
+            return w @ probs
 
     def var(self, expectation, wires, par):
         if expectation == 'Identity':
