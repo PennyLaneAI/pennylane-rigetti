@@ -27,6 +27,7 @@ from pyquil import get_qc
 from pyquil.api._quantum_computer import _get_qvm_with_topology
 from pyquil.gates import MEASURE, RESET
 from pyquil.quil import Pragma, Program
+from pyquil.pyqvm import PyQVM
 
 from .device import ForestDevice
 from ._version import __version__
@@ -102,9 +103,13 @@ class QVMDevice(ForestDevice):
         if isinstance(device, nx.Graph):
             self.qc = _get_qvm_with_topology('device', topology=device, noisy=noisy, connection=self.connection)
         elif isinstance(device, str):
-            self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
+            if "pyqvm" in device:
+                self.qc = PyQVM(n_qubits=num_wires)
+            else:
+                self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
 
         self.active_reset = False
+        self.device_name = device
 
     def pre_expval(self):
         """Run the QVM"""
@@ -159,8 +164,14 @@ class QVMDevice(ForestDevice):
 
         self.prog.wrap_in_numshots_loop(self.shots)
 
-        if "pyqvm" in self.qc.name:
-            bitstring_array = self.qc.run(self.prog)
+        if "pyqvm" in self.device_name:
+            # TODO: clarify the best way to load
+            # and run the pyqvm
+            self.qc.load(self.prog)
+            self.qc.run()
+            # NOTE: this is broken! currently,
+            # PyQVM doesn't set self._bitstrings for some reason
+            bitstring_array = self.qc._bitstrings
         else:
             executable = self.qc.compile(self.prog)
             bitstring_array = self.qc.run(executable=executable)

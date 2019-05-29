@@ -13,6 +13,7 @@ from pyquil.gates import I as Id
 from pyquil.api import QVMConnection, QVMCompiler, local_qvm
 from pyquil.api._config import PyquilConfig
 from pyquil.api._errors import UnknownApiError
+from pyquil.api._qvm import QVMNotRunning
 
 
 # defaults
@@ -130,7 +131,7 @@ def qvm():
         qvm = QVMConnection(random_seed=52)
         qvm.run(Program(Id(0)), [])
         return qvm
-    except (RequestException, UnknownApiError, TypeError) as e:
+    except (RequestException, UnknownApiError, QVMNotRunning, TypeError) as e:
         return pytest.skip("This test requires QVM connection: {}".format(e))
 
 
@@ -142,7 +143,7 @@ def compiler():
         compiler = QVMCompiler(endpoint=config.quilc_url, device=device)
         compiler.quil_to_native_quil(Program(Id(0)))
         return compiler
-    except (RequestException, UnknownApiError, TypeError) as e:
+    except (RequestException, UnknownApiError, QVMNotRunning, TypeError) as e:
         return pytest.skip("This test requires compiler connection: {}".format(e))
 
 
