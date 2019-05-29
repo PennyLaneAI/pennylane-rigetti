@@ -13,7 +13,6 @@ from pyquil.gates import I as Id
 from pyquil.api import QVMConnection, QVMCompiler, local_qvm
 from pyquil.api._config import PyquilConfig
 from pyquil.api._errors import UnknownApiError
-# from pyquil.api._qvm import QVMNotRunning
 
 
 # defaults
