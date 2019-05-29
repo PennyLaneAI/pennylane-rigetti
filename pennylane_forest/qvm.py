@@ -181,7 +181,7 @@ class QVMDevice(ForestDevice):
 
             if expectation == 'Identity':
                 # <I> = \sum_i p_i
-                return p0+p1
+                return p0 + p1
 
             if expectation == 'Hermitian':
                 # <H> = \sum_i w_i p_i

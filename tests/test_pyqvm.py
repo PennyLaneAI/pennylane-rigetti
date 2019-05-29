@@ -18,6 +18,10 @@ import pennylane_forest as plf
 log = logging.getLogger(__name__)
 
 
+# make tests deterministic
+np.random.seed(42)
+
+
 class TestPyQVMBasic(BaseTest):
     """Unit tests for the pyQVM simulator."""
     # pylint: disable=protected-access
@@ -156,8 +160,8 @@ class TestPyQVMBasic(BaseTest):
 
     def test_multi_mode_hermitian_expectation(self, shots, qvm, compiler):
         """Test that arbitrary multi-mode Hermitian expectation values are correct"""
-        theta = 0.432
-        phi = 0.123
+        theta = np.random.random()
+        phi = np.random.random()
 
         dev = plf.QVMDevice(device='2q-pyqvm', shots=10*shots)
         dev.apply('RY', wires=[0], par=[theta])
