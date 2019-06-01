@@ -26,6 +26,8 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
+import itertools
+
 import numpy as np
 
 from pyquil.api import WavefunctionSimulator
@@ -169,11 +171,12 @@ class WavefunctionDevice(ForestDevice):
         r"""Expand a multi-qubit operator into a full system operator.
 
         Args:
-          U (array): :math:`2^n \times 2^n` matrix where n = wires.
-          wires (Sequence[int]): Target subsystems (order matters!)
+            U (array): :math:`2^n \times 2^n` matrix where n = len(wires).
+            wires (Sequence[int]): Target subsystems (order matters! the
+                left-most Hilbert space is at index 0).
 
         Returns:
-          array: :math:`2^N\times 2^N` matrix. The full system operator.
+            array: :math:`2^N\times 2^N` matrix. The full system operator.
         """
         if self.num_wires == 1:
             # total number of wires is 1, simply return the matrix
@@ -183,11 +186,13 @@ class WavefunctionDevice(ForestDevice):
         wires = np.asarray(wires)
 
         if np.any(wires < 0) or np.any(wires >= N) or len(set(wires)) != len(wires):
-            raise ValueError('Bad target subsystems.')
+            raise ValueError("Invalid target subsystems provided in 'wires' argument.")
+
+        if U.shape != (2**len(wires), 2**len(wires)):
+            raise ValueError("Matrix parameter must be of size (2**len(wires), 2**len(wires))")
 
         # generate N qubit basis states via the cartesian product
-        tuples = np.stack(np.meshgrid(*[[0, 1] for _ in range(N)]), -1).reshape(-1, N)
-        tuples[:, [0, 1]] = tuples[:, [1, 0]]
+        tuples = np.array(list(itertools.product([0, 1], repeat=N)))
 
         # wires not acted on by the operator
         inactive_wires = list(set(range(N))-set(wires))
@@ -196,10 +201,13 @@ class WavefunctionDevice(ForestDevice):
         U = np.kron(U, np.identity(2**len(inactive_wires)))
 
         # move active wires to beginning of the list of wires
-        rearanged_wires = np.array(list(wires)+inactive_wires)
+        rearranged_wires = np.array(list(wires)+inactive_wires)
 
         # convert to computational basis
-        perm = np.sum(2**np.arange(N-1, -1, -1)*tuples[:, rearanged_wires], axis=1)
+        # i.e., converting the list of basis state bit strings into
+        # a list of decimal numbers that correspond to the computational
+        # basis state. For example, [0, 1, 0, 1, 1] = 2^3+2^1+2^0 = 11.
+        perm = np.ravel_multi_index(tuples[:, rearranged_wires].T, [2]*N)
 
         # permute U to take into account rearranged wires
         return U[:, perm][perm]

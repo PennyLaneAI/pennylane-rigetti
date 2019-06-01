@@ -65,8 +65,12 @@ class TestWavefunctionBasic(BaseTest):
         self.assertAllAlmostEqual(res, expected, delta=tol)
 
         # test exception raised if unphysical subsystems provided
-        with pytest.raises(ValueError, match="Bad target subsystems."):
+        with pytest.raises(ValueError, match="Invalid target subsystems provided in 'wires' argument."):
             dev.expand(U2, [-1, 5])
+
+        # test exception raised if incorrect sized matrix provided
+        with pytest.raises(ValueError, match="Matrix parameter must be of size"):
+            dev.expand(U, [0, 1])
 
     def test_expand_three(self, tol):
         """Test that a 3 qubit gate correctly expands to 4 qubits."""
