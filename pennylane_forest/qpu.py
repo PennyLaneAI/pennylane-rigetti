@@ -71,5 +71,7 @@ class QPUDevice(QVMDevice):
 
         if load_qc:
             self.qc = get_qc(device, as_qvm=False, connection=self.connection)
+        else:
+            self.qc = get_qc(device, as_qvm=True, connection=self.connection)
 
         self.active_reset = active_reset
