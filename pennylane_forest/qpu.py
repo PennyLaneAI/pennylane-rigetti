@@ -55,6 +55,7 @@ class QPUDevice(ForestDevice):
     """
     name = 'Forest QPU Device'
     short_name = 'forest.qpu'
+    expectations = {'PauliX', 'PauliY', 'PauliZ', 'Identity', 'Hadamard', 'Hermitian'}
 
     def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, **kwargs):
         self._eigs = {}
@@ -77,3 +78,9 @@ class QPUDevice(ForestDevice):
             self.qc = get_qc(device, as_qvm=True, connection=self.connection)
 
         self.active_reset = active_reset
+
+    def pre_expval(self):
+        pass
+
+    def expval(self):
+        pass
