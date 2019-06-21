@@ -23,11 +23,12 @@ import re
 
 from pyquil import get_qc
 
-from .qvm import QVMDevice
+# from .qvm import QVMDevice
+from .device import ForestDevice
 from ._version import __version__
 
 
-class QPUDevice(QVMDevice):
+class QPUDevice(ForestDevice):
     r"""Forest QPU device for PennyLane.
 
     Args:
@@ -67,7 +68,8 @@ class QPUDevice(QVMDevice):
         aspen_match = re.match(r'Aspen-\d+-([\d]+)Q', device)
         num_wires = int(aspen_match.groups()[0])
 
-        super(QVMDevice, self).__init__(num_wires, shots, **kwargs) #pylint: disable=bad-super-call
+        # super(QVMDevice, self).__init__(num_wires, shots, **kwargs) #pylint: disable=bad-super-call
+        super().__init__(num_wires, shots, **kwargs)
 
         if load_qc:
             self.qc = get_qc(device, as_qvm=False, connection=self.connection)
