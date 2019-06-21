@@ -18,6 +18,10 @@ import pennylane_forest as plf
 log = logging.getLogger(__name__)
 
 
+# make tests deterministic
+np.random.seed(42)
+
+
 class TestPyQVMBasic(BaseTest):
     """Unit tests for the pyQVM simulator."""
     # pylint: disable=protected-access
@@ -130,7 +134,7 @@ class TestPyQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device='2q-pyqvm', shots=shots)
+        dev = plf.QVMDevice(device='2q-pyqvm', shots=5*shots)
         dev.apply('RY', wires=[0], par=[theta])
         dev.apply('RY', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
@@ -153,6 +157,36 @@ class TestPyQVMBasic(BaseTest):
         expected = np.array([ev1, ev2])
 
         self.assertAllAlmostEqual(res, expected, delta=3/np.sqrt(shots))
+
+    def test_multi_mode_hermitian_expectation(self, shots, qvm, compiler):
+        """Test that arbitrary multi-mode Hermitian expectation values are correct"""
+        theta = np.random.random()
+        phi = np.random.random()
+
+        dev = plf.QVMDevice(device='2q-pyqvm', shots=10*shots)
+        dev.apply('RY', wires=[0], par=[theta])
+        dev.apply('RY', wires=[1], par=[phi])
+        dev.apply('CNOT', wires=[0, 1], par=[])
+
+        O = qml.expval.qubit.Hermitian
+        name = 'Hermitian'
+
+        A = np.array([[-6, 2+1j, -3, -5+2j],
+                      [2-1j, 0, 2-1j, -5+4j],
+                      [-3, 2+1j, 0, -4+3j],
+                      [-5-2j, -5-4j, -4-3j, -6]])
+
+        dev._expval_queue = [O(A, wires=[0, 1], do_queue=False)]
+        dev.pre_expval()
+
+        res = np.array([dev.expval(name, [0, 1], [A])])
+
+        # below is the analytic expectation value for this circuit with arbitrary
+        # Hermitian observable A
+        expected = 0.5*(6*np.cos(theta)*np.sin(phi)-np.sin(theta)*(8*np.sin(phi)+7*np.cos(phi)+3) \
+                    -2*np.sin(phi)-6*np.cos(phi)-6)
+
+        self.assertAllAlmostEqual(res, expected, delta=4/np.sqrt(shots))
 
     @pytest.mark.parametrize("gate", plf.QVMDevice._operation_map) #pylint: disable=protected-access
     def test_apply(self, gate, apply_unitary, shots):

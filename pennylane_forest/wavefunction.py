@@ -26,6 +26,8 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
+import itertools
+
 import numpy as np
 
 from pyquil.api import WavefunctionSimulator
@@ -152,25 +154,50 @@ class WavefunctionDevice(ForestDevice):
           float: expectation value :math:`\left\langle{A}\right\rangle = \left\langle{\psi}\mid A\mid{\psi}\right\rangle`
         """
         # Expand the Hermitian observable over the entire subsystem
-        A = self.expand_one(A, wires)
+        A = self.expand(A, wires)
         return np.vdot(self.state, A @ self.state).real
 
-    def expand_one(self, U, wires):
-        r"""Expand a one-qubit operator into a full system operator.
+    def expand(self, U, wires):
+        r"""Expand a multi-qubit operator into a full system operator.
 
         Args:
-          U (array): :math:`2\times 2` matrix
-          wires (Sequence[int]): target subsystem
+            U (array): :math:`2^n \times 2^n` matrix where n = len(wires).
+            wires (Sequence[int]): Target subsystems (order matters! the
+                left-most Hilbert space is at index 0).
 
         Returns:
-          array: :math:`2^n\times 2^n` matrix
+            array: :math:`2^N\times 2^N` matrix. The full system operator.
         """
-        if U.shape != (2, 2):
-            raise ValueError('2x2 matrix required.')
-        if len(wires) != 1:
-            raise ValueError('One target subsystem required.')
-        wires = wires[0]
-        before = 2**wires
-        after = 2**(self.num_wires-wires-1)
-        U = np.kron(np.kron(np.eye(before), U), np.eye(after))
-        return U
+        if self.num_wires == 1:
+            # total number of wires is 1, simply return the matrix
+            return U
+
+        N = self.num_wires
+        wires = np.asarray(wires)
+
+        if np.any(wires < 0) or np.any(wires >= N) or len(set(wires)) != len(wires):
+            raise ValueError("Invalid target subsystems provided in 'wires' argument.")
+
+        if U.shape != (2**len(wires), 2**len(wires)):
+            raise ValueError("Matrix parameter must be of size (2**len(wires), 2**len(wires))")
+
+        # generate N qubit basis states via the cartesian product
+        tuples = np.array(list(itertools.product([0, 1], repeat=N)))
+
+        # wires not acted on by the operator
+        inactive_wires = list(set(range(N))-set(wires))
+
+        # expand U to act on the entire system
+        U = np.kron(U, np.identity(2**len(inactive_wires)))
+
+        # move active wires to beginning of the list of wires
+        rearranged_wires = np.array(list(wires)+inactive_wires)
+
+        # convert to computational basis
+        # i.e., converting the list of basis state bit strings into
+        # a list of decimal numbers that correspond to the computational
+        # basis state. For example, [0, 1, 0, 1, 1] = 2^3+2^1+2^0 = 11.
+        perm = np.ravel_multi_index(tuples[:, rearranged_wires].T, [2]*N)
+
+        # permute U to take into account rearranged wires
+        return U[:, perm][perm]
