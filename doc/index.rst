@@ -19,7 +19,7 @@ Features
 * Provides four devices to be used with PennyLane: ``forest.numpy_wavefunction``, ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the pyQVM Numpy wavefunction simulator, Forest wavefunction simulator, quantum virtual machine (QVM), and quantum processing unit (QPU) respectively.
 
 
-* All provided devices support all core qubit PennyLane operations and expectation values.
+* All provided devices support all core qubit PennyLane operations and observables.
 
 
 * Provides custom PennyLane operations to cover additional pyQuil operations: ``T``, ``S``, ``ISWAP``, ``CCNOT``, ``PSWAP``, and many more. Every custom operation supports analytic differentiation.
