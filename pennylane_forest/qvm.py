@@ -50,7 +50,7 @@ class QVMDevice(ForestDevice):
             * Graph topology representing the device architecture.
 
         shots (int): number of circuit evaluations/random samples used
-            to estimate expectation values of expectations.
+            to estimate expectation values of observables.
         noisy (bool): set to ``True`` to add noise models to your QVM.
 
     Keyword args:
@@ -66,7 +66,7 @@ class QVMDevice(ForestDevice):
     """
     name = 'Forest QVM Device'
     short_name = 'forest.qvm'
-    expectations = {'PauliX', 'PauliY', 'PauliZ', 'Identity', 'Hadamard', 'Hermitian'}
+    observables = {'PauliX', 'PauliY', 'PauliZ', 'Identity', 'Hadamard', 'Hermitian'}
 
     def __init__(self, device, *, shots=1024, noisy=False, **kwargs):
         self._eigs = {}
@@ -106,10 +106,10 @@ class QVMDevice(ForestDevice):
 
         self.active_reset = False
 
-    def pre_expval(self):
+    def pre_measure(self):
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
-        for e in self.expval_queue:
+        for e in self.obs_queue:
             wires = e.wires
 
             if e.name == 'PauliX':
@@ -169,7 +169,7 @@ class QVMDevice(ForestDevice):
         for i, q in enumerate(qubits):
             self.state[q] = bitstring_array[:, i]
 
-    def expval(self, expectation, wires, par):
+    def expval(self, observable, wires, par):
         if len(wires) == 1:
             # 1 qubit observable
             evZ = np.mean(1-2*self.state[wires[0]])
@@ -179,11 +179,11 @@ class QVMDevice(ForestDevice):
             p0 = (1+evZ)/2
             p1 = (1-evZ)/2
 
-            if expectation == 'Identity':
+            if observable == 'Identity':
                 # <I> = \sum_i p_i
                 return p0 + p1
 
-            if expectation == 'Hermitian':
+            if observable == 'Hermitian':
                 # <H> = \sum_i w_i p_i
                 Hkey = tuple(par[0].flatten().tolist())
                 w = self._eigs[Hkey]['eigval']
@@ -201,7 +201,7 @@ class QVMDevice(ForestDevice):
 
         probs = self.probabilities(wires)
 
-        if expectation == 'Hermitian':
+        if observable == 'Hermitian':
             Hkey = tuple(par[0].flatten().tolist())
             w = self._eigs[Hkey]['eigval']
             # <A> = \sum_i w_i p_i

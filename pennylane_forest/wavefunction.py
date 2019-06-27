@@ -43,7 +43,7 @@ Z = np.array([[1, 0], [0, -1]]) #: Pauli-Z matrix
 H = np.array([[1, 1], [1, -1]])/np.sqrt(2) # Hadamard matrix
 
 
-expectation_map = {'PauliX': X, 'PauliY': Y, 'PauliZ': Z, 'Identity': I, 'Hadamard': H}
+observable_map = {'PauliX': X, 'PauliY': Y, 'PauliZ': Z, 'Identity': I, 'Hadamard': H}
 
 
 def spectral_decomposition_qubit(A):
@@ -70,7 +70,7 @@ class WavefunctionDevice(ForestDevice):
     Args:
         wires (int): the number of qubits to initialize the device in
         shots (int): Number of circuit evaluations/random samples used
-            to estimate expectation values of expectations.
+            to estimate expectation values of observables.
 
     Keyword args:
         forest_url (str): the Forest URL server. Can also be set by
@@ -86,14 +86,14 @@ class WavefunctionDevice(ForestDevice):
     name = 'Forest Wavefunction Simulator Device'
     short_name = 'forest.wavefunction'
 
-    expectations = {'PauliX', 'PauliY', 'PauliZ', 'Hadamard', 'Hermitian', 'Identity'}
+    observables = {'PauliX', 'PauliY', 'PauliZ', 'Hadamard', 'Hermitian', 'Identity'}
 
     def __init__(self, wires, *, shots=0, **kwargs):
         super().__init__(wires, shots, **kwargs)
         self.qc = WavefunctionSimulator(connection=self.connection)
         self.state = None
 
-    def pre_expval(self):
+    def pre_measure(self):
         self.state = self.qc.wavefunction(self.prog).amplitudes
 
         # pyQuil uses the convention that the first qubit is the least significant
@@ -123,12 +123,11 @@ class WavefunctionDevice(ForestDevice):
 
         self.state = expanded_state
 
-    def expval(self, expectation, wires, par):
-        # measurement/expectation value <psi|A|psi>
-        if expectation == 'Hermitian':
+    def expval(self, observable, wires, par):
+        if observable == 'Hermitian':
             A = par[0]
         else:
-            A = expectation_map[expectation]
+            A = observable_map[observable]
 
         if self.shots == 0:
             # exact expectation value

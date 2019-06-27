@@ -110,7 +110,7 @@ class TestWavefunctionBasic(BaseTest):
         expected = np.kron(SWAP, np.kron(I, I)) @ np.kron(I, U_toffoli[:, rows][rows]) @ np.kron(SWAP, np.kron(I, I))
         self.assertAllAlmostEqual(res, expected, delta=tol)
 
-    @pytest.mark.parametrize("ev", plf.NumpyWavefunctionDevice.expectations)
+    @pytest.mark.parametrize("ev", plf.NumpyWavefunctionDevice.observables)
     def test_ev(self, ev, tol):
         """Test that expectation values are calculated correctly"""
         dev = plf.NumpyWavefunctionDevice(wires=2)
@@ -120,7 +120,7 @@ class TestWavefunctionBasic(BaseTest):
         dev.active_wires = {0, 1}
 
         # get the equivalent pennylane operation class
-        op = getattr(qml.expval.qubit, ev)
+        op = getattr(qml.ops.qubit, ev)
 
         O = test_operation_map[ev]
 
@@ -175,7 +175,7 @@ class TestWavefunctionBasic(BaseTest):
             expected_out = apply_unitary(O, 3)
 
         dev.apply(gate, wires=w, par=p)
-        dev.pre_expval()
+        dev.pre_measure()
 
         # verify the device is now in the expected state
         self.assertAllAlmostEqual(dev.state, expected_out, delta=tol)
@@ -201,7 +201,7 @@ class TestWavefunctionIntegration(BaseTest):
             """Test QNode"""
             qml.Hadamard(wires=0)
             qml.PauliY(wires=0)
-            return qml.expval.PauliX(0)
+            return qml.expval(qml.PauliX(0))
 
         self.assertEqual(len(dev.program), 0)
 
@@ -224,7 +224,7 @@ class TestWavefunctionIntegration(BaseTest):
             """Test QNode"""
             qml.Hadamard(wires=0)
             qml.PauliY(wires=0)
-            return qml.expval.Hermitian(H, 0)
+            return qml.expval(qml.Hermitian(H, 0))
 
         out_state = 1j*np.array([-1, 1])/np.sqrt(2)
         self.assertAllAlmostEqual(circuit(), np.vdot(out_state, H @ out_state), delta=tol)
@@ -239,7 +239,7 @@ class TestWavefunctionIntegration(BaseTest):
             qml.Hadamard(wires=0)
             qml.CNOT(wires=[0, 1])
             qml.QubitUnitary(U2, wires=[0, 1])
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         out_state = U2 @ np.array([1, 0, 0, 1])/np.sqrt(2)
         obs = np.kron(np.array([[1, 0], [0, -1]]), I)
@@ -252,7 +252,7 @@ class TestWavefunctionIntegration(BaseTest):
         def circuit(Umat):
             """Test QNode"""
             qml.QubitUnitary(Umat, wires=[0, 1])
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         circuit1 = qml.QNode(circuit, dev)
         with pytest.raises(ValueError, message="must be a square matrix"):
@@ -280,7 +280,7 @@ class TestWavefunctionIntegration(BaseTest):
             qml.BasisState(np.array([1]), wires=0)
             qml.Hadamard(wires=0)
             qml.Rot(x, y, z, wires=0)
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         print(circuit(a, b, c))
         self.assertAlmostEqual(circuit(a, b, c), np.cos(a)*np.sin(b), delta=tol)
@@ -304,7 +304,7 @@ class TestWavefunctionIntegration(BaseTest):
             qml.Rot(x, y, z, wires=0)
             plf.CPHASE(w, 3, wires=[0, 1])
             plf.CPHASE(w, 0, wires=[0, 1])
-            return qml.expval.PauliY(1)
+            return qml.expval(qml.PauliY(1))
 
         self.assertAlmostEqual(circuit(theta, a, b, c), -np.sin(b/2)**2*np.sin(2*theta), delta=tol)
 
@@ -323,7 +323,7 @@ class TestWavefunctionIntegration(BaseTest):
             qml.BasisState(np.array([1]), wires=0)
             qml.Hadamard(wires=0)
             qml.Rot(x, y, z, wires=0)
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         runs = []
         for _ in range(100):

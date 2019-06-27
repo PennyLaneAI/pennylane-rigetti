@@ -36,11 +36,11 @@ class TestPyQVMBasic(BaseTest):
         dev.apply('RX', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
 
-        O = qml.expval.qubit.Identity
+        O = qml.ops.Identity
         name = 'Identity'
 
-        dev._expval_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        res = dev.pre_expval()
+        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
+        res = dev.pre_measure()
 
         res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
 
@@ -57,11 +57,11 @@ class TestPyQVMBasic(BaseTest):
         dev.apply('RX', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
 
-        O = qml.expval.PauliZ
+        O = qml.PauliZ
         name = 'PauliZ'
 
-        dev._expval_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        res = dev.pre_expval()
+        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
+        res = dev.pre_measure()
 
         res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
 
@@ -78,11 +78,11 @@ class TestPyQVMBasic(BaseTest):
         dev.apply('RY', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
 
-        O = qml.expval.PauliX
+        O = qml.PauliX
         name = 'PauliX'
 
         dev._expval_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        dev.pre_expval()
+        dev.pre_measure()
 
         res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
         # below are the analytic expectation values for this circuit
@@ -98,11 +98,11 @@ class TestPyQVMBasic(BaseTest):
         dev.apply('RX', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
 
-        O = qml.expval.PauliY
+        O = qml.PauliY
         name = 'PauliY'
 
         dev._expval_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        dev.pre_expval()
+        dev.pre_measure()
 
         # below are the analytic expectation values for this circuit
         res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
@@ -118,11 +118,11 @@ class TestPyQVMBasic(BaseTest):
         dev.apply('RY', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
 
-        O = qml.expval.Hadamard
+        O = qml.Hadamard
         name = 'Hadamard'
 
         dev._expval_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        dev.pre_expval()
+        dev.pre_measure()
 
         res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
         # below are the analytic expectation values for this circuit
@@ -139,11 +139,11 @@ class TestPyQVMBasic(BaseTest):
         dev.apply('RY', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
 
-        O = qml.expval.qubit.Hermitian
+        O = qml.Hermitian
         name = 'Hermitian'
 
         dev._expval_queue = [O(H, wires=[0], do_queue=False), O(H, wires=[1], do_queue=False)]
-        dev.pre_expval()
+        dev.pre_measure()
 
         res = np.array([dev.expval(name, [0], [H]), dev.expval(name, [1], [H])])
 
@@ -168,7 +168,7 @@ class TestPyQVMBasic(BaseTest):
         dev.apply('RY', wires=[1], par=[phi])
         dev.apply('CNOT', wires=[0, 1], par=[])
 
-        O = qml.expval.qubit.Hermitian
+        O = qml.Hermitian
         name = 'Hermitian'
 
         A = np.array([[-6, 2+1j, -3, -5+2j],
@@ -177,7 +177,7 @@ class TestPyQVMBasic(BaseTest):
                       [-5-2j, -5-4j, -4-3j, -6]])
 
         dev._expval_queue = [O(A, wires=[0, 1], do_queue=False)]
-        dev.pre_expval()
+        dev.pre_measure()
 
         res = np.array([dev.expval(name, [0, 1], [A])])
 
@@ -229,7 +229,7 @@ class TestPyQVMBasic(BaseTest):
 
         dev.apply(gate, wires=w, par=p)
         dev._expval_queue = []
-        dev.pre_expval()
+        dev.pre_measure()
 
         res = dev.expval('PauliZ', wires=[0], par=None)
         expected = np.vdot(state, np.kron(np.kron(Z, I), I) @ state)
@@ -254,7 +254,7 @@ class TestQVMIntegration(BaseTest):
             qml.Hadamard(wires=0)
             qml.CNOT(wires=[0, 1])
             qml.QubitUnitary(U2, wires=[0, 1])
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         circuit1 = qml.QNode(circuit, dev1)
         circuit2 = qml.QNode(circuit, dev2)
@@ -281,6 +281,6 @@ class TestQVMIntegration(BaseTest):
             qml.BasisState(np.array([1]), wires=0)
             qml.Hadamard(wires=0)
             qml.Rot(x, y, z, wires=0)
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         self.assertAlmostEqual(circuit(a, b, c), np.cos(a)*np.sin(b), delta=3/np.sqrt(shots))

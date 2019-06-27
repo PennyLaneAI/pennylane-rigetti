@@ -27,7 +27,7 @@ from pyquil.pyqvm import PyQVM
 from pyquil.numpy_simulator import NumpyWavefunctionSimulator
 
 from .device import ForestDevice
-from .wavefunction import expectation_map, spectral_decomposition_qubit
+from .wavefunction import observable_map, spectral_decomposition_qubit
 from ._version import __version__
 
 
@@ -37,12 +37,12 @@ class NumpyWavefunctionDevice(ForestDevice):
     Args:
         wires (int): the number of qubits to initialize the device in
         shots (int): Number of circuit evaluations/random samples used
-            to estimate expectation values of expectations.
+            to estimate expectation values of observables.
     """
     name = 'pyQVM NumpyWavefunction Simulator Device'
     short_name = 'forest.numpy_wavefunction'
 
-    expectations = {'PauliX', 'PauliY', 'PauliZ', 'Hadamard', 'Hermitian', 'Identity'}
+    observables = {'PauliX', 'PauliY', 'PauliZ', 'Hadamard', 'Hermitian', 'Identity'}
 
     def __init__(self, wires, *, shots=0, **kwargs):
         super().__init__(wires, shots, **kwargs)
@@ -53,20 +53,19 @@ class NumpyWavefunctionDevice(ForestDevice):
         self.reset()
         self.qc.wf_simulator.reset()
 
-    def pre_expval(self):
+    def pre_measure(self):
         # TODO: currently, the PyQVM considers qubit 0 as the leftmost bit and therefore
         # returns amplitudes in the opposite of the Rigetti Lisp QVM (which considers qubit
         # 0 as the rightmost bit). This may change in the future, so in the future this
-        # might need to get udpated to be similar to the pre_expval function of
+        # might need to get udpated to be similar to the pre_measure function of
         #pennylane_forest/wavefunction.py
         self.state = self.qc.execute(self.prog).wf_simulator.wf.flatten()
 
-    def expval(self, expectation, wires, par):
-        # measurement/expectation value <psi|A|psi>
-        if expectation == 'Hermitian':
+    def expval(self, observable, wires, par):
+        if observable == 'Hermitian':
             A = par[0]
         else:
-            A = expectation_map[expectation]
+            A = observable_map[observable]
 
         if self.shots == 0:
             # exact expectation value

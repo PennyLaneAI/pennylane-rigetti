@@ -164,7 +164,7 @@ class ForestDevice(Device):
     Args:
         wires (int): the number of modes to initialize the device in
         shots (int): Number of circuit evaluations/random samples used
-            to estimate expectation values of expectations.
+            to estimate expectation values of observables.
             For simulator devices, 0 means the exact EV is returned.
 
     Keyword args:
@@ -234,7 +234,7 @@ class ForestDevice(Device):
             self.active_wires = set(range(self.num_wires))
 
     @abc.abstractmethod
-    def pre_expval(self): #pragma no cover
+    def pre_measure(self): #pragma no cover
         """Run the QVM or QPU"""
         raise NotImplementedError
 

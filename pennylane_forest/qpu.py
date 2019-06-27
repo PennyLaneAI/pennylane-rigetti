@@ -33,7 +33,7 @@ class QPUDevice(QVMDevice):
     Args:
         device (str): the name of the device to initialise.
         shots (int): number of circuit evaluations/random samples used
-            to estimate expectation values of expectations.
+            to estimate expectation values of observables.
         active_reset (bool): whether to actively reset qubits instead of waiting for
             for qubits to decay to the ground state naturally.
             Setting this to ``True`` results in a significantly faster expectation value

@@ -26,7 +26,7 @@ def test_simulator_qvm_default_agree(tol, qvm, compiler):
         qml.RY(x, wires=0)
         qml.RX(y, wires=1)
         qml.CNOT(wires=[0, 1])
-        return qml.expval.PauliZ(1)
+        return qml.expval(qml.PauliZ(1))
 
     func1 = qml.QNode(func, dev1)
     func2 = qml.QNode(func, dev2)
@@ -67,7 +67,7 @@ def test_gradient_with_custom_operator(qvm, compiler):
         qml.RX(y, wires=1)
         PSWAP(0.432, wires=[0, 1])
         qml.CNOT(wires=[0, 1])
-        return qml.expval.PauliZ(1)
+        return qml.expval(qml.PauliZ(1))
 
     func2 = qml.QNode(func, dev2)
     func3 = qml.QNode(func, dev3)
