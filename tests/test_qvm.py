@@ -188,6 +188,52 @@ class TestQVMBasic(BaseTest):
 
         self.assertAllAlmostEqual(res, expected, delta=4/np.sqrt(shots))
 
+    def test_var(self, shots):
+        """Tests for variance calculation"""
+        dev = plf.QVMDevice(device='2q-qvm', shots=shots)
+
+        phi = 0.543
+        theta = 0.6543
+
+        # test correct variance for <Z> of a rotated state
+        dev.apply('RX', wires=[0], par=[phi])
+        dev.apply('RY', wires=[0], par=[theta])
+
+        O = qml.PauliZ
+        name = 'PauliZ'
+
+        dev._obs_queue = [O(wires=[0], do_queue=False)]
+        dev.pre_measure()
+
+        var = dev.var(name, [0], [])
+        expected = 0.25*(3-np.cos(2*theta)-2*np.cos(theta)**2*np.cos(2*phi))
+
+        self.assertAlmostEqual(var, expected, delta=3/np.sqrt(shots))
+
+    def test_var_hermitian(self, shots):
+        """Tests for variance calculation using an arbitrary Hermitian observable"""
+        dev = plf.QVMDevice(device='2q-qvm', shots=10*shots)
+
+        phi = 0.543
+        theta = 0.6543
+
+        # test correct variance for <A> of a rotated state
+        A = np.array([[4, -1+6j], [-1-6j, 2]])
+        dev.apply('RX', wires=[0], par=[phi])
+        dev.apply('RY', wires=[0], par=[theta])
+
+        O = qml.Hermitian
+        name = 'Hermitian'
+
+        dev._obs_queue = [O(A, wires=[0], do_queue=False)]
+        dev.pre_measure()
+
+        var = dev.var('Hermitian', [0], [A])
+        expected = 0.5*(2*np.sin(2*theta)*np.cos(phi)**2+24*np.sin(phi)\
+                    *np.cos(phi)*(np.sin(theta)-np.cos(theta))+35*np.cos(2*phi)+39)
+
+        self.assertAlmostEqual(var, expected, delta=0.2)
+
     @pytest.mark.parametrize("gate", plf.QVMDevice._operation_map) #pylint: disable=protected-access
     def test_apply(self, gate, apply_unitary, shots, qvm, compiler):
         """Test the application of gates"""

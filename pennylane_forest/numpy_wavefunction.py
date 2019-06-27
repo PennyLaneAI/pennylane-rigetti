@@ -80,6 +80,15 @@ class NumpyWavefunctionDevice(ForestDevice):
 
         return ev
 
+    def var(self, observable, wires, par):
+        if observable == 'Hermitian':
+            A = par[0]
+        else:
+            A = observable_map[observable]
+
+        var = self.ev(A@A, wires) - self.ev(A, wires)**2
+        return var
+
     def ev(self, A, wires):
         r"""Evaluates a one-qubit expectation in the current state.
 

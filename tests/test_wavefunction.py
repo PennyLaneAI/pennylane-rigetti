@@ -163,6 +163,44 @@ class TestWavefunctionBasic(BaseTest):
         # verify the device is now in the expected state
         self.assertAllAlmostEqual(res, expected_out, delta=tol)
 
+    def test_var(self, tol):
+        """Tests for variance calculation"""
+        dev = plf.WavefunctionDevice(wires=2)
+        dev.active_wires = {0}
+
+        phi = 0.543
+        theta = 0.6543
+
+        # test correct variance for <Z> of a rotated state
+        dev.apply('RX', wires=[0], par=[phi])
+        dev.apply('RY', wires=[0], par=[theta])
+        dev.pre_measure()
+
+        var = dev.var('PauliZ', [0], [])
+        expected = 0.25*(3-np.cos(2*theta)-2*np.cos(theta)**2*np.cos(2*phi))
+
+        self.assertAlmostEqual(var, expected, delta=tol)
+
+    def test_var_hermitian(self, tol):
+        """Tests for variance calculation using an arbitrary Hermitian observable"""
+        dev = plf.WavefunctionDevice(wires=2)
+        dev.active_wires = {0}
+
+        phi = 0.543
+        theta = 0.6543
+
+        # test correct variance for <H> of a rotated state
+        H = np.array([[4, -1+6j], [-1-6j, 2]])
+        dev.apply('RX', wires=[0], par=[phi])
+        dev.apply('RY', wires=[0], par=[theta])
+        dev.pre_measure()
+
+        var = dev.var('Hermitian', [0], [H])
+        expected = 0.5*(2*np.sin(2*theta)*np.cos(phi)**2+24*np.sin(phi)\
+                    *np.cos(phi)*(np.sin(theta)-np.cos(theta))+35*np.cos(2*phi)+39)
+
+        self.assertAlmostEqual(var, expected, delta=tol)
+
     @pytest.mark.parametrize("gate", plf.WavefunctionDevice._operation_map) #pylint: disable=protected-access
     def test_apply(self, gate, apply_unitary, tol, qvm, compiler):
         """Test the application of gates to a state"""

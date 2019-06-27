@@ -241,3 +241,41 @@ class QVMDevice(ForestDevice):
         probs = probs[:, 1]
 
         return probs
+
+    def var(self, observable, wires, par):
+        if len(wires) == 1:
+            # 1 qubit observable
+            if observable == 'Identity':
+                return 0
+
+            varZ = np.var(1-2*self.state[wires[0]])
+
+            if observable in {'PauliX', 'PauliY', 'PauliZ', 'Hadamard'}:
+                return varZ
+
+            # for single qubit state probabilities |psi|^2 = (p0, p1),
+            # we know that p0+p1=1 and that <Z>=p0-p1
+            evZ = np.mean(1-2*self.state[wires[0]])
+            probs = np.array([(1+evZ)/2, (1-evZ)/2])
+
+            if observable == 'Hermitian':
+                # <H> = \sum_i w_i p_i
+                Hkey = tuple(par[0].flatten().tolist())
+                w = self._eigs[Hkey]['eigval']
+                return (w**2) @ probs - (w @ probs)**2
+
+        # Multi-qubit observable
+        # ----------------------
+        # Currently, we only support qml.expval.Hermitian(A, wires),
+        # where A is a 2^N x 2^N matrix acting on N wires.
+        #
+        # Eventually, we will also support tensor products of Pauli
+        # matrices in the PennyLane UI.
+
+        probs = self.probabilities(wires)
+
+        if observable == 'Hermitian':
+            Hkey = tuple(par[0].flatten().tolist())
+            w = self._eigs[Hkey]['eigval']
+            # <A> = \sum_i w_i p_i
+            return (w**2) @ probs - (w @ probs)**2
