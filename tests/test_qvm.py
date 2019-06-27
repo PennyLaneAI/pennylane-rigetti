@@ -278,7 +278,7 @@ class TestQVMIntegration(BaseTest):
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
             qml.device('forest.qvm')
 
-        with pytest.raises(ValueError, match="Number of shots must be a postive integer"):
+        with pytest.raises(ValueError, match="Number of shots must be a positive integer"):
             qml.device('forest.qvm', '2q-qvm', shots=0)
 
     def test_qubit_unitary(self, shots, qvm, compiler):

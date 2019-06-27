@@ -36,5 +36,5 @@ class TestQPUIntegration(BaseTest):
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
             qml.device('forest.qpu')
 
-        with pytest.raises(ValueError, match="Number of shots must be a postive integer"):
+        with pytest.raises(ValueError, match="Number of shots must be a positive integer"):
             qml.device('forest.qpu', 'Aspen-1-7Q-B', shots=0)
