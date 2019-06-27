@@ -120,7 +120,7 @@ class TestWavefunctionBasic(BaseTest):
         dev.active_wires = {0, 1}
 
         # get the equivalent pennylane operation class
-        op = getattr(qml.ops.qubit, ev)
+        op = getattr(qml.ops, ev)
 
         O = test_operation_map[ev]
 

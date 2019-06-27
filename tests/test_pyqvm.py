@@ -81,7 +81,7 @@ class TestPyQVMBasic(BaseTest):
         O = qml.PauliX
         name = 'PauliX'
 
-        dev._expval_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
+        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
         dev.pre_measure()
 
         res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
@@ -101,7 +101,7 @@ class TestPyQVMBasic(BaseTest):
         O = qml.PauliY
         name = 'PauliY'
 
-        dev._expval_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
+        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
         dev.pre_measure()
 
         # below are the analytic expectation values for this circuit
@@ -121,7 +121,7 @@ class TestPyQVMBasic(BaseTest):
         O = qml.Hadamard
         name = 'Hadamard'
 
-        dev._expval_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
+        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
         dev.pre_measure()
 
         res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
@@ -142,7 +142,7 @@ class TestPyQVMBasic(BaseTest):
         O = qml.Hermitian
         name = 'Hermitian'
 
-        dev._expval_queue = [O(H, wires=[0], do_queue=False), O(H, wires=[1], do_queue=False)]
+        dev._obs_queue = [O(H, wires=[0], do_queue=False), O(H, wires=[1], do_queue=False)]
         dev.pre_measure()
 
         res = np.array([dev.expval(name, [0], [H]), dev.expval(name, [1], [H])])
@@ -176,7 +176,7 @@ class TestPyQVMBasic(BaseTest):
                       [-3, 2+1j, 0, -4+3j],
                       [-5-2j, -5-4j, -4-3j, -6]])
 
-        dev._expval_queue = [O(A, wires=[0, 1], do_queue=False)]
+        dev._obs_queue = [O(A, wires=[0, 1], do_queue=False)]
         dev.pre_measure()
 
         res = np.array([dev.expval(name, [0, 1], [A])])
@@ -228,7 +228,7 @@ class TestPyQVMBasic(BaseTest):
             state = apply_unitary(O, 3)
 
         dev.apply(gate, wires=w, par=p)
-        dev._expval_queue = []
+        dev._obs_queue = []
         dev.pre_measure()
 
         res = dev.expval('PauliZ', wires=[0], par=None)
