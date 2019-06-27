@@ -9,7 +9,7 @@ import pennylane as qml
 from pennylane import numpy as np
 
 from conftest import BaseTest
-from conftest import I, U, U2, H, test_operation_map
+from conftest import I, U, U2, SWAP, CNOT, U_toffoli, H, test_operation_map
 
 import pennylane_forest as plf
 from pennylane_forest.wavefunction import spectral_decomposition_qubit
@@ -53,29 +53,92 @@ class TestWavefunctionBasic(BaseTest):
         dev = plf.WavefunctionDevice(wires=3)
 
         # test applied to wire 0
-        res = dev.expand_one(U, [0])
+        res = dev.expand(U, [0])
         expected = np.kron(np.kron(U, I), I)
         self.assertAllAlmostEqual(res, expected, delta=tol)
 
         # test applied to wire 1
-        res = dev.expand_one(U, [1])
+        res = dev.expand(U, [1])
         expected = np.kron(np.kron(I, U), I)
         self.assertAllAlmostEqual(res, expected, delta=tol)
 
         # test applied to wire 2
-        res = dev.expand_one(U, [2])
+        res = dev.expand(U, [2])
         expected = np.kron(np.kron(I, I), U)
         self.assertAllAlmostEqual(res, expected, delta=tol)
 
-        # test exception raised if U is not 2x2 matrix
-        with pytest.raises(ValueError, message="2x2 matrix required"):
-            dev.expand_one(U2, [0])
+    def test_expand_two(self, tol):
+        """Test that a 2 qubit gate correctly expands to 3 qubits."""
+        dev = plf.WavefunctionDevice(wires=4)
 
-        # test exception raised if more than one subsystem provided
-        with pytest.raises(ValueError, message="One target subsystem required"):
-            dev.expand_one(U, [0, 1])
+        # test applied to wire 0+1
+        res = dev.expand(U2, [0, 1])
+        expected = np.kron(np.kron(U2, I), I)
+        self.assertAllAlmostEqual(res, expected, delta=tol)
 
-    @pytest.mark.parametrize("ev", plf.WavefunctionDevice.expectations)
+        # test applied to wire 1+2
+        res = dev.expand(U2, [1, 2])
+        expected = np.kron(np.kron(I, U2), I)
+        self.assertAllAlmostEqual(res, expected, delta=tol)
+
+        # test applied to wire 2+3
+        res = dev.expand(U2, [2, 3])
+        expected = np.kron(np.kron(I, I), U2)
+        self.assertAllAlmostEqual(res, expected, delta=tol)
+
+        # CNOT with target on wire 1
+        res = dev.expand(CNOT, [1, 0])
+        rows = np.array([0, 2, 1, 3])
+        expected = np.kron(np.kron(CNOT[:, rows][rows], I), I)
+        self.assertAllAlmostEqual(res, expected, delta=tol)
+
+        # test exception raised if unphysical subsystems provided
+        with pytest.raises(ValueError, match="Invalid target subsystems provided in 'wires' argument."):
+            dev.expand(U2, [-1, 5])
+
+        # test exception raised if incorrect sized matrix provided
+        with pytest.raises(ValueError, match="Matrix parameter must be of size"):
+            dev.expand(U, [0, 1])
+
+    def test_expand_three(self, tol):
+        """Test that a 3 qubit gate correctly expands to 4 qubits."""
+        dev = plf.WavefunctionDevice(wires=4)
+
+        # test applied to wire 0,1,2
+        res = dev.expand(U_toffoli, [0, 1, 2])
+        expected = np.kron(U_toffoli, I)
+        self.assertAllAlmostEqual(res, expected, delta=tol)
+
+        # test applied to wire 1,2,3
+        res = dev.expand(U_toffoli, [1, 2, 3])
+        expected = np.kron(I, U_toffoli)
+        self.assertAllAlmostEqual(res, expected, delta=tol)
+
+        # test applied to wire 0,2,3
+        res = dev.expand(U_toffoli, [0, 2, 3])
+        expected = np.kron(SWAP, np.kron(I, I)) @ np.kron(I, U_toffoli) @ np.kron(SWAP, np.kron(I, I))
+        self.assertAllAlmostEqual(res, expected, delta=tol)
+
+        # test applied to wire 0,1,3
+        res = dev.expand(U_toffoli, [0, 1, 3])
+        expected = np.kron(np.kron(I, I), SWAP) @ np.kron(U_toffoli, I) @ np.kron(np.kron(I, I), SWAP)
+        self.assertAllAlmostEqual(res, expected, delta=tol)
+
+        # test applied to wire 3, 1, 2
+        res = dev.expand(U_toffoli, [3, 1, 2])
+        # change the control qubit on the Toffoli gate
+        rows = np.array([0, 4, 1, 5, 2, 6, 3, 7])
+        expected = np.kron(I, U_toffoli[:, rows][rows])
+        self.assertAllAlmostEqual(res, expected, delta=tol)
+
+        # test applied to wire 3, 0, 2
+        res = dev.expand(U_toffoli, [3, 0, 2])
+        # change the control qubit on the Toffoli gate
+        rows = np.array([0, 4, 1, 5, 2, 6, 3, 7])
+        expected = np.kron(SWAP, np.kron(I, I)) @ np.kron(I, U_toffoli[:, rows][rows]) @ np.kron(SWAP, np.kron(I, I))
+        self.assertAllAlmostEqual(res, expected, delta=tol)
+
+    @pytest.mark.parametrize("ev", plf.WavefunctionDevice.observables)
     def test_ev(self, ev, tol):
         """Test that expectation values are calculated correctly"""
         dev = plf.WavefunctionDevice(wires=2)
@@ -85,7 +148,7 @@ class TestWavefunctionBasic(BaseTest):
         dev.active_wires = {0, 1}
 
         # get the equivalent pennylane operation class
-        op = getattr(qml.expval.qubit, ev)
+        op = getattr(qml.ops, ev)
 
         O = test_operation_map[ev]
 
@@ -140,7 +203,7 @@ class TestWavefunctionBasic(BaseTest):
             expected_out = apply_unitary(O, 3)
 
         dev.apply(gate, wires=w, par=p)
-        dev.pre_expval()
+        dev.pre_measure()
 
         # verify the device is now in the expected state
         self.assertAllAlmostEqual(dev.state, expected_out, delta=tol)
@@ -166,7 +229,7 @@ class TestWavefunctionIntegration(BaseTest):
             """Test QNode"""
             qml.Hadamard(wires=0)
             qml.PauliY(wires=0)
-            return qml.expval.PauliX(0)
+            return qml.expval(qml.PauliX(0))
 
         self.assertEqual(len(dev.program), 0)
 
@@ -177,7 +240,7 @@ class TestWavefunctionIntegration(BaseTest):
 
     def test_wavefunction_args(self):
         """Test that the wavefunction plugin requires correct arguments"""
-        with pytest.raises(TypeError, message="missing 1 required positional argument: 'wires'"):
+        with pytest.raises(TypeError, match="missing 1 required positional argument: 'wires'"):
             qml.device('forest.wavefunction')
 
     def test_hermitian_expectation(self, tol, qvm, compiler):
@@ -189,7 +252,7 @@ class TestWavefunctionIntegration(BaseTest):
             """Test QNode"""
             qml.Hadamard(wires=0)
             qml.PauliY(wires=0)
-            return qml.expval.Hermitian(H, 0)
+            return qml.expval(qml.Hermitian(H, 0))
 
         out_state = 1j*np.array([-1, 1])/np.sqrt(2)
         self.assertAllAlmostEqual(circuit(), np.vdot(out_state, H @ out_state), delta=tol)
@@ -204,7 +267,7 @@ class TestWavefunctionIntegration(BaseTest):
             qml.Hadamard(wires=0)
             qml.CNOT(wires=[0, 1])
             qml.QubitUnitary(U2, wires=[0, 1])
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         out_state = U2 @ np.array([1, 0, 0, 1])/np.sqrt(2)
         obs = np.kron(np.array([[1, 0], [0, -1]]), I)
@@ -217,18 +280,18 @@ class TestWavefunctionIntegration(BaseTest):
         def circuit(Umat):
             """Test QNode"""
             qml.QubitUnitary(Umat, wires=[0, 1])
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         circuit1 = qml.QNode(circuit, dev)
-        with pytest.raises(ValueError, message="must be a square matrix"):
+        with pytest.raises(ValueError, match="must be a square matrix"):
             circuit1(np.array([[0, 1]]))
 
         circuit1 = qml.QNode(circuit, dev)
-        with pytest.raises(ValueError, message="must be unitary"):
+        with pytest.raises(ValueError, match="must be unitary"):
             circuit1(np.array([[1, 1], [1, 1]]))
 
         circuit1 = qml.QNode(circuit, dev)
-        with pytest.raises(ValueError, message=r"must be 2\^Nx2\^N"):
+        with pytest.raises(ValueError, match=r"must be 2\^Nx2\^N"):
             circuit1(U)
 
     def test_one_qubit_wavefunction_circuit(self, tol, qvm, compiler):
@@ -245,7 +308,7 @@ class TestWavefunctionIntegration(BaseTest):
             qml.BasisState(np.array([1]), wires=0)
             qml.Hadamard(wires=0)
             qml.Rot(x, y, z, wires=0)
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         self.assertAlmostEqual(circuit(a, b, c), np.cos(a)*np.sin(b), delta=tol)
 
@@ -268,7 +331,7 @@ class TestWavefunctionIntegration(BaseTest):
             qml.Rot(x, y, z, wires=0)
             plf.CPHASE(w, 3, wires=[0, 1])
             plf.CPHASE(w, 0, wires=[0, 1])
-            return qml.expval.PauliY(1)
+            return qml.expval(qml.PauliY(1))
 
         self.assertAlmostEqual(circuit(theta, a, b, c), -np.sin(b/2)**2*np.sin(2*theta), delta=tol)
 
@@ -287,7 +350,7 @@ class TestWavefunctionIntegration(BaseTest):
             qml.BasisState(np.array([1]), wires=0)
             qml.Hadamard(wires=0)
             qml.Rot(x, y, z, wires=0)
-            return qml.expval.PauliZ(0)
+            return qml.expval(qml.PauliZ(0))
 
         runs = []
         for _ in range(100):
