@@ -240,7 +240,7 @@ class TestWavefunctionIntegration(BaseTest):
 
     def test_wavefunction_args(self):
         """Test that the wavefunction plugin requires correct arguments"""
-        with pytest.raises(TypeError, message="missing 1 required positional argument: 'wires'"):
+        with pytest.raises(TypeError, match="missing 1 required positional argument: 'wires'"):
             qml.device('forest.wavefunction')
 
     def test_hermitian_expectation(self, tol, qvm, compiler):
@@ -283,15 +283,15 @@ class TestWavefunctionIntegration(BaseTest):
             return qml.expval(qml.PauliZ(0))
 
         circuit1 = qml.QNode(circuit, dev)
-        with pytest.raises(ValueError, message="must be a square matrix"):
+        with pytest.raises(ValueError, match="must be a square matrix"):
             circuit1(np.array([[0, 1]]))
 
         circuit1 = qml.QNode(circuit, dev)
-        with pytest.raises(ValueError, message="must be unitary"):
+        with pytest.raises(ValueError, match="must be unitary"):
             circuit1(np.array([[1, 1], [1, 1]]))
 
         circuit1 = qml.QNode(circuit, dev)
-        with pytest.raises(ValueError, message=r"must be 2\^Nx2\^N"):
+        with pytest.raises(ValueError, match=r"must be 2\^Nx2\^N"):
             circuit1(U)
 
     def test_one_qubit_wavefunction_circuit(self, tol, qvm, compiler):

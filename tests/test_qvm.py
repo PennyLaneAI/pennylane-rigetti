@@ -265,20 +265,20 @@ class TestQVMIntegration(BaseTest):
 
     def test_incorrect_qc_name(self):
         """Test that exception is raised if name is incorrect"""
-        with pytest.raises(ValueError, message="QVM device string does not indicate the number of qubits"):
+        with pytest.raises(ValueError, match="QVM device string does not indicate the number of qubits"):
             qml.device('forest.qvm', device='Aspen-1-B')
 
     def test_incorrect_qc_type(self):
         """Test that exception is raised device is not a string or graph"""
-        with pytest.raises(ValueError, message="Required argument device must be a string"):
+        with pytest.raises(ValueError, match="Required argument device must be a string"):
             qml.device('forest.qvm', device=3)
 
     def test_qvm_args(self):
         """Test that the QVM plugin requires correct arguments"""
-        with pytest.raises(TypeError, message="missing 2 required positional arguments: 'device' and 'wires'"):
+        with pytest.raises(TypeError, match="missing 2 required positional arguments: 'device' and 'wires'"):
             qml.device('forest.qvm')
 
-        with pytest.raises(ValueError, message="Number of shots must be a postive integer"):
+        with pytest.raises(ValueError, match="Number of shots must be a postive integer"):
             qml.device('forest.qvm', '2q-qvm', shots=0)
 
     def test_qubit_unitary(self, shots, qvm, compiler):
