@@ -33,7 +33,7 @@ class TestQPUIntegration(BaseTest):
         with pytest.raises(ValueError, match="QPU device does not support a wires parameter"):
             qml.device('forest.qpu', device='Aspen-1-7Q-B', wires=2)
 
-        with pytest.raises(TypeError, match="missing 1 required positional arguments"):
+        with pytest.raises(TypeError, match="missing 1 required positional argument"):
             qml.device('forest.qpu')
 
         with pytest.raises(ValueError, match="Number of shots must be a postive integer"):

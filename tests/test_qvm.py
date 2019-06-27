@@ -275,7 +275,7 @@ class TestQVMIntegration(BaseTest):
 
     def test_qvm_args(self):
         """Test that the QVM plugin requires correct arguments"""
-        with pytest.raises(TypeError, match="missing 2 required positional arguments"):
+        with pytest.raises(TypeError, match="missing 1 required positional argument"):
             qml.device('forest.qvm')
 
         with pytest.raises(ValueError, match="Number of shots must be a postive integer"):
