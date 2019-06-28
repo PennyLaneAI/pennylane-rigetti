@@ -67,7 +67,8 @@ class QPUDevice(ForestDevice):
     short_name = 'forest.qpu'
     expectations = {'PauliX', 'PauliY', 'PauliZ', 'Identity', 'Hadamard', 'Hermitian'}
 
-    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, **kwargs):
+    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, symmetrize_readout='exhaustive',
+                 calibrate_readout='plus-eig', **kwargs):
         self._eigs = {}
 
         if 'wires' in kwargs:
@@ -88,6 +89,8 @@ class QPUDevice(ForestDevice):
             self.qc = get_qc(device, as_qvm=True, connection=self.connection)
 
         self.active_reset = active_reset
+        self.symmetrize_readout = symmetrize_readout
+        self.calibrate_readout = calibrate_readout
 
     def pre_expval(self):
         # pass
@@ -154,15 +157,17 @@ class QPUDevice(ForestDevice):
         for i, q in enumerate(qubits):
             self.state[q] = bitstring_array[:, i]
 
-    def expval(self, expectation, wires, par):
+    def expval(self, expectation, wires, par, symmetrize_readout='exhaustive', calibrate_readout='plus-eig'):
         d_expectation = {'PauliZ': sZ}
         if len(wires) == 1:
             qubit = self.qc.qubits()[0]
             prep_prog = Program([instr for instr in self.program if isinstance(instr, Gate)])
+            prep_prog.define_noisy_readout(0, p00=0.9, p11=0.85)
             expt_setting = ExperimentSetting(TensorProductState(), d_expectation[expectation](qubit))
             tomo_expt = TomographyExperiment(settings=[expt_setting], program=prep_prog)
             grouped_tomo_expt = group_experiments(tomo_expt)
-            meas_obs = list(measure_observables(self.qc, grouped_tomo_expt))
+            meas_obs = list(measure_observables(self.qc, grouped_tomo_expt, symmetrize_readout=self.symmetrize_readout,
+                calibrate_readout=self.calibrate_readout))
             return np.sum(expt_result.expectation for expt_result in meas_obs)
 
         # if len(wires) == 1:
