@@ -162,7 +162,6 @@ class QPUDevice(ForestDevice):
         if len(wires) == 1:
             qubit = self.qc.qubits()[0]
             prep_prog = Program([instr for instr in self.program if isinstance(instr, Gate)])
-            prep_prog.define_noisy_readout(0, p00=0.9, p11=0.85)
             expt_setting = ExperimentSetting(TensorProductState(), d_expectation[expectation](qubit))
             tomo_expt = TomographyExperiment(settings=[expt_setting], program=prep_prog)
             grouped_tomo_expt = group_experiments(tomo_expt)
