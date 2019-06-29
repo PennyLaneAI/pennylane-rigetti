@@ -125,8 +125,8 @@ class CPHASE(Operation):
     """
     num_params = 2
     num_wires = 2
-    par_domain = 'R'
-    grad_method = 'A'
+    par_domain = "R"
+    grad_method = "A"
 
 
 class CSWAP(Operation):
@@ -207,5 +207,5 @@ class PSWAP(Operation):
     """
     num_params = 1
     num_wires = 2
-    par_domain = 'R'
-    grad_method = 'A'
+    par_domain = "R"
+    grad_method = "A"

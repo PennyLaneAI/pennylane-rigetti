@@ -39,9 +39,10 @@ from pyquil.api._base_connection import ForestConnection
 from pyquil.api._config import PyquilConfig
 
 from pyquil.quil import DefGate
-from pyquil.gates import (X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT)
+from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT
+
 # following gates are not supported by PennyLane
-from pyquil.gates import (S, T, CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, CSWAP, ISWAP, PSWAP)
+from pyquil.gates import S, T, CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, CSWAP, ISWAP, PSWAP
 
 from pennylane import Device
 
@@ -83,8 +84,8 @@ def qubit_unitary(par, *wires):
     if not np.allclose(par @ par.conj().T, np.identity(par.shape[0])):
         raise ValueError("Qubit unitary matrix must be unitary.")
 
-    if par.shape != tuple([2**len(wires)]*2):
-        raise ValueError('Qubit unitary matrix must be 2^Nx2^N, where N is the number of wires.')
+    if par.shape != tuple([2 ** len(wires)] * 2):
+        raise ValueError("Qubit unitary matrix must be 2^Nx2^N, where N is the number of wires.")
 
     # Get the Quil definition for the new gate
     gate_definition = DefGate("U_{}".format(str(uuid.uuid4())[:8]), par)
@@ -133,28 +134,28 @@ def controlled_phase(phi, q, *wires):
 # mapping operations supported by PennyLane to the
 # corresponding pyQuil operation
 pyquil_operation_map = {
-    'BasisState': basis_state,
-    'QubitUnitary': qubit_unitary,
+    "BasisState": basis_state,
+    "QubitUnitary": qubit_unitary,
     "PauliX": X,
     "PauliY": Y,
     "PauliZ": Z,
     "Hadamard": H,
-    'CNOT': CNOT,
-    'SWAP': SWAP,
-    'CZ': CZ,
-    'PhaseShift': PHASE,
-    'RX': RX,
-    'RY': RY,
-    'RZ': RZ,
-    'Rot': rotation,
+    "CNOT": CNOT,
+    "SWAP": SWAP,
+    "CZ": CZ,
+    "PhaseShift": PHASE,
+    "RX": RX,
+    "RY": RY,
+    "RZ": RZ,
+    "Rot": rotation,
     # the following gates are provided by the PL-Forest plugin
-    'S': S,
-    'T': T,
-    'CCNOT': CCNOT,
-    'CPHASE': controlled_phase,
-    'CSWAP': CSWAP,
-    'ISWAP': ISWAP,
-    'PSWAP': PSWAP,
+    "S": S,
+    "T": T,
+    "CCNOT": CCNOT,
+    "CPHASE": controlled_phase,
+    "CSWAP": CSWAP,
+    "ISWAP": ISWAP,
+    "PSWAP": PSWAP,
 }
 
 
@@ -178,24 +179,23 @@ class ForestDevice(Device):
             variable ``QUILC_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
     """
-    pennylane_requires = '>=0.4'
+    pennylane_requires = ">=0.4"
     version = __version__
-    author = 'Josh Izaac'
+    author = "Josh Izaac"
 
     _operation_map = pyquil_operation_map
 
     def __init__(self, wires, shots, **kwargs):
         super().__init__(wires, shots)
-        self.forest_url = kwargs.get('forest_url', pyquil_config.forest_url)
-        self.qvm_url = kwargs.get('qvm_url', pyquil_config.qvm_url)
-        self.compiler_url = kwargs.get('compiler_url', pyquil_config.quilc_url)
+        self.forest_url = kwargs.get("forest_url", pyquil_config.forest_url)
+        self.qvm_url = kwargs.get("qvm_url", pyquil_config.qvm_url)
+        self.compiler_url = kwargs.get("compiler_url", pyquil_config.quilc_url)
 
         self.connection = ForestConnection(
             sync_endpoint=self.qvm_url,
             compiler_endpoint=self.compiler_url,
-            forest_cloud_endpoint=self.forest_url
+            forest_cloud_endpoint=self.forest_url,
         )
-
 
         # The following environment variables are deprecated I think
 
@@ -234,7 +234,7 @@ class ForestDevice(Device):
             self.active_wires = set(range(self.num_wires))
 
     @abc.abstractmethod
-    def pre_measure(self): #pragma no cover
+    def pre_measure(self):  # pragma no cover
         """Run the QVM or QPU"""
         raise NotImplementedError
 

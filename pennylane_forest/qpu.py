@@ -52,22 +52,24 @@ class QPUDevice(QVMDevice):
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
     """
-    name = 'Forest QPU Device'
-    short_name = 'forest.qpu'
+    name = "Forest QPU Device"
+    short_name = "forest.qpu"
 
     def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, **kwargs):
         self._eigs = {}
 
-        if 'wires' in kwargs:
+        if "wires" in kwargs:
             raise ValueError("QPU device does not support a wires parameter.")
 
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
 
-        aspen_match = re.match(r'Aspen-\d+-([\d]+)Q', device)
+        aspen_match = re.match(r"Aspen-\d+-([\d]+)Q", device)
         num_wires = int(aspen_match.groups()[0])
 
-        super(QVMDevice, self).__init__(num_wires, shots, **kwargs) #pylint: disable=bad-super-call
+        super(QVMDevice, self).__init__(
+            num_wires, shots, **kwargs
+        )  # pylint: disable=bad-super-call
 
         if load_qc:
             self.qc = get_qc(device, as_qvm=False, connection=self.connection)
