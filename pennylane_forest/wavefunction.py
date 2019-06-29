@@ -37,13 +37,13 @@ from ._version import __version__
 
 
 I = np.identity(2)
-X = np.array([[0, 1], [1, 0]]) #: Pauli-X matrix
-Y = np.array([[0, -1j], [1j, 0]]) #: Pauli-Y matrix
-Z = np.array([[1, 0], [0, -1]]) #: Pauli-Z matrix
-H = np.array([[1, 1], [1, -1]])/np.sqrt(2) # Hadamard matrix
+X = np.array([[0, 1], [1, 0]])  #: Pauli-X matrix
+Y = np.array([[0, -1j], [1j, 0]])  #: Pauli-Y matrix
+Z = np.array([[1, 0], [0, -1]])  #: Pauli-Z matrix
+H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)  # Hadamard matrix
 
 
-observable_map = {'PauliX': X, 'PauliY': Y, 'PauliZ': Z, 'Identity': I, 'Hadamard': H}
+observable_map = {"PauliX": X, "PauliY": Y, "PauliZ": Z, "Identity": I, "Hadamard": H}
 
 
 def spectral_decomposition_qubit(A):
@@ -83,10 +83,10 @@ class WavefunctionDevice(ForestDevice):
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
     """
-    name = 'Forest Wavefunction Simulator Device'
-    short_name = 'forest.wavefunction'
+    name = "Forest Wavefunction Simulator Device"
+    short_name = "forest.wavefunction"
 
-    observables = {'PauliX', 'PauliY', 'PauliZ', 'Hadamard', 'Hermitian', 'Identity'}
+    observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
 
     def __init__(self, wires, *, shots=0, **kwargs):
         super().__init__(wires, shots, **kwargs)
@@ -98,7 +98,7 @@ class WavefunctionDevice(ForestDevice):
 
         # pyQuil uses the convention that the first qubit is the least significant
         # qubit. Here, we reverse this to make it the last qubit, matching PennyLane convention.
-        self.state = self.state.reshape([2]*len(self.active_wires)).T.flatten()
+        self.state = self.state.reshape([2] * len(self.active_wires)).T.flatten()
         self.expand_state()
 
     def expand_state(self):
@@ -113,18 +113,20 @@ class WavefunctionDevice(ForestDevice):
         inactive_wires = set(range(self.num_wires)) - self.active_wires
 
         # place the inactive subsystems in the vacuum state
-        other_subsystems = np.zeros([2**len(inactive_wires)])
+        other_subsystems = np.zeros([2 ** len(inactive_wires)])
         other_subsystems[0] = 1
 
         # expand the state of the device into a length-num_wire state vector
-        expanded_state = np.kron(self.state, other_subsystems).reshape([2]*self.num_wires)
-        expanded_state = np.moveaxis(expanded_state, range(len(self.active_wires)), self.active_wires)
+        expanded_state = np.kron(self.state, other_subsystems).reshape([2] * self.num_wires)
+        expanded_state = np.moveaxis(
+            expanded_state, range(len(self.active_wires)), self.active_wires
+        )
         expanded_state = expanded_state.flatten()
 
         self.state = expanded_state
 
     def expval(self, observable, wires, par):
-        if observable == 'Hermitian':
+        if observable == "Hermitian":
             A = par[0]
         else:
             A = observable_map[observable]
@@ -138,9 +140,18 @@ class WavefunctionDevice(ForestDevice):
             a, P = spectral_decomposition_qubit(A)
             p0 = self.ev(P[0], wires)  # probability of measuring a[0]
             n0 = np.random.binomial(self.shots, p0)
-            ev = (n0*a[0] +(self.shots-n0)*a[1]) / self.shots
+            ev = (n0 * a[0] + (self.shots - n0) * a[1]) / self.shots
 
         return ev
+
+    def var(self, observable, wires, par):
+        if observable == "Hermitian":
+            A = par[0]
+        else:
+            A = observable_map[observable]
+
+        var = self.ev(A @ A, wires) - self.ev(A, wires) ** 2
+        return var
 
     def ev(self, A, wires):
         r"""Evaluates a one-qubit expectation in the current state.
@@ -177,26 +188,26 @@ class WavefunctionDevice(ForestDevice):
         if np.any(wires < 0) or np.any(wires >= N) or len(set(wires)) != len(wires):
             raise ValueError("Invalid target subsystems provided in 'wires' argument.")
 
-        if U.shape != (2**len(wires), 2**len(wires)):
+        if U.shape != (2 ** len(wires), 2 ** len(wires)):
             raise ValueError("Matrix parameter must be of size (2**len(wires), 2**len(wires))")
 
         # generate N qubit basis states via the cartesian product
         tuples = np.array(list(itertools.product([0, 1], repeat=N)))
 
         # wires not acted on by the operator
-        inactive_wires = list(set(range(N))-set(wires))
+        inactive_wires = list(set(range(N)) - set(wires))
 
         # expand U to act on the entire system
-        U = np.kron(U, np.identity(2**len(inactive_wires)))
+        U = np.kron(U, np.identity(2 ** len(inactive_wires)))
 
         # move active wires to beginning of the list of wires
-        rearranged_wires = np.array(list(wires)+inactive_wires)
+        rearranged_wires = np.array(list(wires) + inactive_wires)
 
         # convert to computational basis
         # i.e., converting the list of basis state bit strings into
         # a list of decimal numbers that correspond to the computational
         # basis state. For example, [0, 1, 0, 1, 1] = 2^3+2^1+2^0 = 11.
-        perm = np.ravel_multi_index(tuples[:, rearranged_wires].T, [2]*N)
+        perm = np.ravel_multi_index(tuples[:, rearranged_wires].T, [2] * N)
 
         # permute U to take into account rearranged wires
         return U[:, perm][perm]

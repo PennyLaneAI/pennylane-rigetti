@@ -65,7 +65,9 @@ class TestWavefunctionBasic(BaseTest):
         self.assertAllAlmostEqual(res, expected, delta=tol)
 
         # test exception raised if unphysical subsystems provided
-        with pytest.raises(ValueError, match="Invalid target subsystems provided in 'wires' argument."):
+        with pytest.raises(
+            ValueError, match="Invalid target subsystems provided in 'wires' argument."
+        ):
             dev.expand(U2, [-1, 5])
 
         # test exception raised if incorrect sized matrix provided
@@ -88,12 +90,16 @@ class TestWavefunctionBasic(BaseTest):
 
         # test applied to wire 0,2,3
         res = dev.expand(U_toffoli, [0, 2, 3])
-        expected = np.kron(SWAP, np.kron(I, I)) @ np.kron(I, U_toffoli) @ np.kron(SWAP, np.kron(I, I))
+        expected = (
+            np.kron(SWAP, np.kron(I, I)) @ np.kron(I, U_toffoli) @ np.kron(SWAP, np.kron(I, I))
+        )
         self.assertAllAlmostEqual(res, expected, delta=tol)
 
         # test applied to wire 0,1,3
         res = dev.expand(U_toffoli, [0, 1, 3])
-        expected = np.kron(np.kron(I, I), SWAP) @ np.kron(U_toffoli, I) @ np.kron(np.kron(I, I), SWAP)
+        expected = (
+            np.kron(np.kron(I, I), SWAP) @ np.kron(U_toffoli, I) @ np.kron(np.kron(I, I), SWAP)
+        )
         self.assertAllAlmostEqual(res, expected, delta=tol)
 
         # test applied to wire 3, 1, 2
@@ -107,7 +113,11 @@ class TestWavefunctionBasic(BaseTest):
         res = dev.expand(U_toffoli, [3, 0, 2])
         # change the control qubit on the Toffoli gate
         rows = np.array([0, 4, 1, 5, 2, 6, 3, 7])
-        expected = np.kron(SWAP, np.kron(I, I)) @ np.kron(I, U_toffoli[:, rows][rows]) @ np.kron(SWAP, np.kron(I, I))
+        expected = (
+            np.kron(SWAP, np.kron(I, I))
+            @ np.kron(I, U_toffoli[:, rows][rows])
+            @ np.kron(SWAP, np.kron(I, I))
+        )
         self.assertAllAlmostEqual(res, expected, delta=tol)
 
     @pytest.mark.parametrize("ev", plf.NumpyWavefunctionDevice.observables)
@@ -116,7 +126,7 @@ class TestWavefunctionBasic(BaseTest):
         dev = plf.NumpyWavefunctionDevice(wires=2)
 
         # start in the following initial state
-        dev.state = np.array([1, 0, 1, 1])/np.sqrt(3)
+        dev.state = np.array([1, 0, 1, 1]) / np.sqrt(3)
         dev.active_wires = {0, 1}
 
         # get the equivalent pennylane operation class
@@ -135,7 +145,51 @@ class TestWavefunctionBasic(BaseTest):
         # verify the device is now in the expected state
         self.assertAllAlmostEqual(res, expected_out, delta=tol)
 
-    @pytest.mark.parametrize("gate", plf.NumpyWavefunctionDevice._operation_map) #pylint: disable=protected-access
+    def test_var(self, tol):
+        """Tests for variance calculation"""
+        dev = plf.NumpyWavefunctionDevice(wires=2)
+        dev.active_wires = {0}
+
+        phi = 0.543
+        theta = 0.6543
+
+        # test correct variance for <Z> of a rotated state
+        dev.apply("RX", wires=[0], par=[phi])
+        dev.apply("RY", wires=[0], par=[theta])
+        dev.pre_measure()
+
+        var = dev.var("PauliZ", [0], [])
+        expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
+
+        self.assertAlmostEqual(var, expected, delta=tol)
+
+    def test_var_hermitian(self, tol):
+        """Tests for variance calculation using an arbitrary Hermitian observable"""
+        dev = plf.NumpyWavefunctionDevice(wires=2)
+        dev.active_wires = {0}
+
+        phi = 0.543
+        theta = 0.6543
+
+        # test correct variance for <H> of a rotated state
+        H = np.array([[4, -1 + 6j], [-1 - 6j, 2]])
+        dev.apply("RX", wires=[0], par=[phi])
+        dev.apply("RY", wires=[0], par=[theta])
+        dev.pre_measure()
+
+        var = dev.var("Hermitian", [0], [H])
+        expected = 0.5 * (
+            2 * np.sin(2 * theta) * np.cos(phi) ** 2
+            + 24 * np.sin(phi) * np.cos(phi) * (np.sin(theta) - np.cos(theta))
+            + 35 * np.cos(2 * phi)
+            + 39
+        )
+
+        self.assertAlmostEqual(var, expected, delta=tol)
+
+    @pytest.mark.parametrize(
+        "gate", plf.NumpyWavefunctionDevice._operation_map
+    )  # pylint: disable=protected-access
     def test_apply(self, gate, apply_unitary, tol):
         """Test the application of gates to a state"""
         dev = plf.NumpyWavefunctionDevice(wires=3)
@@ -150,17 +204,17 @@ class TestWavefunctionBasic(BaseTest):
         # the list of wires to apply the operation to
         w = list(range(op.num_wires))
 
-        if op.par_domain == 'A':
+        if op.par_domain == "A":
             # the parameter is an array
-            if gate == 'QubitUnitary':
+            if gate == "QubitUnitary":
                 p = [U]
                 w = [0]
                 expected_out = apply_unitary(U, 3)
-            elif gate == 'BasisState':
+            elif gate == "BasisState":
                 p = [np.array([1, 1, 1])]
                 expected_out = np.array([0, 0, 0, 0, 0, 0, 0, 1])
         else:
-            p = [0.432423, 2, 0.324][:op.num_params]
+            p = [0.432423, 2, 0.324][: op.num_params]
             fn = test_operation_map[gate]
 
             if callable(fn):
@@ -183,18 +237,19 @@ class TestWavefunctionBasic(BaseTest):
 
 class TestWavefunctionIntegration(BaseTest):
     """Test the NumPy wavefunction simulator works correctly from the PennyLane frontend."""
+
     # pylint:disable=no-self-use
 
     def test_load_wavefunction_device(self):
         """Test that the wavefunction device loads correctly"""
-        dev = qml.device('forest.numpy_wavefunction', wires=2)
+        dev = qml.device("forest.numpy_wavefunction", wires=2)
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 0)
-        self.assertEqual(dev.short_name, 'forest.numpy_wavefunction')
+        self.assertEqual(dev.short_name, "forest.numpy_wavefunction")
 
     def test_program_property(self):
         """Test that the program property works as expected"""
-        dev = qml.device('forest.numpy_wavefunction', wires=2)
+        dev = qml.device("forest.numpy_wavefunction", wires=2)
 
         @qml.qnode(dev)
         def circuit():
@@ -208,16 +263,16 @@ class TestWavefunctionIntegration(BaseTest):
         # construct and run the program
         circuit()
         self.assertEqual(len(dev.program), 2)
-        self.assertEqual(str(dev.program), 'H 0\nY 0\n')
+        self.assertEqual(str(dev.program), "H 0\nY 0\n")
 
     def test_wavefunction_args(self):
         """Test that the wavefunction plugin requires correct arguments"""
         with pytest.raises(TypeError, match="missing 1 required positional argument: 'wires'"):
-            qml.device('forest.numpy_wavefunction')
+            qml.device("forest.numpy_wavefunction")
 
     def test_hermitian_expectation(self, tol):
         """Test that an arbitrary Hermitian expectation value works"""
-        dev = qml.device('forest.numpy_wavefunction', wires=1)
+        dev = qml.device("forest.numpy_wavefunction", wires=1)
 
         @qml.qnode(dev)
         def circuit():
@@ -226,12 +281,12 @@ class TestWavefunctionIntegration(BaseTest):
             qml.PauliY(wires=0)
             return qml.expval(qml.Hermitian(H, 0))
 
-        out_state = 1j*np.array([-1, 1])/np.sqrt(2)
+        out_state = 1j * np.array([-1, 1]) / np.sqrt(2)
         self.assertAllAlmostEqual(circuit(), np.vdot(out_state, H @ out_state), delta=tol)
 
     def test_qubit_unitary(self, tol):
         """Test that an arbitrary unitary operation works"""
-        dev = qml.device('forest.numpy_wavefunction', wires=3)
+        dev = qml.device("forest.numpy_wavefunction", wires=3)
 
         @qml.qnode(dev)
         def circuit():
@@ -241,13 +296,13 @@ class TestWavefunctionIntegration(BaseTest):
             qml.QubitUnitary(U2, wires=[0, 1])
             return qml.expval(qml.PauliZ(0))
 
-        out_state = U2 @ np.array([1, 0, 0, 1])/np.sqrt(2)
+        out_state = U2 @ np.array([1, 0, 0, 1]) / np.sqrt(2)
         obs = np.kron(np.array([[1, 0], [0, -1]]), I)
         self.assertAllAlmostEqual(circuit(), np.vdot(out_state, obs @ out_state), delta=tol)
 
     def test_invalid_qubit_unitary(self):
         """Test that an invalid unitary operation is not allowed"""
-        dev = qml.device('forest.numpy_wavefunction', wires=3)
+        dev = qml.device("forest.numpy_wavefunction", wires=3)
 
         def circuit(Umat):
             """Test QNode"""
@@ -268,7 +323,7 @@ class TestWavefunctionIntegration(BaseTest):
 
     def test_one_qubit_wavefunction_circuit(self, tol):
         """Test that the wavefunction plugin provides correct result for simple circuit"""
-        dev = qml.device('forest.numpy_wavefunction', wires=1)
+        dev = qml.device("forest.numpy_wavefunction", wires=1)
 
         a = 0.543
         b = 0.123
@@ -283,12 +338,12 @@ class TestWavefunctionIntegration(BaseTest):
             return qml.expval(qml.PauliZ(0))
 
         print(circuit(a, b, c))
-        self.assertAlmostEqual(circuit(a, b, c), np.cos(a)*np.sin(b), delta=tol)
+        self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=tol)
 
     def test_two_qubit_wavefunction_circuit(self, tol):
         """Test that the wavefunction plugin provides correct result for simple 2-qubit circuit,
         even when the number of wires > number of qubits."""
-        dev = qml.device('forest.numpy_wavefunction', wires=3)
+        dev = qml.device("forest.numpy_wavefunction", wires=3)
 
         a = 0.543
         b = 0.123
@@ -306,12 +361,14 @@ class TestWavefunctionIntegration(BaseTest):
             plf.CPHASE(w, 0, wires=[0, 1])
             return qml.expval(qml.PauliY(1))
 
-        self.assertAlmostEqual(circuit(theta, a, b, c), -np.sin(b/2)**2*np.sin(2*theta), delta=tol)
+        self.assertAlmostEqual(
+            circuit(theta, a, b, c), -np.sin(b / 2) ** 2 * np.sin(2 * theta), delta=tol
+        )
 
     def test_nonzero_shots(self):
         """Test that the wavefunction plugin provides correct result for high shot number"""
-        shots = 10**2
-        dev = qml.device('forest.numpy_wavefunction', wires=1, shots=shots)
+        shots = 10 ** 2
+        dev = qml.device("forest.numpy_wavefunction", wires=1, shots=shots)
 
         a = 0.543
         b = 0.123
@@ -329,6 +386,6 @@ class TestWavefunctionIntegration(BaseTest):
         for _ in range(100):
             runs.append(circuit(a, b, c))
 
-        expected_var = np.sqrt(1/shots)
-        print(np.mean(runs), np.cos(a)*np.sin(b))
-        self.assertAlmostEqual(np.mean(runs), np.cos(a)*np.sin(b), delta=expected_var)
+        expected_var = np.sqrt(1 / shots)
+        print(np.mean(runs), np.cos(a) * np.sin(b))
+        self.assertAlmostEqual(np.mean(runs), np.cos(a) * np.sin(b), delta=expected_var)

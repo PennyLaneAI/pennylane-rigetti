@@ -22,6 +22,7 @@ Once PyQuil and the PennyLane plugin are installed, the three Forest devices can
 You can instantiate these devices in PennyLane as follows:
 
 >>> import pennylane as qml
+>>> from pennylane import expval, var
 >>> dev_numpy = qml.device('forest.numpy_wavefunction', wires=2)
 >>> dev_simulator = qml.device('forest.wavefunction', wires=2)
 >>> dev_pyqvm = qml.device('forest.qvm', device='2q-pyqvm', shots=1000)
@@ -32,7 +33,7 @@ You can instantiate these devices in PennyLane as follows:
 
 These devices can then be used just like other devices for the definition and evaluation of QNodes within PennyLane.
 
-A simple quantum function that returns the expectation value of a measurement and depends on three classical input parameters would look like:
+A simple quantum function that returns the expectation value and variance of a measurement and depends on three classical input parameters would look like:
 
 .. code-block:: python
 
@@ -42,12 +43,12 @@ A simple quantum function that returns the expectation value of a measurement an
         qml.RY(y, wires=[0])
         qml.RX(x, wires=[0])
         qml.CNOT(wires=[0, 1])
-        return qml.expval.PauliX(wires=1)
+        return expval(qml.PauliZ(0)), var(qml.PauliZ(1))
 
-You can then execute the circuit like any other function to get the quantum mechanical expectation value:
+You can then execute the circuit like any other function to get the quantum mechanical expectation value and variance:
 
 >>> circuit(0.2, 0.1, 0.3)
--0.017578125
+array([0.97517033, 0.04904283])
 
 It is also easy to perform abstract calculations on a physical Forest QPU:
 
@@ -63,7 +64,7 @@ It is also easy to perform abstract calculations on a physical Forest QPU:
         qml.RX(y, wires=1)
         PSWAP(0.432, wires=[0, 1])
         qml.CNOT(wires=[0, 1])
-        return qml.expval.PauliZ(1)
+        return expval(qml.PauliZ(1))
 
 Note that:
 
@@ -108,7 +109,7 @@ On initialization, the PennyLane-Forest devices accept additional keyword argume
 
     If using the downloadable Forest SDK with the default server configurations
     for the QVM and the Quil compiler (i.e., you launch them with the commands
-    ``qvm -S`` and ``quilc -S``), then you will not need to set these keyword arguments.
+    ``qvm -S`` and ``quilc -R``), then you will not need to set these keyword arguments.
 
     Likewise, if you are running PennyLane using the Rigetti Quantum Cloud Service (QCS)
     on a provided QMI, these environment variables are set automatically and will also
@@ -118,7 +119,7 @@ On initialization, the PennyLane-Forest devices accept additional keyword argume
 The ``forest.numpy_wavefunction`` device
 ========================================
 
-The ``forest.numpy_wavefunction`` device provides an interface between PennyLane and the pyQuil `NumPy wavefunction simulator <http://docs.rigetti.com/en/stable/wavefunction_simulator.html>`_. Because the NumPy wavefunction simulator allows access and manipulation of the underlying quantum state vector, ``forest.numpy_wavefunction`` is able to support the full suite of PennyLane and Quil quantum operations and expectation values.
+The ``forest.numpy_wavefunction`` device provides an interface between PennyLane and the pyQuil `NumPy wavefunction simulator <http://docs.rigetti.com/en/stable/wavefunction_simulator.html>`_. Because the NumPy wavefunction simulator allows access and manipulation of the underlying quantum state vector, ``forest.numpy_wavefunction`` is able to support the full suite of PennyLane and Quil quantum operations and observables.
 
 In addition, it is generally faster than running equivalent simulations on the QVM, as the final state can be inspected and the expectation value calculated analytically, rather than by sampling measurements.
 
@@ -143,7 +144,7 @@ In addition, it is generally faster than running equivalent simulations on the Q
 The ``forest.wavefunction`` device
 ==================================
 
-The ``forest.wavefunction`` device provides an interface between PennyLane and the Forest SDK `wavefunction simulator <http://docs.rigetti.com/en/stable/wavefunction_simulator.html>`_. Because the wavefunction simulator allows access and manipulation of the underlying quantum state vector, ``forest.wavefunction`` is able to support the full suite of PennyLane and Quil quantum operations and expectation values.
+The ``forest.wavefunction`` device provides an interface between PennyLane and the Forest SDK `wavefunction simulator <http://docs.rigetti.com/en/stable/wavefunction_simulator.html>`_. Because the wavefunction simulator allows access and manipulation of the underlying quantum state vector, ``forest.wavefunction`` is able to support the full suite of PennyLane and Quil quantum operations and observables.
 
 In addition, it is generally faster than running equivalent simulations on the QVM, as the final state can be inspected and the expectation value calculated analytically, rather than by sampling measurements.
 
@@ -208,7 +209,7 @@ For example, see how increasing the shot count increases the expectation value a
 
     def circuit(x):
         qml.RX(x, wires=[0])
-        return qml.expval.PauliZ(0)
+        return expval(qml.PauliZ(0))
 
     dev_exact = qml.device('forest.wavefunction', wires=1)
     dev_s1024 = qml.device('forest.qvm', device='1q-qvm')
@@ -228,13 +229,13 @@ Printing out the results of the three device expectation values:
 0.6977
 
 
-Supported expectation values
-----------------------------
+Supported observables
+---------------------
 
-The QVM device supports ``qml.expval.PauliZ`` expectation values 'natively', while also supporting ``qml.expval.Identity``, ``qml.expval.PauliY``, ``qml.expval.Hadamard``, and ``qml.expval.Hermitian`` by performing implicit change of basis operations.
+The QVM device supports ``qml.PauliZ`` observables values 'natively', while also supporting ``qml.Identity``, ``qml.PauliY``, ``qml.Hadamard``, and ``qml.Hermitian`` by performing implicit change of basis operations.
 
-Native expectation values
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Native observables
+^^^^^^^^^^^^^^^^^^
 
 The QVM currently supports only one measurement, returning ``1`` if the qubit is measured to be in the state :math:`|1\rangle`, and ``0`` if the qubit is measured to be in the state :math:`|0\rangle`. This is equivalent to measuring in the Pauli-Z basis, with state :math:`|1\rangle` corresponding to Pauli-Z eigenvalue :math:`\lambda=-1`, and likewise state :math:`|0\rangle` corresponding to eigenvalue :math:`\lambda=1`. As a result, we can simply perform a rescaling of the measurement results to get the Pauli-Z expectation value of the :math:`i` th wire:
 
@@ -246,21 +247,21 @@ where :math:`N` is the total number of shots, and :math:`m_j` is the :math:`j` t
 Change of measurement basis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For the remaining expectation values, it is easy to perform a quantum change of basis operation before measurement such that the correct expectation value is performed. For example, say we have a unitary Hermitian observable :math:`\hat{A}`. Since, by definition, it must have eigenvalues :math:`\pm 1`, there will always exist a unitary matrix :math:`U` such that it satisfies the following similarity transform:
+For the remaining observables, it is easy to perform a quantum change of basis operation before measurement such that the correct expectation value is performed. For example, say we have a unitary Hermitian observable :math:`\hat{A}`. Since, by definition, it must have eigenvalues :math:`\pm 1`, there will always exist a unitary matrix :math:`U` such that it satisfies the following similarity transform:
 
 .. math:: \hat{A} = U^\dagger Z U
 
 Since :math:`U` is unitary, it can be applied to the specified qubit before measurement in the Pauli-Z basis. Below is a table of the various change of basis operations performed implicitly by PennyLane.
 
-+-------------------------+-----------------------------------+
-|    Expectation value    | Change of basis gate    :math:`U` |
-+=========================+===================================+
-| ``qml.expval.PauliX``   | :math:`H`                         |
-+-------------------------+-----------------------------------+
-| ``qml.expval.PauliY``   | :math:`H S^{-1}=HSZ`              |
-+-------------------------+-----------------------------------+
-| ``qml.expval.Hadamard`` | :math:`R_y(-\pi/4)`               |
-+-------------------------+-----------------------------------+
++------------------+-----------------------------------+
+|    Observable    | Change of basis gate    :math:`U` |
++==================+===================================+
+| ``qml.PauliX``   | :math:`H`                         |
++------------------+-----------------------------------+
+| ``qml.PauliY``   | :math:`H S^{-1}=HSZ`              |
++------------------+-----------------------------------+
+| ``qml.Hadamard`` | :math:`R_y(-\pi/4)`               |
++------------------+-----------------------------------+
 
 To see how this affects the resultant quil program, you may use the :attr:`~.ForestDevice.program` property to print out the quil program after evaluation on the device.
 
@@ -271,7 +272,7 @@ To see how this affects the resultant quil program, you may use the :attr:`~.For
     @qml.qnode(dev)
     def circuit(x):
         qml.RX(x, wires=[0])
-        return qml.expval.PauliY(0)
+        return expval(qml.PauliY(0))
 
 >>> circuit(0.54)
 -0.525390625
@@ -292,7 +293,7 @@ MEASURE 0 ro[0]
 Arbitrary Hermitian observables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Arbitrary Hermitian expectation values, ``qml.expval.Hermitian``, are also supported by the QVM. However, since they are not necessarily unitary (and thus have eigenvalues :math:`\lambda_i\neq \pm 1`), we cannot use the similarity transform approach above.
+Arbitrary Hermitian observables, ``qml.Hermitian``, are also supported by the QVM. However, since they are not necessarily unitary (and thus have eigenvalues :math:`\lambda_i\neq \pm 1`), we cannot use the similarity transform approach above.
 
 Instead, we can calculate the eigenvectors :math:`\mathbf{v}_i` of :math:`\hat{A}`, and construct our unitary change of basis operation as follows:
 
@@ -303,7 +304,7 @@ After measuring the qubit state, we can determine the probability :math:`P_0` of
 .. math:: \langle\hat{A}\rangle = \lambda_1 P_0 + \lambda_2 P_1
 
 
-This process is done automatically behind the scenes in the QVM device when ``qml.expval.Hermitian`` is returned.
+This process is done automatically behind the scenes in the QVM device when ``qml.expval(qml.Hermitian)`` is returned.
 
 
 
@@ -325,7 +326,7 @@ In addition, ``forest.qpu`` also accepts the optional ``active_reset`` keyword a
 Supported operations
 ====================
 
-All devices support all PennyLane `operations <https://pennylane.readthedocs.io/en/latest/code/ops/qubit.html>`_ and `expectation <https://pennylane.readthedocs.io/en/latest/code/expval/qubit.html>`_ values, with the exception of the PennyLane ``QubitStateVector`` state preparation operation.
+All devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/latest/code/ops/qubit.html>`_, with the exception of the PennyLane ``QubitStateVector`` state preparation operation.
 
 In addition, PennyLane-Forest provides the following PyQuil-specific operations for PennyLane. These are all importable from :mod:`pennylane_forest.ops <.ops>`.
 
