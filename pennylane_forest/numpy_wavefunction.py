@@ -27,7 +27,7 @@ from pyquil.pyqvm import PyQVM
 from pyquil.numpy_simulator import NumpyWavefunctionSimulator
 
 from .device import ForestDevice
-from .wavefunction import observable_map, spectral_decomposition_qubit
+from .wavefunction import observable_map, spectral_decomposition
 from ._version import __version__
 
 
@@ -72,11 +72,7 @@ class NumpyWavefunctionDevice(ForestDevice):
             ev = self.ev(A, wires)
         else:
             # estimate the ev
-            # sample Bernoulli distribution n_eval times / binomial distribution once
-            a, P = spectral_decomposition_qubit(A)
-            p0 = self.ev(P[0], wires)  # probability of measuring a[0]
-            n0 = np.random.binomial(self.shots, p0)
-            ev = (n0 * a[0] + (self.shots - n0) * a[1]) / self.shots
+            ev = np.mean(self.sample(observable, wires, par, self.shots))
 
         return ev
 
@@ -86,14 +82,44 @@ class NumpyWavefunctionDevice(ForestDevice):
         else:
             A = observable_map[observable]
 
-        var = self.ev(A @ A, wires) - self.ev(A, wires) ** 2
+        if self.shots == 0:
+            # exact variance value
+            var = self.ev(A @ A, wires) - self.ev(A, wires) ** 2
+        else:
+            # estimate the variance
+            var = np.var(self.sample(observable, wires, par, self.shots))
+
         return var
 
+    def sample(self, observable, wires, par, n=None):
+        if n is None:
+            n = self.shots
+
+        if n == 0:
+            raise ValueError("Calling sample with n = 0 is not possible.")
+
+        if n < 0 or not isinstance(n, int):
+            raise ValueError("The number of samples must be a positive integer.")
+
+        if observable == "Hermitian":
+            A = par[0]
+        else:
+            A = observable_map[observable]
+
+        a, P = spectral_decomposition(A)
+
+        p = np.zeros(a.shape)
+
+        for idx, Pi in enumerate(P):
+            p[idx] = self.ev(Pi, wires)
+
+        return np.random.choice(a, n, p=p)
+
     def ev(self, A, wires):
-        r"""Evaluates a one-qubit expectation in the current state.
+        r"""Evaluates an expectation in the current state.
 
         Args:
-          A (array): :math:`2\times 2` Hermitian matrix corresponding to the expectation
+          A (array): :math:`2^N\times 2^N` Hermitian matrix corresponding to the expectation
           wires (Sequence[int]): target subsystem
 
         Returns:

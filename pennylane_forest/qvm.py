@@ -19,7 +19,9 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
+import itertools
 import re
+
 import numpy as np
 
 import networkx as nx
@@ -174,42 +176,37 @@ class QVMDevice(ForestDevice):
             self.state[q] = bitstring_array[:, i]
 
     def expval(self, observable, wires, par):
-        if len(wires) == 1:
-            # 1 qubit observable
-            evZ = np.mean(1 - 2 * self.state[wires[0]])
+        return np.mean(self.sample(observable, wires, par))
 
-            # for single qubit state probabilities |psi|^2 = (p0, p1),
-            # we know that p0+p1=1 and that <Z>=p0-p1
-            p0 = (1 + evZ) / 2
-            p1 = (1 - evZ) / 2
+    def var(self, observable, wires, par):
+        return np.var(self.sample(observable, wires, par))
 
-            if observable == "Identity":
-                # <I> = \sum_i p_i
-                return p0 + p1
+    def sample(self, observable, wires, par, n=None):
+        if n is None:
+            n = self.shots
 
-            if observable == "Hermitian":
-                # <H> = \sum_i w_i p_i
-                Hkey = tuple(par[0].flatten().tolist())
-                w = self._eigs[Hkey]["eigval"]
-                return w[0] * p0 + w[1] * p1
+        if n == 0:
+            raise ValueError("Calling sample with n = 0 is not possible.")
 
-            return evZ
+        if n < 0 or not isinstance(n, int):
+            raise ValueError("The number of samples must be a positive integer.")
 
-        # Multi-qubit observable
-        # ----------------------
-        # Currently, we only support qml.expval.Hermitian(A, wires),
-        # where A is a 2^N x 2^N matrix acting on N wires.
-        #
-        # Eventually, we will also support tensor products of Pauli
-        # matrices in the PennyLane UI.
-
-        probs = self.probabilities(wires)
+        if observable == "Identity":
+            return np.ones([n])
 
         if observable == "Hermitian":
             Hkey = tuple(par[0].flatten().tolist())
-            w = self._eigs[Hkey]["eigval"]
-            # <A> = \sum_i w_i p_i
-            return w @ probs
+            eigvals = self._eigs[Hkey]["eigval"]
+            res = np.array([self.state[i] for i in wires]).T
+
+            samples = np.zeros([n])
+
+            for w, b in zip(eigvals, itertools.product([0, 1], repeat=len(wires))):
+                samples = np.where(np.all(res == b, axis=1), w, samples)
+
+            return samples
+
+        return 1 - 2 * self.state[wires[0]]
 
     def probabilities(self, wires):
         """Returns the (marginal) probabilities of the quantum state.
@@ -223,7 +220,6 @@ class QVMDevice(ForestDevice):
             array: array of shape ``[2**len(wires)]`` containing
             the probabilities of each computational basis state
         """
-
         # create an array of size [2^len(wires), 2] to store
         # the resulting probability of each computational basis state
         probs = np.zeros([2 ** len(wires), 2])
@@ -245,41 +241,3 @@ class QVMDevice(ForestDevice):
         probs = probs[:, 1]
 
         return probs
-
-    def var(self, observable, wires, par):
-        if len(wires) == 1:
-            # 1 qubit observable
-            if observable == "Identity":
-                return 0
-
-            varZ = np.var(1 - 2 * self.state[wires[0]])
-
-            if observable in {"PauliX", "PauliY", "PauliZ", "Hadamard"}:
-                return varZ
-
-            # for single qubit state probabilities |psi|^2 = (p0, p1),
-            # we know that p0+p1=1 and that <Z>=p0-p1
-            evZ = np.mean(1 - 2 * self.state[wires[0]])
-            probs = np.array([(1 + evZ) / 2, (1 - evZ) / 2])
-
-            if observable == "Hermitian":
-                # <H> = \sum_i w_i p_i
-                Hkey = tuple(par[0].flatten().tolist())
-                w = self._eigs[Hkey]["eigval"]
-                return (w ** 2) @ probs - (w @ probs) ** 2
-
-        # Multi-qubit observable
-        # ----------------------
-        # Currently, we only support qml.expval.Hermitian(A, wires),
-        # where A is a 2^N x 2^N matrix acting on N wires.
-        #
-        # Eventually, we will also support tensor products of Pauli
-        # matrices in the PennyLane UI.
-
-        probs = self.probabilities(wires)
-
-        if observable == "Hermitian":
-            Hkey = tuple(par[0].flatten().tolist())
-            w = self._eigs[Hkey]["eigval"]
-            # <A> = \sum_i w_i p_i
-            return (w ** 2) @ probs - (w @ probs) ** 2

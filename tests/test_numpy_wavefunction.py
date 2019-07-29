@@ -135,7 +135,7 @@ class TestWavefunctionBasic(BaseTest):
         O = test_operation_map[ev]
 
         # calculate the expected output
-        if op.num_wires == 1 or op.num_wires == 0:
+        if op.num_wires == 1 or op.num_wires <= 0:
             expected_out = dev.state.conj() @ np.kron(O, I) @ dev.state
         elif op.num_wires == 2:
             expected_out = dev.state.conj() @ O @ dev.state

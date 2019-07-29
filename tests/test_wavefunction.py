@@ -12,7 +12,7 @@ from conftest import BaseTest
 from conftest import I, U, U2, SWAP, CNOT, U_toffoli, H, test_operation_map
 
 import pennylane_forest as plf
-from pennylane_forest.wavefunction import spectral_decomposition_qubit
+from pennylane_forest.wavefunction import spectral_decomposition
 
 
 log = logging.getLogger(__name__)
@@ -21,9 +21,9 @@ log = logging.getLogger(__name__)
 class TestAuxillaryFunctions(BaseTest):
     """Test auxillary functions."""
 
-    def test_spectral_decomposition_qubit(self, tol):
+    def test_spectral_decomposition(self, tol):
         """Test that the correct spectral decomposition is returned."""
-        a, P = spectral_decomposition_qubit(H)
+        a, P = spectral_decomposition(H)
 
         # verify that H = \sum_k a_k P_k
         self.assertAllAlmostEqual(H, np.einsum("i,ijk->jk", a, P), delta=tol)
@@ -163,7 +163,7 @@ class TestWavefunctionBasic(BaseTest):
         O = test_operation_map[ev]
 
         # calculate the expected output
-        if op.num_wires == 1 or op.num_wires == 0:
+        if op.num_wires == 1 or op.num_wires <= 0:
             expected_out = dev.state.conj() @ np.kron(O, I) @ dev.state
         elif op.num_wires == 2:
             expected_out = dev.state.conj() @ O @ dev.state
