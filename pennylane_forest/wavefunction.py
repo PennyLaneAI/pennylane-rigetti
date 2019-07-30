@@ -166,29 +166,3 @@ class WavefunctionDevice(ForestDevice):
         # Expand the Hermitian observable over the entire subsystem
         As = self.mat_vec_product(A, self.state, wires)
         return np.vdot(self.state, As).real
-
-    def mat_vec_product(self, mat, vec, wires):
-        r"""Apply multiplication of a matrix to subsystems of the quantum state.
-
-        Args:
-            mat (array): matrix to multiply
-            vec (array): state vector to multiply
-            wires (Sequence[int]): target subsystems
-
-        Returns:
-            array: output vector after applying ``mat`` to input ``vec`` on specified subsystems
-        """
-        mat = np.reshape(mat, [2] * len(wires) * 2)
-        vec = np.reshape(vec, [2] * self.num_wires)
-        axes = (np.arange(len(wires), 2 * len(wires)), wires)
-        tdot = np.tensordot(mat, vec, axes=axes)
-
-        # tensordot causes the axes given in `wires` to end up in the first positions
-        # of the resulting tensor. This corresponds to a (partial) transpose of
-        # the correct output state
-        # We'll need to invert this permutation to put the indices in the correct place
-        unused_idxs = [idx for idx in range(self.num_wires) if idx not in wires]
-        perm = wires + unused_idxs
-        inv_perm = np.argsort(perm) # argsort gives inverse permutation
-        state_multi_index = np.transpose(tdot, inv_perm)
-        return np.reshape(state_multi_index, 2 ** self.num_wires)

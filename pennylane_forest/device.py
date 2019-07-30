@@ -246,3 +246,70 @@ class ForestDevice(Device):
     @property
     def operations(self):
         return set(self._operation_map.keys())
+
+    def mat_vec_product(self, mat, vec, wires):
+        r"""Apply multiplication of a matrix to subsystems of the quantum state.
+
+        Args:
+            mat (array): matrix to multiply
+            vec (array): state vector to multiply
+            wires (Sequence[int]): target subsystems
+
+        Returns:
+            array: output vector after applying ``mat`` to input ``vec`` on specified subsystems
+        """
+        # first, we need to reshape both the matrix and vector
+        # into blocks of 2x2 matrices, in order to do the higher
+        # order matrix multiplication
+
+        # Reshape the matrix to ``size=[2, 2, 2, ..., 2]``,
+        # where ``len(size) == 2*len(wires)``
+        #
+        # The first half of the dimensions correspond to a
+        # 'ket' acting on each wire/qubit, while the second
+        # half of the dimensions correspond to a 'bra' acting
+        # on each wire/qubit.
+        #
+        # E.g., if mat = \sum_{ijkl} (c_{ijkl} |ij><kl|),
+        # and wires=[0, 1], then
+        # the reshaped dimensions of mat are such that
+        # mat[i, j, k, l] == c_{ijkl}.
+        mat = np.reshape(mat, [2] * len(wires) * 2)
+
+        # Reshape the state vector to ``size=[2, 2, ..., 2]``,
+        # where ``len(size) == num_wires``.
+        # Each wire corresponds to a subsystem.
+        #
+        # E.g., if vec = \sum_{ijk}c_{ijk}|ijk>,
+        # the reshaped dimensions of vec are such that
+        # vec[i, j, k] == c_{ijk}.
+        vec = np.reshape(vec, [2] * self.num_wires)
+
+        # Calculate the axes on which the matrix multiplication
+        # takes place. For the state vector, this simply
+        # corresponds to the requested wires. For the matrix,
+        # it is the latter half of the dimensions (the 'bra' dimensions).
+        #
+        # For example, if num_wires=3 and wires=[2, 0], then
+        # axes=((2, 3), (2, 0)). This is equivalent to doing
+        # np.einsum("ijkl,lnk", mat, vec).
+        axes = (np.arange(len(wires), 2 * len(wires)), wires)
+
+        # After the tensor dot operation, the resulting array
+        # will have shape ``size=[2, 2, ..., 2]``,
+        # where ``len(size) == num_wires``, corresponding
+        # to a valid state of the system.
+        tdot = np.tensordot(mat, vec, axes=axes)
+
+        # Tensordot causes the axes given in `wires` to end up in the first positions
+        # of the resulting tensor. This corresponds to a (partial) transpose of
+        # the correct output state
+        # We'll need to invert this permutation to put the indices in the correct place
+        unused_idxs = [idx for idx in range(self.num_wires) if idx not in wires]
+        perm = wires + unused_idxs
+
+        # argsort gives the inverse permutation
+        inv_perm = np.argsort(perm)
+        state_multi_index = np.transpose(tdot, inv_perm)
+
+        return np.reshape(state_multi_index, 2 ** self.num_wires)
