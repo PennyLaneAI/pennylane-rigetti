@@ -63,12 +63,12 @@ class QPUDevice(ForestDevice):
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
     """
-    name = 'Forest QPU Device'
-    short_name = 'forest.qpu'
-    expectations = {'PauliX', 'PauliY', 'PauliZ', 'Identity', 'Hadamard', 'Hermitian'}
+    name = "Forest QPU Device"
+    short_name = "forest.qpu"
+    expectations = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
-    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, symmetrize_readout='exhaustive',
-                 calibrate_readout='plus-eig', **kwargs):
+    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, symmetrize_readout="exhaustive",
+                 calibrate_readout="plus-eig", **kwargs):
         self._eigs = {}
 
         if "wires" in kwargs:
@@ -100,21 +100,21 @@ class QPUDevice(ForestDevice):
         for e in self.expval_queue:
             wires = e.wires
 
-            if e.name == 'PauliX':
+            if e.name == "PauliX":
                 # X = H.Z.H
-                self.apply('Hadamard', wires, [])
+                self.apply("Hadamard", wires, [])
 
-            elif e.name == 'PauliY':
+            elif e.name == "PauliY":
                 # Y = (HS^)^.Z.(HS^) and S^=SZ
-                self.apply('PauliZ', wires, [])
-                self.apply('S', wires, [])
-                self.apply('Hadamard', wires, [])
+                self.apply("PauliZ", wires, [])
+                self.apply("S", wires, [])
+                self.apply("Hadamard", wires, [])
 
-            elif e.name == 'Hadamard':
+            elif e.name == "Hadamard":
                 # H = Ry(-pi/4)^.Z.Ry(-pi/4)
-                self.apply('RY', wires, [-np.pi/4])
+                self.apply("RY", wires, [-np.pi/4])
 
-            elif e.name == 'Hermitian':
+            elif e.name == "Hermitian":
                 # For arbitrary Hermitian matrix H, let U be the unitary matrix
                 # that diagonalises it, and w_i be the eigenvalues.
                 H = e.parameters[0]
@@ -122,16 +122,16 @@ class QPUDevice(ForestDevice):
 
                 if Hkey in self._eigs:
                     # retrieve eigenvectors
-                    U = self._eigs[Hkey]['eigvec']
+                    U = self._eigs[Hkey]["eigvec"]
                 else:
                     # store the eigenvalues corresponding to H
                     # in a dictionary, so that they do not need to
                     # be calculated later
                     w, U = np.linalg.eigh(H)
-                    self._eigs[Hkey] = {'eigval': w, 'eigvec': U}
+                    self._eigs[Hkey] = {"eigval": w, "eigvec": U}
 
                 # Perform a change of basis before measuring by applying U^ to the circuit
-                self.apply('QubitUnitary', wires, [U.conj().T])
+                self.apply("QubitUnitary", wires, [U.conj().T])
 
         prag = Program(Pragma('INITIAL_REWIRING', ['"PARTIAL"']))
 
@@ -141,7 +141,7 @@ class QPUDevice(ForestDevice):
         self.prog = prag + self.prog
 
         qubits = list(self.prog.get_qubits())
-        ro = self.prog.declare('ro', 'BIT', len(qubits))
+        ro = self.prog.declare("ro", "BIT", len(qubits))
         for i, q in enumerate(qubits):
             self.prog.inst(MEASURE(q, ro[i]))
 
@@ -157,8 +157,8 @@ class QPUDevice(ForestDevice):
         for i, q in enumerate(qubits):
             self.state[q] = bitstring_array[:, i]
 
-    def expval(self, expectation, wires, par, symmetrize_readout='exhaustive', calibrate_readout='plus-eig'):
-        d_expectation = {'PauliZ': sZ}
+    def expval(self, expectation, wires, par, symmetrize_readout="exhaustive", calibrate_readout="plus-eig"):
+        d_expectation = {"PauliZ": sZ}
         if len(wires) == 1:
             qubit = self.qc.qubits()[0]
             prep_prog = Program([instr for instr in self.program if isinstance(instr, Gate)])
