@@ -92,12 +92,12 @@ class QPUDevice(ForestDevice):
         self.symmetrize_readout = symmetrize_readout
         self.calibrate_readout = calibrate_readout
 
-    def pre_expval(self):
+    def pre_measure(self):
         # pass
         ## code below borrowed from `qvm.py`
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
-        for e in self.expval_queue:
+        for e in self.obs_queue:
             wires = e.wires
 
             if e.name == "PauliX":
