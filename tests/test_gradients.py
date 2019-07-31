@@ -12,9 +12,9 @@ def test_simulator_qvm_default_agree(tol, qvm, compiler):
     on the calculation of quantum gradients."""
     w = 2
 
-    dev1 = qml.device('default.qubit', wires=w)
-    dev2 = qml.device('forest.wavefunction', wires=w)
-    dev3 = qml.device('forest.qvm', device='9q-square-qvm', shots=5000)
+    dev1 = qml.device("default.qubit", wires=w)
+    dev2 = qml.device("forest.wavefunction", wires=w)
+    dev3 = qml.device("forest.qvm", device="9q-square-qvm", shots=5000)
 
     in_state = np.zeros([w])
     in_state[0] = 1
@@ -26,7 +26,7 @@ def test_simulator_qvm_default_agree(tol, qvm, compiler):
         qml.RY(x, wires=0)
         qml.RX(y, wires=1)
         qml.CNOT(wires=[0, 1])
-        return qml.expval.PauliZ(1)
+        return qml.expval(qml.PauliZ(1))
 
     func1 = qml.QNode(func, dev1)
     func2 = qml.QNode(func, dev2)
@@ -57,8 +57,8 @@ def test_gradient_with_custom_operator(qvm, compiler):
     operator is used."""
     w = 9
 
-    dev2 = qml.device('forest.wavefunction', wires=w)
-    dev3 = qml.device('forest.qvm', device='9q-square-qvm', shots=5000)
+    dev2 = qml.device("forest.wavefunction", wires=w)
+    dev3 = qml.device("forest.qvm", device="9q-square-qvm", shots=5000)
 
     def func(x, y):
         """Reference QNode"""
@@ -67,7 +67,7 @@ def test_gradient_with_custom_operator(qvm, compiler):
         qml.RX(y, wires=1)
         PSWAP(0.432, wires=[0, 1])
         qml.CNOT(wires=[0, 1])
-        return qml.expval.PauliZ(1)
+        return qml.expval(qml.PauliZ(1))
 
     func2 = qml.QNode(func, dev2)
     func3 = qml.QNode(func, dev3)
