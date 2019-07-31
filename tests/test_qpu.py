@@ -27,7 +27,7 @@ class TestQPUIntegration(BaseTest):
 
     def test_load_virtual_qpu_device(self):
         """Test that the QPU simulators load correctly"""
-        qml.device("forest.qpu", device="Aspen-1-2Q-B", load_qc=False)
+        qml.device("forest.qpu", device="Aspen-4-2Q-A", load_qc=False)
 
     def test_qpu_args(self):
         """Test that the QPU plugin requires correct arguments"""
