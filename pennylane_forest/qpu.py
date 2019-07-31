@@ -65,7 +65,7 @@ class QPUDevice(ForestDevice):
     """
     name = "Forest QPU Device"
     short_name = "forest.qpu"
-    expectations = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
+    observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
     def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, symmetrize_readout="exhaustive",
                  calibrate_readout="plus-eig", **kwargs):
