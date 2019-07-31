@@ -258,6 +258,13 @@ class ForestDevice(Device):
         Returns:
             array: output vector after applying ``mat`` to input ``vec`` on specified subsystems
         """
+        num_wires = len(wires)
+
+        if mat.shape != (2 ** num_wires, 2 ** num_wires):
+            raise ValueError(
+                f"Please specify a {2**num_wires} x {2**num_wires} matrix for {num_wires} wires."
+            )
+
         # first, we need to reshape both the matrix and vector
         # into blocks of 2x2 matrices, in order to do the higher
         # order matrix multiplication

@@ -165,7 +165,7 @@ class TestQVMBasic(BaseTest):
         ev2 = ((a - d) * np.cos(theta) * np.cos(phi) + 2 * re_b * np.sin(phi) + a + d) / 2
         expected = np.array([ev1, ev2])
 
-        self.assertAllAlmostEqual(res, expected, delta=3 / np.sqrt(shots))
+        self.assertAllAlmostEqual(res, expected, delta=4 / np.sqrt(shots))
 
     def test_multi_mode_hermitian_expectation(self, shots, qvm, compiler):
         """Test that arbitrary multi-mode Hermitian expectation values are correct"""
