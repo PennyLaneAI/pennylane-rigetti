@@ -48,3 +48,54 @@ class TestQPUIntegration(BaseTest):
 
         with pytest.raises(ValueError, match="Readout error cannot be set on the physical QPU"):
             qml.device("forest.qpu", device=device, load_qc=True, readout_error=[0.9, 0.75])
+
+
+class TestQPUBasic(BaseTest):
+    """Unit tests for the QPU (as a QVM)."""
+
+    # pylint: disable=protected-access
+
+    def test_no_readout_correction(self):
+        # need to find a device with qubit 0
+        found_good_device = False
+        while not found_good_device:
+            device = np.random.choice(VALID_QPU_LATTICES)
+            dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
+                                symmetrize_readout=None, calibrate_readout=None)
+            if 0 in dev_qpu.qc.qubits():
+                found_good_device = True
+
+        qubit = 0
+
+        @qml.qnode(dev_qpu)
+        def circuit_Xpl():
+            qml.RY(np.pi/2, wires=qubit)
+            return qml.expval(qml.PauliX(qubit))
+
+        @qml.qnode(dev_qpu)
+        def circuit_Xmi():
+            qml.RY(-np.pi/2, wires=qubit)
+            return qml.expval(qml.PauliX(qubit))
+
+        @qml.qnode(dev_qpu)
+        def circuit_Ypl():
+            qml.RX(-np.pi/2, wires=qubit)
+            return qml.expval(qml.PauliY(qubit))
+
+        @qml.qnode(dev_qpu)
+        def circuit_Ymi():
+            qml.RX(np.pi/2, wires=qubit)
+            return qml.expval(qml.PauliY(qubit))
+
+        @qml.qnode(dev_qpu)
+        def circuit_Zpl():
+            qml.RX(0.0, wires=qubit)
+            return qml.expval(qml.PauliZ(qubit))
+
+        @qml.qnode(dev_qpu)
+        def circuit_Zmi():
+            qml.RX(np.pi, wires=qubit)
+            return qml.expval(qml.PauliZ(qubit))
+
+        assert np.allclose([circuit_Xpl(), circuit_Ypl(), circuit_Zpl()], 0.8, atol=2e-2)
+        assert np.allclose([circuit_Xmi(), circuit_Ymi(), circuit_Zmi()], -0.5, atol=2e-2)
