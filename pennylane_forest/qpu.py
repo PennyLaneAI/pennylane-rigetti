@@ -100,15 +100,18 @@ class QPUDevice(ForestDevice):
         for e in self.obs_queue:
             wires = e.wires
 
-            if e.name == "PauliX":
-                # X = H.Z.H
-                self.apply("Hadamard", wires, [])
+            if e.name in ["PauliX", "PauliY"]:
+                pass
 
-            elif e.name == "PauliY":
-                # Y = (HS^)^.Z.(HS^) and S^=SZ
-                self.apply("PauliZ", wires, [])
-                self.apply("S", wires, [])
-                self.apply("Hadamard", wires, [])
+            # if e.name == "PauliX":
+            #     # X = H.Z.H
+            #     self.apply("Hadamard", wires, [])
+
+            # elif e.name == "PauliY":
+            #     # Y = (HS^)^.Z.(HS^) and S^=SZ
+            #     self.apply("PauliZ", wires, [])
+            #     self.apply("S", wires, [])
+            #     self.apply("Hadamard", wires, [])
 
             elif e.name == "Hadamard":
                 # H = Ry(-pi/4)^.Z.Ry(-pi/4)
@@ -157,12 +160,12 @@ class QPUDevice(ForestDevice):
         for i, q in enumerate(qubits):
             self.state[q] = bitstring_array[:, i]
 
-    def expval(self, expectation, wires, par, symmetrize_readout="exhaustive", calibrate_readout="plus-eig"):
-        d_expectation = {"PauliZ": sZ}
+    def expval(self, observable, wires, par, symmetrize_readout="exhaustive", calibrate_readout="plus-eig"):
+        d_expectation = {"PauliZ": sZ, "PauliX": sX, "Hadamard": []}
         if len(wires) == 1:
             qubit = self.qc.qubits()[0]
             prep_prog = Program([instr for instr in self.program if isinstance(instr, Gate)])
-            expt_setting = ExperimentSetting(TensorProductState(), d_expectation[expectation](qubit))
+            expt_setting = ExperimentSetting(TensorProductState(), d_expectation[observable](qubit))
             tomo_expt = TomographyExperiment(settings=[expt_setting], program=prep_prog)
             grouped_tomo_expt = group_experiments(tomo_expt)
             meas_obs = list(measure_observables(self.qc, grouped_tomo_expt, symmetrize_readout=self.symmetrize_readout,
