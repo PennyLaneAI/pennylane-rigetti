@@ -161,12 +161,20 @@ class QPUDevice(ForestDevice):
             self.state[q] = bitstring_array[:, i]
 
     def expval(self, observable, wires, par, symmetrize_readout="exhaustive", calibrate_readout="plus-eig"):
-        d_expectation = {"PauliZ": sZ, "PauliX": sX, "Hadamard": []}
+        # identify Experiment Settings for each of the possible observables
+        d_expt_settings = {
+            "Identity": [ExperimentSetting(TensorProductState(), sI(0))],
+            "PauliX": [ExperimentSetting(TensorProductState(), sX(0))],
+            "PauliY": [ExperimentSetting(TensorProductState(), sY(0))],
+            "PauliZ": [ExperimentSetting(TensorProductState(), sZ(0))],
+            "Hadamard": [ExperimentSetting(TensorProductState(), float(np.sqrt(1/2)) * sX(0)),
+                         ExperimentSetting(TensorProductState(), float(np.sqrt(1/2)) * sZ(0))]
+        }
+        # expectation values for single-qubit observables
         if len(wires) == 1:
             qubit = self.qc.qubits()[0]
             prep_prog = Program([instr for instr in self.program if isinstance(instr, Gate)])
-            expt_setting = ExperimentSetting(TensorProductState(), d_expectation[observable](qubit))
-            tomo_expt = TomographyExperiment(settings=[expt_setting], program=prep_prog)
+            tomo_expt = TomographyExperiment(settings=d_expt_settings['observable'], program=prep_prog)
             grouped_tomo_expt = group_experiments(tomo_expt)
             meas_obs = list(measure_observables(self.qc, grouped_tomo_expt, symmetrize_readout=self.symmetrize_readout,
                 calibrate_readout=self.calibrate_readout))
