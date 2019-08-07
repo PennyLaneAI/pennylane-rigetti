@@ -67,8 +67,14 @@ class QPUDevice(ForestDevice):
     short_name = "forest.qpu"
     observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
-    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, symmetrize_readout="exhaustive",
-                 calibrate_readout="plus-eig", **kwargs):
+    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, readout_error=None,
+                 symmetrize_readout="exhaustive", calibrate_readout="plus-eig", **kwargs):
+
+        if readout_error is not None and load_qc:
+            raise ValueError("Readout error cannot be set on the physical QPU")
+
+        self.readout_error = readout_error
+
         self._eigs = {}
 
         if "wires" in kwargs:
@@ -80,7 +86,6 @@ class QPUDevice(ForestDevice):
         aspen_match = re.match(r"Aspen-\d+-([\d]+)Q", device)
         num_wires = int(aspen_match.groups()[0])
 
-        # super(QVMDevice, self).__init__(num_wires, shots, **kwargs) #pylint: disable=bad-super-call
         super().__init__(num_wires, shots, **kwargs)
 
         if load_qc:
@@ -162,10 +167,14 @@ class QPUDevice(ForestDevice):
             if observable in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
                 qubit = self.qc.qubits()[0]
                 prep_prog = Program([instr for instr in self.program if isinstance(instr, Gate)])
+                if self.readout_error is not None:
+                    prep_prog.define_noisy_readout(qubit, p00=self.readout_error[0],
+                                                          p11=self.readout_error[1])
                 tomo_expt = TomographyExperiment(settings=d_expt_settings[observable], program=prep_prog)
                 grouped_tomo_expt = group_experiments(tomo_expt)
-                meas_obs = list(measure_observables(self.qc, grouped_tomo_expt, symmetrize_readout=self.symmetrize_readout,
-                    calibrate_readout=self.calibrate_readout))
+                meas_obs = list(measure_observables(self.qc, grouped_tomo_expt,
+                                                    symmetrize_readout=self.symmetrize_readout,
+                                                    calibrate_readout=self.calibrate_readout))
                 return np.sum(expt_result.expectation for expt_result in meas_obs)
 
             elif observable == 'Hermitian':
