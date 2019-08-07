@@ -97,5 +97,14 @@ class TestQPUBasic(BaseTest):
             qml.RX(np.pi, wires=qubit)
             return qml.expval(qml.PauliZ(qubit))
 
-        assert np.allclose([circuit_Xpl(), circuit_Ypl(), circuit_Zpl()], 0.8, atol=2e-2)
-        assert np.allclose([circuit_Xmi(), circuit_Ymi(), circuit_Zmi()], -0.5, atol=2e-2)
+        num_expts = 10
+        results_unavged = np.zeros((num_expts, 6))
+
+        for i in range(num_expts):
+            results_unavged[i, :] = [circuit_Xpl(), circuit_Ypl(), circuit_Zpl(),
+                                     circuit_Xmi(), circuit_Ymi(), circuit_Zmi()]
+
+        results = np.mean(results_unavged, axis=0)
+
+        assert np.allclose(results[:3], 0.8, atol=2e-2)
+        assert np.allclose(results[3:], -0.5, atol=2e-2)

@@ -74,7 +74,7 @@ class QPUDevice(ForestDevice):
     short_name = "forest.qpu"
     observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
-    def __init__(self, device, *, shots=2048, active_reset=True, load_qc=True, readout_error=None,
+    def __init__(self, device, *, shots=1024, active_reset=True, load_qc=True, readout_error=None,
                  symmetrize_readout="exhaustive", calibrate_readout="plus-eig", **kwargs):
 
         if readout_error is not None and load_qc:
