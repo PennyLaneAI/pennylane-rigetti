@@ -4,13 +4,15 @@ Unit tests for the QPU device.
 import logging
 
 import pytest
-
+import pyquil
 import pennylane as qml
 
 from conftest import BaseTest
 
 
 log = logging.getLogger(__name__)
+
+VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc]
 
 
 class TestQPUIntegration(BaseTest):
@@ -19,8 +21,9 @@ class TestQPUIntegration(BaseTest):
     # pylint: disable=no-self-use
 
     def test_load_qpu_device(self):
+        device = [qpu for qpu in VALID_QPU_LATTICES if '2Q' in qpu][0]
         """Test that the QPU device loads correctly"""
-        dev = qml.device("forest.qpu", device="Aspen-4-2Q-A", load_qc=False)
+        dev = qml.device("forest.qpu", device=device, load_qc=False)
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 1024)
         self.assertEqual(dev.short_name, "forest.qpu")
@@ -31,11 +34,12 @@ class TestQPUIntegration(BaseTest):
 
     def test_qpu_args(self):
         """Test that the QPU plugin requires correct arguments"""
+        device = VALID_QPU_LATTICES[0]
         with pytest.raises(ValueError, match="QPU device does not support a wires parameter"):
-            qml.device("forest.qpu", device="Aspen-4-7Q-A", wires=2)
+            qml.device("forest.qpu", device=device, wires=2)
 
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
             qml.device("forest.qpu")
 
         with pytest.raises(ValueError, match="Number of shots must be a positive integer"):
-            qml.device("forest.qpu", "Aspen-4-7Q-A", shots=0)
+            qml.device("forest.qpu", device=device, shots=0)
