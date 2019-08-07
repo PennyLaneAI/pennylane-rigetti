@@ -51,6 +51,13 @@ class QPUDevice(ForestDevice):
             evaluation when the number of shots is larger than ~1000.
         load_qc (bool): set to False to avoid getting the quantum computing
             device on initialization. This is convenient if not currently connected to the QPU.
+        readout_error (list): specifies the conditional probabilities [p(0|0), p(1|1)], where
+            p(i|j) denotes the prob of reading out i having sampled j; can be set to `None` if no
+            readout errors need to be simulated; can only be set for the QPU-as-a-QVM
+        symmetrize_readout (str): method to perform readout symmetrization, using exhaustive
+            symmetrization by default
+        calibrate_readout (str): method to perform calibration for readout error mitigation, normalizing
+            by the expectation value in the +1-eigenstate of the observable by default
 
     Keyword args:
         forest_url (str): the Forest URL server. Can also be set by
@@ -67,7 +74,7 @@ class QPUDevice(ForestDevice):
     short_name = "forest.qpu"
     observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
-    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, readout_error=None,
+    def __init__(self, device, *, shots=2048, active_reset=True, load_qc=True, readout_error=None,
                  symmetrize_readout="exhaustive", calibrate_readout="plus-eig", **kwargs):
 
         if readout_error is not None and load_qc:
@@ -173,9 +180,10 @@ class QPUDevice(ForestDevice):
                 tomo_expt = TomographyExperiment(settings=d_expt_settings[observable], program=prep_prog)
                 grouped_tomo_expt = group_experiments(tomo_expt)
                 meas_obs = list(measure_observables(self.qc, grouped_tomo_expt,
+                                                    active_reset=self.active_reset,
                                                     symmetrize_readout=self.symmetrize_readout,
                                                     calibrate_readout=self.calibrate_readout))
-                return np.sum(expt_result.expectation for expt_result in meas_obs)
+                return np.sum([expt_result.expectation for expt_result in meas_obs])
 
             elif observable == 'Hermitian':
                 # <H> = \sum_i w_i p_i
