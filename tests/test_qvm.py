@@ -206,7 +206,7 @@ class TestQVMBasic(BaseTest):
 
         self.assertAllAlmostEqual(res, expected, delta=4 / np.sqrt(shots))
 
-    def test_var(self, shots):
+    def test_var(self, shots, qvm, compiler):
         """Tests for variance calculation"""
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
@@ -228,9 +228,9 @@ class TestQVMBasic(BaseTest):
 
         self.assertAlmostEqual(var, expected, delta=3 / np.sqrt(shots))
 
-    def test_var_hermitian(self, shots):
+    def test_var_hermitian(self, shots, qvm, compiler):
         """Tests for variance calculation using an arbitrary Hermitian observable"""
-        dev = plf.QVMDevice(device="2q-qvm", shots=10 * shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=100 * shots)
 
         phi = 0.543
         theta = 0.6543
@@ -420,14 +420,14 @@ class TestQVMIntegration(BaseTest):
 
     # pylint: disable=no-self-use
 
-    def test_load_qvm_device(self):
+    def test_load_qvm_device(self, qvm):
         """Test that the QVM device loads correctly"""
         dev = qml.device("forest.qvm", device="2q-qvm")
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 1024)
         self.assertEqual(dev.short_name, "forest.qvm")
 
-    def test_load_qvm_device_from_topology(self):
+    def test_load_qvm_device_from_topology(self, qvm):
         """Test that the QVM device, from an input topology, loads correctly"""
         topology = nx.complete_graph(2)
         dev = qml.device("forest.qvm", device=topology)
@@ -435,7 +435,7 @@ class TestQVMIntegration(BaseTest):
         self.assertEqual(dev.shots, 1024)
         self.assertEqual(dev.short_name, "forest.qvm")
 
-    def test_load_virtual_qpu_device(self):
+    def test_load_virtual_qpu_device(self, qvm):
         """Test that the QPU simulators load correctly"""
         qml.device("forest.qvm", device=np.random.choice(VALID_QPU_LATTICES))
 
