@@ -12,7 +12,6 @@ from conftest import BaseTest
 from conftest import I, U, U2, SWAP, CNOT, U_toffoli, H, test_operation_map
 
 import pennylane_forest as plf
-from pennylane_forest.wavefunction import spectral_decomposition
 
 
 log = logging.getLogger(__name__)
@@ -23,7 +22,7 @@ class TestAuxillaryFunctions(BaseTest):
 
     def test_spectral_decomposition(self, tol):
         """Test that the correct spectral decomposition is returned."""
-        a, P = spectral_decomposition(H)
+        a, P = plf.WavefunctionDevice.spectral_decomposition(H)
 
         # verify that H = \sum_k a_k P_k
         self.assertAllAlmostEqual(H, np.einsum("i,ijk->jk", a, P), delta=tol)

@@ -47,24 +47,6 @@ H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)  # Hadamard matrix
 observable_map = {"PauliX": X, "PauliY": Y, "PauliZ": Z, "Identity": I, "Hadamard": H}
 
 
-def spectral_decomposition(A):
-    r"""Spectral decomposition of a Hermitian matrix.
-
-    Args:
-        A (array): Hermitian matrix
-
-    Returns:
-        (vector[float], list[array[complex]]): (a, P): eigenvalues and hermitian projectors
-            such that :math:`A = \sum_k a_k P_k`.
-    """
-    d, v = eigh(A)
-    P = []
-    for k in range(d.shape[0]):
-        temp = v[:, k]
-        P.append(np.outer(temp, temp.conj()))
-    return d, P
-
-
 class WavefunctionDevice(ForestDevice):
     r"""Wavefunction simulator device for PennyLane.
 
@@ -149,7 +131,7 @@ class WavefunctionDevice(ForestDevice):
 
         if self.shots == 0:
             # exact variance value
-            var = self.ev(A @ A, wires) - self.ev(A, wires) ** 2
+            var = self.ev(A @ A, wires) - self.ev(A, wires)**2
         else:
             # estimate the variance
             var = np.var(self.sample(observable, wires, par, self.shots))
@@ -171,13 +153,17 @@ class WavefunctionDevice(ForestDevice):
         else:
             A = observable_map[observable]
 
-        a, P = spectral_decomposition(A)
+        # Calculate the probability p of observing
+        # eigenvalue a for the observable A.
+        a, P = self.spectral_decomposition(A)
 
         p = np.zeros(a.shape)
 
         for idx, Pi in enumerate(P):
             p[idx] = self.ev(Pi, wires)
 
+        # randomly sample from the eigenvalues of A
+        # according to the computed probabilities
         return np.random.choice(a, n, p=p)
 
     def ev(self, A, wires):
@@ -193,3 +179,21 @@ class WavefunctionDevice(ForestDevice):
         # Expand the Hermitian observable over the entire subsystem
         As = self.mat_vec_product(A, self.state, wires)
         return np.vdot(self.state, As).real
+
+    @staticmethod
+    def spectral_decomposition(A):
+        r"""Spectral decomposition of a Hermitian matrix.
+
+        Args:
+            A (array): Hermitian matrix
+
+        Returns:
+            (vector[float], list[array[complex]]): (a, P): eigenvalues and Hermitian projectors
+                such that :math:`A = \sum_k a_k P_k`.
+        """
+        d, v = eigh(A)
+        P = []
+        for k in range(d.shape[0]):
+            temp = v[:, k]
+            P.append(np.outer(temp, temp.conj()))
+        return d, P
