@@ -230,7 +230,7 @@ class TestPyQVMBasic(BaseTest):
 
     def test_var_hermitian(self, shots):
         """Tests for variance calculation using an arbitrary Hermitian observable"""
-        dev = plf.QVMDevice(device="2q-pyqvm", shots=10 * shots)
+        dev = plf.QVMDevice(device="2q-pyqvm", shots=100 * shots)
 
         phi = 0.543
         theta = 0.6543
