@@ -23,8 +23,7 @@ import re
 
 from pyquil import get_qc
 
-# from .qvm import QVMDevice
-from .device import ForestDevice
+from .qvm import QVMDevice
 from ._version import __version__
 
 import numpy as np
@@ -38,7 +37,7 @@ from pyquil.operator_estimation import ExperimentSetting, TensorProductState, To
 from pyquil.quilbase import Gate
 
 
-class QPUDevice(ForestDevice):
+class QPUDevice(QVMDevice):
     r"""Forest QPU device for PennyLane.
 
     Args:
@@ -93,7 +92,7 @@ class QPUDevice(ForestDevice):
         aspen_match = re.match(r"Aspen-\d+-([\d]+)Q", device)
         num_wires = int(aspen_match.groups()[0])
 
-        super().__init__(num_wires, shots, **kwargs)
+        super(QVMDevice, self).__init__(num_wires, shots, **kwargs)
 
         if load_qc:
             self.qc = get_qc(device, as_qvm=False, connection=self.connection)
@@ -209,38 +208,3 @@ class QPUDevice(ForestDevice):
             w = self._eigs[Hkey]['eigval']
             # <A> = \sum_i w_i p_i
             return w @ probs
-
-    def probabilities(self, wires):
-        """Returns the (marginal) probabilities of the quantum state.
-
-        Args:
-            wires (Sequence[int]): sequence of wires to return
-                marginal probabilities for. Wires not provided
-                are traced out of the system.
-
-        Returns:
-            array: array of shape ``[2**len(wires)]`` containing
-            the probabilities of each computational basis state
-        """
-
-        # create an array of size [2^len(wires), 2] to store
-        # the resulting probability of each computational basis state
-        probs = np.zeros([2 ** len(wires), 2])
-        probs[:, 0] = np.arange(2 ** len(wires))
-
-        # extract the measured samples
-        res = np.array([self.state[w] for w in wires]).T
-        for i in res:
-            # for each sample, calculate which
-            # computational basis state it corresponds to
-            cb = np.sum(2 ** np.arange(len(wires) - 1, -1, -1) * i)
-            # add a tally for this computational basis state
-            # to our array of basis probabilities
-            probs[cb, 1] += 1
-
-        # sort the probabilities by the first column,
-        # and divide by the number of shots
-        probs = probs[probs[:, 0].argsort()] / self.shots
-        probs = probs[:, 1]
-
-        return probs
