@@ -190,9 +190,6 @@ class QPUDevice(QVMDevice):
                 w = self._eigs[Hkey]['eigval']
                 return w[0]*p0 + w[1]*p1
 
-            else:
-                raise ValueError("Unknown observable")
-
         # Multi-qubit observable
         # ----------------------
         # Currently, we only support qml.expval.Hermitian(A, wires),
