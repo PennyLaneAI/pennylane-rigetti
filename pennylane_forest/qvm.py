@@ -117,9 +117,6 @@ class QVMDevice(ForestDevice):
         # pylint: disable=attribute-defined-outside-init
         for e in self.obs_queue:
             wires = e.wires
-            wire_map = {0:0, 1:1, 2:2, 3:7, 4:10, 5:11, 6:15, 7:16, 8:17}
-            wires = [wire_map[w] for w in wires]
-
 
             if e.name == "PauliX":
                 # X = H.Z.H
