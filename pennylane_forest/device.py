@@ -224,6 +224,9 @@ class ForestDevice(Device):
 
     def apply(self, operation, wires, par):
         # pylint: disable=attribute-defined-outside-init
+        wire_map = {0:0, 1:1, 2:2, 3:7, 4:10, 5:11, 6:15, 7:16, 8:17}
+        wires = [wire_map[w] for w in wires]
+
         self.prog += self._operation_map[operation](*par, *wires)
 
         # keep track of the active wires. This is required, as the
