@@ -55,11 +55,11 @@ class QPUDevice(QVMDevice):
     name = "Forest QPU Device"
     short_name = "forest.qpu"
 
-    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, wires=wires, **kwargs):
+    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, wires=None, **kwargs):
         self._eigs = {}
 
-        if "wires" in kwargs:
-            raise ValueError("QPU device does not support a wires parameter.")
+        # if "wires" in kwargs:
+        #     raise ValueError("QPU device does not support a wires parameter.")
 
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
