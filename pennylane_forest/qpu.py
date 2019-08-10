@@ -55,7 +55,7 @@ class QPUDevice(QVMDevice):
     name = "Forest QPU Device"
     short_name = "forest.qpu"
 
-    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, **kwargs):
+    def __init__(self, device, *, shots=1024, active_reset=False, load_qc=True, wires=wires, **kwargs):
         self._eigs = {}
 
         if "wires" in kwargs:
@@ -65,7 +65,8 @@ class QPUDevice(QVMDevice):
             raise ValueError("Number of shots must be a positive integer.")
 
         aspen_match = re.match(r"Aspen-\d+-([\d]+)Q", device)
-        num_wires = int(aspen_match.groups()[0])
+        # num_wires = int(aspen_match.groups()[0])
+        num_wires = wires
 
         super(QVMDevice, self).__init__(
             num_wires, shots, **kwargs
