@@ -29,6 +29,7 @@ Code details
 import itertools
 
 import numpy as np
+from numpy.linalg import eigh
 
 from pyquil.api import WavefunctionSimulator
 
@@ -44,24 +45,6 @@ H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)  # Hadamard matrix
 
 
 observable_map = {"PauliX": X, "PauliY": Y, "PauliZ": Z, "Identity": I, "Hadamard": H}
-
-
-def spectral_decomposition_qubit(A):
-    r"""Spectral decomposition of a :math:`2\times 2` Hermitian matrix.
-
-    Args:
-        A (array): :math:`2\times 2` Hermitian matrix
-
-    Returns:
-        (vector[float], list[array[complex]]): (a, P): eigenvalues and hermitian projectors
-        such that :math:`A = \sum_k a_k P_k`.
-    """
-    d, v = np.linalg.eigh(A)
-    P = []
-    for k in range(2):
-        temp = v[:, k]
-        P.append(np.outer(temp, temp.conj()))
-    return d, P
 
 
 class WavefunctionDevice(ForestDevice):
@@ -136,11 +119,7 @@ class WavefunctionDevice(ForestDevice):
             ev = self.ev(A, wires)
         else:
             # estimate the ev
-            # sample Bernoulli distribution n_eval times / binomial distribution once
-            a, P = spectral_decomposition_qubit(A)
-            p0 = self.ev(P[0], wires)  # probability of measuring a[0]
-            n0 = np.random.binomial(self.shots, p0)
-            ev = (n0 * a[0] + (self.shots - n0) * a[1]) / self.shots
+            ev = np.mean(self.sample(observable, wires, par, self.shots))
 
         return ev
 
@@ -150,14 +129,48 @@ class WavefunctionDevice(ForestDevice):
         else:
             A = observable_map[observable]
 
-        var = self.ev(A @ A, wires) - self.ev(A, wires) ** 2
+        if self.shots == 0:
+            # exact variance value
+            var = self.ev(A @ A, wires) - self.ev(A, wires)**2
+        else:
+            # estimate the variance
+            var = np.var(self.sample(observable, wires, par, self.shots))
+
         return var
 
+    def sample(self, observable, wires, par, n=None):
+        if n is None:
+            n = self.shots
+
+        if n == 0:
+            raise ValueError("Calling sample with n = 0 is not possible.")
+
+        if n < 0 or not isinstance(n, int):
+            raise ValueError("The number of samples must be a positive integer.")
+
+        if observable == "Hermitian":
+            A = par[0]
+        else:
+            A = observable_map[observable]
+
+        # Calculate the probability p of observing
+        # eigenvalue a for the observable A.
+        a, P = self.spectral_decomposition(A)
+
+        p = np.zeros(a.shape)
+
+        for idx, Pi in enumerate(P):
+            p[idx] = self.ev(Pi, wires)
+
+        # randomly sample from the eigenvalues of A
+        # according to the computed probabilities
+        return np.random.choice(a, n, p=p)
+
     def ev(self, A, wires):
-        r"""Evaluates a one-qubit expectation in the current state.
+        r"""Evaluates an expectation in the current state.
 
         Args:
-          A (array): :math:`2\times 2` Hermitian matrix corresponding to the expectation
+          A (array): :math:`2^N\times 2^N` Hermitian matrix corresponding to the expectation
           wires (Sequence[int]): target subsystem
 
         Returns:
@@ -166,3 +179,21 @@ class WavefunctionDevice(ForestDevice):
         # Expand the Hermitian observable over the entire subsystem
         As = self.mat_vec_product(A, self.state, wires)
         return np.vdot(self.state, As).real
+
+    @staticmethod
+    def spectral_decomposition(A):
+        r"""Spectral decomposition of a Hermitian matrix.
+
+        Args:
+            A (array): Hermitian matrix
+
+        Returns:
+            (vector[float], list[array[complex]]): (a, P): eigenvalues and Hermitian projectors
+                such that :math:`A = \sum_k a_k P_k`.
+        """
+        d, v = eigh(A)
+        P = []
+        for k in range(d.shape[0]):
+            temp = v[:, k]
+            P.append(np.outer(temp, temp.conj()))
+        return d, P

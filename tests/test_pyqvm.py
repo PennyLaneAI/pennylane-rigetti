@@ -204,7 +204,7 @@ class TestPyQVMBasic(BaseTest):
             - 6
         )
 
-        self.assertAllAlmostEqual(res, expected, delta=4 / np.sqrt(shots))
+        self.assertAllAlmostEqual(res, expected, delta=6 / np.sqrt(shots))
 
     def test_var(self, shots):
         """Tests for variance calculation"""
@@ -254,7 +254,7 @@ class TestPyQVMBasic(BaseTest):
             + 39
         )
 
-        self.assertAlmostEqual(var, expected, delta=0.2)
+        self.assertAlmostEqual(var, expected, delta=0.3)
 
     @pytest.mark.parametrize(
         "gate", plf.QVMDevice._operation_map
