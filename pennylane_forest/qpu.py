@@ -103,59 +103,12 @@ class QPUDevice(QVMDevice):
         self.symmetrize_readout = symmetrize_readout
         self.calibrate_readout = calibrate_readout
 
-    def pre_measure(self):
-        # pass
-        ## code below borrowed from `qvm.py`
-        """Run the QVM"""
-        # pylint: disable=attribute-defined-outside-init
-        for e in self.obs_queue:
-            wires = e.wires
-
-            if e.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
-                pass
-
-            elif e.name == "Hermitian":
-                # For arbitrary Hermitian matrix H, let U be the unitary matrix
-                # that diagonalises it, and w_i be the eigenvalues.
-                H = e.parameters[0]
-                Hkey = tuple(H.flatten().tolist())
-
-                if Hkey in self._eigs:
-                    # retrieve eigenvectors
-                    U = self._eigs[Hkey]["eigvec"]
-                else:
-                    # store the eigenvalues corresponding to H
-                    # in a dictionary, so that they do not need to
-                    # be calculated later
-                    w, U = np.linalg.eigh(H)
-                    self._eigs[Hkey] = {"eigval": w, "eigvec": U}
-
-                # Perform a change of basis before measuring by applying U^ to the circuit
-                self.apply("QubitUnitary", wires, [U.conj().T])
-
-        prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
-
-        if self.active_reset:
-            prag += RESET()
-
-        self.prog = prag + self.prog
-
-        qubits = list(self.prog.get_qubits())
-        ro = self.prog.declare("ro", "BIT", len(qubits))
-        for i, q in enumerate(qubits):
-            self.prog.inst(MEASURE(q, ro[i]))
-
-        self.prog.wrap_in_numshots_loop(self.shots)
-
-        if "pyqvm" in self.qc.name:
-            bitstring_array = self.qc.run(self.prog)
-        else:
-            executable = self.qc.compile(self.prog)
-            bitstring_array = self.qc.run(executable=executable)
-
-        self.state = {}
-        for i, q in enumerate(qubits):
-            self.state[q] = bitstring_array[:, i]
+    def pre_rotations(self, observable, wires):
+        """
+        This is used in `QVM.pre_measure`. Since the pre-rotations are handled
+        by `measure_observables` (see `expval`), we simply don't do anything here
+        """
+        pass
 
     def expval(self, observable, wires, par):
         # identify Experiment Settings for each of the possible observables
@@ -200,7 +153,7 @@ class QPUDevice(QVMDevice):
 
         probs = self.probabilities(wires)
 
-        if expectation == 'Hermitian':
+        if observable == 'Hermitian':
             Hkey = tuple(par[0].flatten().tolist())
             w = self._eigs[Hkey]['eigval']
             # <A> = \sum_i w_i p_i
