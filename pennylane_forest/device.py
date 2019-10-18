@@ -179,14 +179,15 @@ class ForestDevice(Device):
             variable ``QUILC_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
     """
-    pennylane_requires = ">=0.4"
+    pennylane_requires = ">=0.6"
     version = __version__
     author = "Josh Izaac"
 
     _operation_map = pyquil_operation_map
 
-    def __init__(self, wires, shots, **kwargs):
+    def __init__(self, wires, shots=1000, analytic=False,  **kwargs):
         super().__init__(wires, shots)
+        self.analytic = analytic
         self.forest_url = kwargs.get("forest_url", pyquil_config.forest_url)
         self.qvm_url = kwargs.get("qvm_url", pyquil_config.qvm_url)
         self.compiler_url = kwargs.get("compiler_url", pyquil_config.quilc_url)

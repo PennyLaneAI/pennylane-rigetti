@@ -9,7 +9,7 @@ with open("pennylane_forest/_version.py") as f:
 
 requirements = [
     "pyquil>=2.7",
-    "pennylane>=0.4"
+    "pennylane>=0.6"
 ]
 
 info = {
