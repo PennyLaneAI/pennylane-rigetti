@@ -102,7 +102,7 @@ class QPUDevice(QVMDevice):
         self.active_reset = active_reset
         self.symmetrize_readout = symmetrize_readout
         self.calibrate_readout = calibrate_readout
-        self.wiring = {q: i for i, q in enumerate(self.qc.qubits())}
+        self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
 
     def pre_rotations(self, observable, wires):
         """
@@ -127,8 +127,12 @@ class QPUDevice(QVMDevice):
             }
             # expectation values for single-qubit observables
             if observable in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
-                # qubit = self.qc.qubits()[0]
-                prep_prog = Program([instr for instr in self.program if isinstance(instr, Gate)])
+                prep_prog = Program()
+                for instr in self.program.instructions:
+                    if isinstance(instr, Gate):
+                        # assumes single qubit gates
+                        gate, _ = instr.out().split(' ')
+                        prep_prog += Program(str(gate) + ' ' + str(qubit))
                 if self.readout_error is not None:
                     prep_prog.define_noisy_readout(qubit, p00=self.readout_error[0],
                                                           p11=self.readout_error[1])
