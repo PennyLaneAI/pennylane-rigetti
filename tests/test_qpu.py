@@ -56,16 +56,10 @@ class TestQPUBasic(BaseTest):
     # pylint: disable=protected-access
 
     def test_no_readout_correction(self):
-        # need to find a device with qubit 0
-        found_good_device = False
-        while not found_good_device:
-            device = np.random.choice(VALID_QPU_LATTICES)
-            dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                                symmetrize_readout=None, calibrate_readout=None)
-            if 0 in dev_qpu.qc.qubits():
-                found_good_device = True
-
-        qubit = 0
+        device = np.random.choice(VALID_QPU_LATTICES)
+        dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
+                            symmetrize_readout=None, calibrate_readout=None)
+        qubit = 0   # just run program on the first qubit
 
         @qml.qnode(dev_qpu)
         def circuit_Xpl():
@@ -109,16 +103,11 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(results[:3], 0.8, atol=2e-2)
         assert np.allclose(results[3:], -0.5, atol=2e-2)
 
-    def test_no_readout_correction(self):
-        # need to find a device with qubit 0
-        found_good_device = False
-        while not found_good_device:
-            device = np.random.choice(VALID_QPU_LATTICES)
-            dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75])
-            if 0 in dev_qpu.qc.qubits():
-                found_good_device = True
-
-        qubit = 0
+    def test_readout_correction(self):
+        device = np.random.choice(VALID_QPU_LATTICES)
+        dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
+                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig")
+        qubit = 0   # just run program on the first qubit
 
         @qml.qnode(dev_qpu)
         def circuit_Xpl():
