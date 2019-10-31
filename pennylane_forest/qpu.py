@@ -102,6 +102,7 @@ class QPUDevice(QVMDevice):
         self.active_reset = active_reset
         self.symmetrize_readout = symmetrize_readout
         self.calibrate_readout = calibrate_readout
+        self.wiring = {q: i for i, q in enumerate(self.qc.qubits())}
 
     def pre_rotations(self, observable, wires):
         """
@@ -111,20 +112,22 @@ class QPUDevice(QVMDevice):
         pass
 
     def expval(self, observable, wires, par):
-        # identify Experiment Settings for each of the possible observables
-        d_expt_settings = {
-            "Identity": [ExperimentSetting(TensorProductState(), sI(0))],
-            "PauliX": [ExperimentSetting(TensorProductState(), sX(0))],
-            "PauliY": [ExperimentSetting(TensorProductState(), sY(0))],
-            "PauliZ": [ExperimentSetting(TensorProductState(), sZ(0))],
-            "Hadamard": [ExperimentSetting(TensorProductState(), float(np.sqrt(1/2)) * sX(0)),
-                         ExperimentSetting(TensorProductState(), float(np.sqrt(1/2)) * sZ(0))]
-        }
-        # expectation values for single-qubit observables
+        # Single-qubit observable
         if len(wires) == 1:
-
+            # identify Experiment Settings for each of the possible single-qubit observables
+            wire = wires[0]
+            qubit = self.wiring[wire]
+            d_expt_settings = {
+                "Identity": [ExperimentSetting(TensorProductState(), sI(qubit))],
+                "PauliX": [ExperimentSetting(TensorProductState(), sX(qubit))],
+                "PauliY": [ExperimentSetting(TensorProductState(), sY(qubit))],
+                "PauliZ": [ExperimentSetting(TensorProductState(), sZ(qubit))],
+                "Hadamard": [ExperimentSetting(TensorProductState(), float(np.sqrt(1/2)) * sX(qubit)),
+                             ExperimentSetting(TensorProductState(), float(np.sqrt(1/2)) * sZ(qubit))]
+            }
+            # expectation values for single-qubit observables
             if observable in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
-                qubit = self.qc.qubits()[0]
+                # qubit = self.qc.qubits()[0]
                 prep_prog = Program([instr for instr in self.program if isinstance(instr, Gate)])
                 if self.readout_error is not None:
                     prep_prog.define_noisy_readout(qubit, p00=self.readout_error[0],
