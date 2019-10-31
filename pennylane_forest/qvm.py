@@ -112,25 +112,31 @@ class QVMDevice(ForestDevice):
 
         self.active_reset = False
 
+    def pre_rotations(self, observable, wires):
+        """Apply pre-rotations in the case of observales other than 'Hermitian'"""
+        if observable == "PauliX":
+            # X = H.Z.H
+            self.apply("Hadamard", wires, [])
+
+        elif observable == "PauliY":
+            # Y = (HS^)^.Z.(HS^) and S^=SZ
+            self.apply("PauliZ", wires, [])
+            self.apply("S", wires, [])
+            self.apply("Hadamard", wires, [])
+
+        elif observable == "Hadamard":
+            # H = Ry(-pi/4)^.Z.Ry(-pi/4)
+            self.apply("RY", wires, [-np.pi / 4])
+
+
     def pre_measure(self):
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
         for e in self.obs_queue:
             wires = e.wires
 
-            if e.name == "PauliX":
-                # X = H.Z.H
-                self.apply("Hadamard", wires, [])
-
-            elif e.name == "PauliY":
-                # Y = (HS^)^.Z.(HS^) and S^=SZ
-                self.apply("PauliZ", wires, [])
-                self.apply("S", wires, [])
-                self.apply("Hadamard", wires, [])
-
-            elif e.name == "Hadamard":
-                # H = Ry(-pi/4)^.Z.Ry(-pi/4)
-                self.apply("RY", wires, [-np.pi / 4])
+            if e.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
+                self.pre_rotations(e.name, wires)
 
             elif e.name == "Hermitian":
                 # For arbitrary Hermitian matrix H, let U be the unitary matrix
