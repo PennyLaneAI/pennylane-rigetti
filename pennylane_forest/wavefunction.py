@@ -71,8 +71,8 @@ class WavefunctionDevice(ForestDevice):
 
     observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
 
-    def __init__(self, wires, *, shots=0, **kwargs):
-        super().__init__(wires, shots, **kwargs)
+    def __init__(self, wires, *, shots=1000, analytic=True, **kwargs):
+        super().__init__(wires, shots, analytic, **kwargs)
         self.qc = WavefunctionSimulator(connection=self.connection)
         self.state = None
 
@@ -114,12 +114,12 @@ class WavefunctionDevice(ForestDevice):
         else:
             A = observable_map[observable]
 
-        if self.shots == 0:
+        if self.analytic:
             # exact expectation value
             ev = self.ev(A, wires)
         else:
             # estimate the ev
-            ev = np.mean(self.sample(observable, wires, par, self.shots))
+            ev = np.mean(self.sample(observable, wires, par))
 
         return ev
 
@@ -129,24 +129,17 @@ class WavefunctionDevice(ForestDevice):
         else:
             A = observable_map[observable]
 
-        if self.shots == 0:
+        if self.analytic:
             # exact variance value
             var = self.ev(A @ A, wires) - self.ev(A, wires)**2
         else:
             # estimate the variance
-            var = np.var(self.sample(observable, wires, par, self.shots))
+            var = np.var(self.sample(observable, wires, par))
 
         return var
 
-    def sample(self, observable, wires, par, n=None):
-        if n is None:
-            n = self.shots
-
-        if n == 0:
-            raise ValueError("Calling sample with n = 0 is not possible.")
-
-        if n < 0 or not isinstance(n, int):
-            raise ValueError("The number of samples must be a positive integer.")
+    def sample(self, observable, wires, par):
+        n = self.shots
 
         if observable == "Hermitian":
             A = par[0]

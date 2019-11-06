@@ -43,8 +43,8 @@ class NumpyWavefunctionDevice(WavefunctionDevice):
 
     observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
 
-    def __init__(self, wires, *, shots=0, **kwargs):
-        super(WavefunctionDevice, self).__init__(wires, shots, **kwargs)
+    def __init__(self, wires, *, shots=1000, analytic=True, **kwargs):
+        super(WavefunctionDevice, self).__init__(wires, shots, analytic, **kwargs)
         self.qc = PyQVM(n_qubits=wires, quantum_simulator_type=NumpyWavefunctionSimulator)
         self.state = None
 
