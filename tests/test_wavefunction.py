@@ -179,7 +179,7 @@ class TestWavefunctionBasic(BaseTest):
         """Tests if the samples of a Hermitian observable returned by sample have
         the correct values
         """
-        dev = plf.WavefunctionDevice(wires=1, shots=1000)
+        dev = plf.WavefunctionDevice(wires=1, shots=1000_000)
         theta = 0.543
 
         dev.apply('RX', wires=[0], par=[theta])
@@ -204,7 +204,7 @@ class TestWavefunctionBasic(BaseTest):
         """Tests if the samples of a multi-qubit Hermitian observable returned by sample have
         the correct values
         """
-        dev = plf.WavefunctionDevice(wires=2, shots=1000)
+        dev = plf.WavefunctionDevice(wires=2, shots=1000_000)
         theta = 0.543
 
         dev.apply('RX', wires=[0], par=[theta])

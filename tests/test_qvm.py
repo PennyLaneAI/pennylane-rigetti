@@ -330,7 +330,7 @@ class TestQVMBasic(BaseTest):
         the correct values
         """
         theta = 0.543
-        shots = 100000
+        shots = 1000_000
         A = np.array([[1, 2j], [-2j, 0]])
 
         dev = plf.QVMDevice(device="1q-qvm", shots=shots)
