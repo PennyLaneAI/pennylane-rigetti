@@ -187,15 +187,8 @@ class QVMDevice(ForestDevice):
     def var(self, observable, wires, par):
         return np.var(self.sample(observable, wires, par))
 
-    def sample(self, observable, wires, par, n=None):
-        if n is None:
-            n = self.shots
-
-        if n == 0:
-            raise ValueError("Calling sample with n = 0 is not possible.")
-
-        if n < 0 or not isinstance(n, int):
-            raise ValueError("The number of samples must be a positive integer.")
+    def sample(self, observable, wires, par):
+        n = self.shots
 
         if observable == "Identity":
             return np.ones([n])
