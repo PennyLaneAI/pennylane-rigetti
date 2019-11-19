@@ -97,3 +97,40 @@ class TestProgramConverter:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
+
+    def test_convert_program_with_controlled_dagger_operations(self):
+        program = pyquil.Program()
+
+        program += g.CNOT(0, 1).controlled(2)
+        program += g.CNOT(0, 1).dagger().controlled(2)
+        program += g.CNOT(0, 1).controlled(2).dagger()
+        program += g.CNOT(0, 1).dagger().controlled(2).dagger()
+        program += g.RX(0.3, 3).controlled(4)
+        program += g.RX(0.2, 3).controlled(4).dagger()
+        program += g.RX(0.3, 3).dagger().controlled(4)
+        program += g.RX(0.2, 3).dagger().controlled(4).dagger()
+        program += g.X(2).dagger().controlled(4).controlled(1).dagger()
+        program += g.X(0).dagger().controlled(4).controlled(1)
+        program += g.X(0).dagger().controlled(4).dagger().dagger().controlled(1).dagger()
+
+        with OperationRecorder() as rec:
+            load_program(program)
+
+        expected_queue = [
+            plf.ops.CCNOT(wires=[2, 0, 1]),
+            plf.ops.CCNOT(wires=[2, 0, 1]).inv(),
+            plf.ops.CCNOT(wires=[2, 0, 1]).inv(),
+            plf.ops.CCNOT(wires=[2, 0, 1]),
+            qml.CRX(0.3, wires=[4, 3]),
+            qml.CRX(0.2, wires=[4, 3]).inv(),
+            qml.CRX(0.3, wires=[4, 3]).inv(),
+            qml.CRX(0.2, wires=[4, 3]),
+            plf.ops.CCNOT(wires=[1, 4, 2]),
+            plf.ops.CCNOT(wires=[1, 4, 0]).inv(),
+            plf.ops.CCNOT(wires=[1, 4, 0]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params

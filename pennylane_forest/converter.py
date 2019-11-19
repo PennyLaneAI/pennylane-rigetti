@@ -82,5 +82,5 @@ def load_program(program):
         wires = _qubits_to_wires(gate.qubits)
         pl_gate_instance = pl_gate(*gate.params, wires=wires)
 
-        if "DAGGER" in gate.modifiers:
+        if gate.modifiers.count("DAGGER") % 2 == 1:
             pl_gate_instance.inv()
