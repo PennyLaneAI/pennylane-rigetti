@@ -59,7 +59,9 @@ def load_program(program):
         # print("gate.params = ", gate.params)
 
         pl_gate = pyquil_inv_operation_map[gate.name]
-        # print("pl gate = ", pl_gate)
-
+        
         wires = _qubits_to_wires(gate.qubits)
-        pl_gate(*gate.params, wires=wires)
+        pl_gate_instance = pl_gate(*gate.params, wires=wires)
+
+        if "DAGGER" in gate.modifiers:
+            pl_gate_instance.inv()

@@ -47,6 +47,7 @@ class TestProgramConverter:
         program += g.H(2)
         program += g.H(7)
         program += g.X(7).dagger()
+        program += g.X(7)
         program += g.Y(1)
         program += g.RZ(0.34, 1)
 
@@ -60,6 +61,7 @@ class TestProgramConverter:
             qml.Hadamard(2),
             qml.Hadamard(4),
             qml.PauliX(4).inv(),
+            qml.PauliX(4),
             qml.PauliY(1),
             qml.RZ(0.34, wires=[1]),
         ]
