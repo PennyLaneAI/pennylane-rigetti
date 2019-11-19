@@ -22,7 +22,8 @@ class TestQPUIntegration(BaseTest):
 
     def test_load_qpu_device(self):
         """Test that the QPU device loads correctly"""
-        device = [qpu for qpu in VALID_QPU_LATTICES if '2Q' in qpu][0]
+        device = [qpu for qpu in VALID_QPU_LATTICES if '-2Q' in qpu][0]
+        print(device)
         dev = qml.device("forest.qpu", device=device, load_qc=False)
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 1024)
