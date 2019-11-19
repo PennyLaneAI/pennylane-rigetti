@@ -1,3 +1,4 @@
+import pytest
 import pennylane as qml
 from pennylane.utils import OperationRecorder
 from pennylane_forest.converter import *
@@ -6,6 +7,72 @@ import pyquil.gates as g
 
 class TestProgramConverter:
     """Test that PyQuil Program instances are properly converted."""
+
+    # "PHASE" : qml.PhaseShift,
+    # "RX" : qml.RX,
+    # "RY" : qml.RY,
+    # "RZ" : qml.RZ,
+    # "CRX" : qml.CRX,
+    # "CRY" : qml.CRY,
+    # "CRZ" : qml.CRZ,
+
+    # # the following gates are provided by the PL-Forest plugin
+    # "S" : plf.ops.S,
+    # "T" : plf.ops.T,
+    # "CCNOT" : plf.ops.CCNOT,
+    # "CPHASE" : plf.ops.CPHASE,
+    # "CSWAP" : plf.ops.CSWAP,
+    # "ISWAP" : plf.ops.ISWAP,
+    # "PSWAP" : plf.ops.PSWAP,
+
+    @pytest.mark.parametrize("pyquil_operation,expected_pl_operation", [
+        (g.H(0), qml.Hadamard(0)),
+        (g.H(0).dagger(), qml.Hadamard(0).inv()),
+        (g.H(0).dagger().dagger(), qml.Hadamard(0).inv().inv()),
+        (g.X(0), qml.PauliX(0)),
+        (g.X(0).dagger(), qml.PauliX(0).inv()),
+        (g.X(0).dagger().dagger(), qml.PauliX(0).inv().inv()),
+        (g.X(0).controlled(1), qml.CNOT(wires=[1, 0])),
+        (g.X(0).controlled(1).dagger(), qml.CNOT(wires=[1, 0]).inv()),
+        (g.X(0).controlled(1).dagger().dagger(), qml.CNOT(wires=[1, 0]).inv().inv()),
+        (g.Y(0), qml.PauliY(0)),
+        (g.Y(0).dagger(), qml.PauliY(0).inv()),
+        (g.Y(0).dagger().dagger(), qml.PauliY(0).inv().inv()),
+        (g.Z(0), qml.PauliZ(0)),
+        (g.Z(0).dagger(), qml.PauliZ(0).inv()),
+        (g.Z(0).dagger().dagger(), qml.PauliZ(0).inv().inv()),
+        (g.Z(0).controlled(1), qml.CZ(wires=[1, 0])),
+        (g.Z(0).controlled(1).dagger(), qml.CZ(wires=[1, 0]).inv()),
+        (g.Z(0).controlled(1).dagger().dagger(), qml.CZ(wires=[1, 0]).inv().inv()),
+        (g.CNOT(0, 1), qml.CNOT(wires=[0, 1])),
+        (g.CNOT(0, 1).dagger(), qml.CNOT(wires=[0, 1]).inv()),
+        (g.CNOT(0, 1).dagger().dagger(), qml.CNOT(wires=[0, 1]).inv().inv()),
+        (g.CNOT(0, 1).controlled(2), plf.ops.CCNOT(wires=[2, 0, 1])),
+        (g.CNOT(0, 1).controlled(2).dagger(), plf.ops.CCNOT(wires=[2, 0, 1]).inv()),
+        (g.CNOT(0, 1).controlled(2).dagger().dagger(), plf.ops.CCNOT(wires=[2, 0, 1]).inv().inv()),
+        (g.SWAP(0, 1), qml.SWAP(wires=[0, 1])),
+        (g.SWAP(0, 1).dagger(), qml.SWAP(wires=[0, 1]).inv()),
+        (g.SWAP(0, 1).dagger().dagger(), qml.SWAP(wires=[0, 1]).inv().inv()),
+        (g.SWAP(0, 1).controlled(2), qml.CSWAP(wires=[2, 0, 1])),
+        (g.SWAP(0, 1).controlled(2).dagger(), qml.CSWAP(wires=[2, 0, 1]).inv()),
+        (g.SWAP(0, 1).controlled(2).dagger().dagger(), qml.CSWAP(wires=[2, 0, 1]).inv().inv()),
+        (g.CZ(0, 1), qml.CZ(wires=[0, 1])),
+        (g.CZ(0, 1).dagger(), qml.CZ(wires=[0, 1]).inv()),
+        (g.CZ(0, 1).dagger().dagger(), qml.CZ(wires=[0, 1]).inv().inv()),
+    ])
+    def test_convert_operation(self, pyquil_operation, expected_pl_operation):
+        program = pyquil.Program()
+
+        program += pyquil_operation
+
+        with OperationRecorder() as rec:
+            load_program(program)
+
+        assert rec.queue[0].name == expected_pl_operation.name
+        assert rec.queue[0].wires == expected_pl_operation.wires
+        assert rec.queue[0].params == expected_pl_operation.params
+
+
 
     def test_convert_simple_program(self):
         program = pyquil.Program()
