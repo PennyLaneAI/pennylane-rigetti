@@ -16,6 +16,9 @@ pyquil_inv_operation_map = {
     "RX" : qml.RX,
     "RY" : qml.RY,
     "RZ" : qml.RZ,
+    "CRX" : qml.CRX,
+    "CRY" : qml.CRY,
+    "CRZ" : qml.CRZ,
 
     # the following gates are provided by the PL-Forest plugin
     "S" : plf.ops.S,
@@ -26,6 +29,26 @@ pyquil_inv_operation_map = {
     "ISWAP" : plf.ops.ISWAP,
     "PSWAP" : plf.ops.PSWAP,
 }
+
+_control_map = {
+    "X" : "CNOT",
+    "Z" : "CZ",
+    "CNOT" : "CCNOT",
+    "SWAP" : "CSWAP",
+    "RX" : "CRX",
+    "RY" : "CRY",
+    "RZ" : "CRZ",
+    "PHASE" : "CPHASE",
+}
+
+def _resolve_operation_name(gate):
+    name = gate.name
+
+    for modifier in gate.modifiers:
+        if modifier == "CONTROLLED":
+            name = _control_map[name]
+
+    return name
 
 def _get_qubit_index(qubit):
     if isinstance(qubit, int):
@@ -52,14 +75,10 @@ def load_program(program):
 
     for i, gate in enumerate(program.instructions):
         print("gate[{}] = {}".format(i, gate))
-        # print("gate.modifiers = ", gate.modifiers)
-        # print("gate.name = ", gate.name)
-        # print("gate.qubits = ", gate.qubits)
-        # print(" -> wires = ", _qubits_to_wires(gate.qubits))
-        # print("gate.params = ", gate.params)
+        print("gate.modifiers = ", gate.modifiers)
 
-        pl_gate = pyquil_inv_operation_map[gate.name]
-        
+        pl_gate = pyquil_inv_operation_map[_resolve_operation_name(gate)]
+
         wires = _qubits_to_wires(gate.qubits)
         pl_gate_instance = pl_gate(*gate.params, wires=wires)
 
