@@ -1,16 +1,15 @@
-import pytest
 import numpy as np
 import pennylane as qml
-from pennylane.utils import OperationRecorder
-from pennylane_forest.converter import *
 import pyquil
 import pyquil.gates as g
+import pytest
+from pennylane.utils import OperationRecorder
+from pennylane_forest.converter import *
 
 
 class TestProgramConverter:
     """Test that PyQuil Program instances are properly converted."""
 
-    # fmt: off
     @pytest.mark.parametrize(
         "pyquil_operation,expected_pl_operation",
         [
@@ -31,7 +30,10 @@ class TestProgramConverter:
             (g.X(0).controlled(1).dagger().dagger(), qml.CNOT(wires=[1, 0]).inv().inv()),
             (g.X(0).controlled(1).controlled(2), plf.ops.CCNOT(wires=[2, 1, 0])),
             (g.X(0).controlled(1).controlled(2).dagger(), plf.ops.CCNOT(wires=[2, 1, 0]).inv()),
-            (g.X(0).controlled(1).controlled(2).dagger().dagger(), plf.ops.CCNOT(wires=[2, 1, 0]).inv().inv(),),
+            (
+                g.X(0).controlled(1).controlled(2).dagger().dagger(),
+                plf.ops.CCNOT(wires=[2, 1, 0]).inv().inv(),
+            ),
             (g.Y(0), qml.PauliY(0)),
             (g.Y(0).dagger(), qml.PauliY(0).inv()),
             (g.Y(0).dagger().dagger(), qml.PauliY(0).inv().inv()),
@@ -46,7 +48,10 @@ class TestProgramConverter:
             (g.CNOT(0, 1).dagger().dagger(), qml.CNOT(wires=[0, 1]).inv().inv()),
             (g.CNOT(0, 1).controlled(2), plf.ops.CCNOT(wires=[2, 0, 1])),
             (g.CNOT(0, 1).controlled(2).dagger(), plf.ops.CCNOT(wires=[2, 0, 1]).inv()),
-            (g.CNOT(0, 1).controlled(2).dagger().dagger(), plf.ops.CCNOT(wires=[2, 0, 1]).inv().inv(),),
+            (
+                g.CNOT(0, 1).controlled(2).dagger().dagger(),
+                plf.ops.CCNOT(wires=[2, 0, 1]).inv().inv(),
+            ),
             (g.SWAP(0, 1), qml.SWAP(wires=[0, 1])),
             (g.SWAP(0, 1).dagger(), qml.SWAP(wires=[0, 1]).inv()),
             (g.SWAP(0, 1).dagger().dagger(), qml.SWAP(wires=[0, 1]).inv().inv()),
@@ -67,7 +72,10 @@ class TestProgramConverter:
             (g.PHASE(0.3, 0).dagger().dagger(), qml.PhaseShift(0.3, wires=[0]).inv().inv()),
             (g.PHASE(0.3, 0).controlled(1), plf.ops.CPHASE(0.3, 3, wires=[1, 0])),
             (g.PHASE(0.3, 0).controlled(1).dagger(), plf.ops.CPHASE(0.3, 3, wires=[1, 0]).inv()),
-            (g.PHASE(0.3, 0).controlled(1).dagger().dagger(), plf.ops.CPHASE(0.3, 3, wires=[1, 0]).inv().inv(),),
+            (
+                g.PHASE(0.3, 0).controlled(1).dagger().dagger(),
+                plf.ops.CPHASE(0.3, 3, wires=[1, 0]).inv().inv(),
+            ),
             (g.RX(0.3, 0), qml.RX(0.3, wires=[0])),
             (g.RX(0.3, 0).dagger(), qml.RX(0.3, wires=[0]).inv()),
             (g.RX(0.3, 0).dagger().dagger(), qml.RX(0.3, wires=[0]).inv().inv()),
@@ -88,16 +96,28 @@ class TestProgramConverter:
             (g.RZ(0.3, 0).controlled(1).dagger().dagger(), qml.CRZ(0.3, wires=[1, 0]).inv().inv()),
             (g.CPHASE(0.3, 0, 1), plf.ops.CPHASE(0.3, 3, wires=[0, 1])),
             (g.CPHASE(0.3, 0, 1).dagger(), plf.ops.CPHASE(0.3, 3, wires=[0, 1]).inv()),
-            (g.CPHASE(0.3, 0, 1).dagger().dagger(), plf.ops.CPHASE(0.3, 3, wires=[0, 1]).inv().inv(),),
+            (
+                g.CPHASE(0.3, 0, 1).dagger().dagger(),
+                plf.ops.CPHASE(0.3, 3, wires=[0, 1]).inv().inv(),
+            ),
             (g.CPHASE00(0.3, 0, 1), plf.ops.CPHASE(0.3, 0, wires=[0, 1])),
             (g.CPHASE00(0.3, 0, 1).dagger(), plf.ops.CPHASE(0.3, 0, wires=[0, 1]).inv()),
-            (g.CPHASE00(0.3, 0, 1).dagger().dagger(), plf.ops.CPHASE(0.3, 0, wires=[0, 1]).inv().inv(),),
+            (
+                g.CPHASE00(0.3, 0, 1).dagger().dagger(),
+                plf.ops.CPHASE(0.3, 0, wires=[0, 1]).inv().inv(),
+            ),
             (g.CPHASE01(0.3, 0, 1), plf.ops.CPHASE(0.3, 1, wires=[0, 1])),
             (g.CPHASE01(0.3, 0, 1).dagger(), plf.ops.CPHASE(0.3, 1, wires=[0, 1]).inv()),
-            (g.CPHASE01(0.3, 0, 1).dagger().dagger(), plf.ops.CPHASE(0.3, 1, wires=[0, 1]).inv().inv(),),
+            (
+                g.CPHASE01(0.3, 0, 1).dagger().dagger(),
+                plf.ops.CPHASE(0.3, 1, wires=[0, 1]).inv().inv(),
+            ),
             (g.CPHASE10(0.3, 0, 1), plf.ops.CPHASE(0.3, 2, wires=[0, 1])),
             (g.CPHASE10(0.3, 0, 1).dagger(), plf.ops.CPHASE(0.3, 2, wires=[0, 1]).inv()),
-            (g.CPHASE10(0.3, 0, 1).dagger().dagger(), plf.ops.CPHASE(0.3, 2, wires=[0, 1]).inv().inv(),),
+            (
+                g.CPHASE10(0.3, 0, 1).dagger().dagger(),
+                plf.ops.CPHASE(0.3, 2, wires=[0, 1]).inv().inv(),
+            ),
             (g.CSWAP(0, 1, 2), qml.CSWAP(wires=[0, 1, 2])),
             (g.CSWAP(0, 1, 2).dagger(), qml.CSWAP(wires=[0, 1, 2]).inv()),
             (g.CSWAP(0, 1, 2).dagger().dagger(), qml.CSWAP(wires=[0, 1, 2]).inv().inv()),
@@ -106,7 +126,6 @@ class TestProgramConverter:
             (g.CCNOT(0, 1, 2).dagger().dagger(), plf.ops.CCNOT(wires=[0, 1, 2]).inv().inv()),
         ],
     )
-    # fmt: on
     def test_convert_operation(self, pyquil_operation, expected_pl_operation):
         program = pyquil.Program()
 
@@ -250,8 +269,7 @@ class TestProgramConverter:
     def test_convert_program_with_defgates(self):
         program = pyquil.Program()
 
-        sqrt_x = np.array([[ 0.5+0.5j,  0.5-0.5j],
-                   [ 0.5-0.5j,  0.5+0.5j]])
+        sqrt_x = np.array([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]])
 
         sqrt_x_t2 = np.kron(sqrt_x, sqrt_x)
         sqrt_x_t3 = np.kron(sqrt_x, sqrt_x_t2)
@@ -266,7 +284,7 @@ class TestProgramConverter:
         program += sqrt_x_definition
         program += sqrt_x_t2_definition
         program += sqrt_x_t3_definition
-        
+
         program += g.CNOT(0, 1)
         program += SQRT_X(0)
         program += SQRT_X_T2(1, 2)
@@ -300,8 +318,7 @@ class TestProgramConverter:
         program += g.S(0).controlled(1)
 
         with pytest.raises(
-            qml.DeviceError, 
-            match=r"Gate Nr\. .*, .*, can not be imported to PennyLane",
+            qml.DeviceError, match=r"Gate Nr\. .*, .*, can not be imported to PennyLane",
         ):
             load_program(program)
 
@@ -313,7 +330,7 @@ class TestProgramConverter:
         program += g.CNOT(0, 1)
 
         with pytest.raises(
-            qml.DeviceError, 
+            qml.DeviceError,
             match="Forked gates can not be imported into PennyLane, as this functionality is not supported",
         ):
             load_program(program)
