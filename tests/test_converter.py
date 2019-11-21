@@ -241,3 +241,16 @@ class TestProgramConverter:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
+
+    def test_forked_gate_error(self):
+        program = pyquil.Program()
+
+        program += g.CNOT(0, 1)
+        program += g.RX(0.3, 1).forked(2, [0.5])
+        program += g.CNOT(0, 1)
+
+
+        with pytest.raises(qml.DeviceError, match="Forked gates can not be imported into PennyLane, as this functionality is not supported"):
+            load_program(program)
+            
+        
