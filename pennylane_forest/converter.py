@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+import numpy as np
 
 import pennylane as qml
 import pennylane_forest as plf
@@ -77,7 +78,12 @@ def load_program(program):
 
     defgate_to_matrix_map = {}
     for defgate in program.defined_gates:
-        defgate_to_matrix_map[defgate.name] = defgate.matrix
+        if isinstance(defgate, pyquil.quil.DefPermutationGate):
+            permutation_matrix = np.eye(defgate.permutation.shape[0])
+            permutation_matrix = permutation_matrix[:, defgate.permutation]
+            defgate_to_matrix_map[defgate.name] = permutation_matrix
+        elif isinstance(defgate, pyquil.quil.DefGate):
+            defgate_to_matrix_map[defgate.name] = defgate.matrix
 
     print("defgate_to_matrix_map", defgate_to_matrix_map)
 

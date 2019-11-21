@@ -311,6 +311,35 @@ class TestProgramConverter:
             assert converted.wires == expected.wires
             assert converted.params == expected.params
 
+    def test_convert_program_with_defpermutationgates(self):
+        program = pyquil.Program()
+
+        expected_matrix = np.eye(4)
+        expected_matrix = expected_matrix[:, [1,0,3,2]]
+
+        x_plus_x_definition = pyquil.quil.DefPermutationGate("X+X", [1,0,3,2])
+        X_plus_X = x_plus_x_definition.get_constructor()
+
+        program += x_plus_x_definition
+
+        program += g.CNOT(0, 1)
+        program += X_plus_X(0, 1)
+        program += g.CNOT(0, 1)
+
+        with OperationRecorder() as rec:
+            load_program(program)
+
+        expected_queue = [
+            qml.CNOT(wires=[0, 1]),
+            qml.QubitUnitary(expected_matrix, wires=[0, 1]),
+            qml.CNOT(wires=[0, 1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert np.array_equal(converted.params, expected.params)
+
     def test_unsupported_gate_error(self):
         program = pyquil.Program()
 
