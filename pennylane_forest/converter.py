@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+
 import pennylane as qml
 import pennylane_forest as plf
 import pyquil
@@ -102,7 +103,9 @@ def load_program(program):
             try:
                 pl_gate = pyquil_inv_operation_map[_resolve_operation_name(gate)]
             except KeyError:
-                raise qml.DeviceError("Gate Nr. {}, {}, can not be imported to PennyLane.".format(i + 1, gate)) from None
+                raise qml.DeviceError(
+                    "Gate Nr. {}, {}, can not be imported to PennyLane.".format(i + 1, gate)
+                ) from None
 
         wires = _qubits_to_wires(gate.qubits)
         pl_gate_instance = pl_gate(*gate.params, wires=wires)
