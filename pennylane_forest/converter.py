@@ -99,7 +99,10 @@ def load_program(program):
         if gate.name in defgate_to_matrix_map:
             pl_gate = lambda wires: qml.QubitUnitary(defgate_to_matrix_map[gate.name], wires=wires)
         else:
-            pl_gate = pyquil_inv_operation_map[_resolve_operation_name(gate)]
+            try:
+                pl_gate = pyquil_inv_operation_map[_resolve_operation_name(gate)]
+            except KeyError:
+                raise qml.DeviceError("Gate Nr. {}, {}, can not be imported to PennyLane.".format(i + 1, gate)) from None
 
         wires = _qubits_to_wires(gate.qubits)
         pl_gate_instance = pl_gate(*gate.params, wires=wires)
