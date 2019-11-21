@@ -74,6 +74,12 @@ def load_program(program):
     qubit_to_wire_map = dict(zip(program_qubits, range(len(program_qubits))))
     print("qubit_to_wire_map = ", qubit_to_wire_map)
 
+    defgate_to_matrix_map = {}
+    for defgate in program.defined_gates:
+        defgate_to_matrix_map[defgate.name] = defgate.matrix
+
+    print("defgate_to_matrix_map", defgate_to_matrix_map)
+
     def _qubits_to_wires(qubits):
         if isinstance(qubits, Sequence):
             return [qubit_to_wire_map[_get_qubit_index(qubit)] for qubit in qubits]
@@ -90,7 +96,10 @@ def load_program(program):
                 + "Gate Nr. {}, {} was forked.".format(i + 1, gate)
             )
 
-        pl_gate = pyquil_inv_operation_map[_resolve_operation_name(gate)]
+        if gate.name in defgate_to_matrix_map:
+            pl_gate = lambda wires: qml.QubitUnitary(defgate_to_matrix_map[gate.name], wires=wires)
+        else:
+            pl_gate = pyquil_inv_operation_map[_resolve_operation_name(gate)]
 
         wires = _qubits_to_wires(gate.qubits)
         pl_gate_instance = pl_gate(*gate.params, wires=wires)
