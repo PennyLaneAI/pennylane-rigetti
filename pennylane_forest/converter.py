@@ -16,6 +16,9 @@ pyquil_inv_operation_map = {
     "RX" : qml.RX,
     "RY" : qml.RY,
     "RZ" : qml.RZ,
+
+    # Those are not native Quil gates, but we have them here
+    # to support CONTROLLED RX and the like
     "CRX" : qml.CRX,
     "CRY" : qml.CRY,
     "CRZ" : qml.CRZ,
@@ -24,7 +27,10 @@ pyquil_inv_operation_map = {
     "S" : plf.ops.S,
     "T" : plf.ops.T,
     "CCNOT" : plf.ops.CCNOT,
-    "CPHASE" : plf.ops.CPHASE,
+    "CPHASE" : lambda *params, wires: plf.ops.CPHASE(*params, 3, wires=wires),
+    "CPHASE00" : lambda *params, wires: plf.ops.CPHASE(*params, 0, wires=wires),
+    "CPHASE01" : lambda *params, wires: plf.ops.CPHASE(*params, 1, wires=wires),
+    "CPHASE10" : lambda *params, wires: plf.ops.CPHASE(*params, 2, wires=wires),
     "CSWAP" : plf.ops.CSWAP,
     "ISWAP" : plf.ops.ISWAP,
     "PSWAP" : plf.ops.PSWAP,
