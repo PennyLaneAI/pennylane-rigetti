@@ -208,6 +208,20 @@ class TestProgramConverter:
             assert converted.wires == expected.wires
             assert converted.params == expected.params
 
+    @pytest.mark.parametrize("wires", [[0, 1, 2, 3], [4, 5]])
+    def test_convert_wire_error(self, wires):
+        program = pyquil.Program()
+
+        program += g.H(0)
+        program += g.H(1)
+        program += g.H(2)
+
+        with pytest.raises(
+            qml.DeviceError,
+            match="The number of given wires does not match the number of qubits in the PyQuil Program",
+        ):
+            load_program(program, wires=wires)
+
     def test_convert_program_with_inverses(self):
         program = pyquil.Program()
 
@@ -500,4 +514,3 @@ class TestProgramConverter:
             match="Forked gates can not be imported into PennyLane, as this functionality is not supported",
         ):
             load_program(program)
-
