@@ -57,6 +57,8 @@ _control_map = {
     "PHASE": "CPHASE",
 }
 
+_matrix_dictionary = pyquil.gate_matrices.QUANTUM_GATES
+
 
 def _simplify_controlled_operations(gate):
     print("_simplify_controlled_operations/gate = ", gate)
@@ -79,7 +81,7 @@ def _simplify_controlled_operations(gate):
     return gate
 
 def _controlled_gate_matrix(gate):
-    gate_matrix = pyquil.gate_matrices.QUANTUM_GATES[gate.name]
+    gate_matrix = _matrix_dictionary[gate.name]
     print("_controlled_gate_matrix/gate_matrix = ", gate_matrix)
     for i, modifier in enumerate(gate.modifiers):
         if modifier == "CONTROLLED":
@@ -115,6 +117,8 @@ def load_program(program):
         elif isinstance(defgate, pyquil.quil.DefGate):
             defgate_to_matrix_map[defgate.name] = defgate.matrix
 
+        _matrix_dictionary[defgate.name] = defgate_to_matrix_map[defgate.name]
+
     print("defgate_to_matrix_map", defgate_to_matrix_map)
 
     def _qubits_to_wires(qubits):
@@ -135,17 +139,15 @@ def load_program(program):
 
         print("gate.name = ", gate.name)
 
-        if gate.name in defgate_to_matrix_map:
-            pl_gate = lambda wires: qml.QubitUnitary(defgate_to_matrix_map[gate.name], wires=wires)
+        simplified_gate = _simplify_controlled_operations(gate)
+        print("simplified_gate = ", simplified_gate)
+        
+        if "CONTROLLED" in simplified_gate.modifiers:
+            pl_gate = lambda wires: qml.QubitUnitary(_controlled_gate_matrix(simplified_gate), wires=wires)    
+        elif simplified_gate.name in defgate_to_matrix_map:
+            pl_gate = lambda wires: qml.QubitUnitary(defgate_to_matrix_map[simplified_gate.name], wires=wires)
         else:
-            simplified_gate = _simplify_controlled_operations(gate)
-
-            print("simplified_gate = ", simplified_gate)
-
-            if "CONTROLLED" in simplified_gate.modifiers:
-                pl_gate = lambda wires: qml.QubitUnitary(_controlled_gate_matrix(simplified_gate), wires=wires)      
-            else:
-                pl_gate = pyquil_inv_operation_map[simplified_gate.name]                          
+            pl_gate = pyquil_inv_operation_map[simplified_gate.name]                          
 
         wires = _qubits_to_wires(gate.qubits)
         pl_gate_instance = pl_gate(*gate.params, wires=wires)

@@ -344,6 +344,48 @@ class TestProgramConverter:
             assert converted.wires == expected.wires
             assert converted.params == expected.params
 
+    def test_convert_program_with_controlled_defgates(self, tol):
+        program = pyquil.Program()
+
+        sqrt_x = np.array([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]])
+        sqrt_x_t2 = np.kron(sqrt_x, sqrt_x)
+
+        c_sqrt_x = np.eye(4, dtype=complex)
+        c_sqrt_x[2:, 2:] = sqrt_x
+
+        c_sqrt_x_t2 = np.eye(8, dtype=complex)
+        c_sqrt_x_t2[4:, 4:] = sqrt_x_t2
+
+        sqrt_x_definition = pyquil.quil.DefGate("SQRT-X", sqrt_x)
+        SQRT_X = sqrt_x_definition.get_constructor()
+        sqrt_x_t2_definition = pyquil.quil.DefGate("SQRT-X-T2", sqrt_x_t2)
+        SQRT_X_T2 = sqrt_x_t2_definition.get_constructor()
+
+        program += sqrt_x_definition
+        program += sqrt_x_t2_definition
+
+        program += g.CNOT(0,1)
+        program += SQRT_X(0).controlled(1)
+        program += SQRT_X_T2(1, 2).controlled(0)
+        program += g.X(0).controlled(1)
+        program += g.RX(0.4, 0)
+
+        with OperationRecorder() as rec:
+            load_program(program)
+
+        expected_queue = [
+            qml.CNOT(wires=[0, 1]),
+            qml.QubitUnitary(c_sqrt_x, wires=[1, 0]),
+            qml.QubitUnitary(c_sqrt_x_t2, wires=[0, 1, 2]),
+            qml.CNOT(wires=[1, 0]),
+            qml.RX(0.4, wires=[0]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert np.allclose(converted.params, expected.params, atol=tol, rtol=0)
+
     def test_convert_program_with_defpermutationgates(self):
         program = pyquil.Program()
 
