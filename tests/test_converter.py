@@ -233,10 +233,10 @@ class TestProgramConverter:
         program = pyquil.Program()
 
         CS_matrix = np.eye(4, dtype=complex)
-        CS_matrix[3,3] = 1j
+        CS_matrix[3, 3] = 1j
 
         CCT_matrix = np.eye(8, dtype=complex)
-        CCT_matrix[7,7] = np.exp(1j * np.pi / 4)
+        CCT_matrix[7, 7] = np.exp(1j * np.pi / 4)
 
         program += g.CNOT(0, 1)
         program += g.S(0).controlled(1)
@@ -364,7 +364,7 @@ class TestProgramConverter:
         program += sqrt_x_definition
         program += sqrt_x_t2_definition
 
-        program += g.CNOT(0,1)
+        program += g.CNOT(0, 1)
         program += SQRT_X(0).controlled(1)
         program += SQRT_X_T2(1, 2).controlled(0)
         program += g.X(0).controlled(1)
@@ -390,9 +390,9 @@ class TestProgramConverter:
         program = pyquil.Program()
 
         expected_matrix = np.eye(4)
-        expected_matrix = expected_matrix[:, [1,0,3,2]]
+        expected_matrix = expected_matrix[:, [1, 0, 3, 2]]
 
-        x_plus_x_definition = pyquil.quil.DefPermutationGate("X+X", [1,0,3,2])
+        x_plus_x_definition = pyquil.quil.DefPermutationGate("X+X", [1, 0, 3, 2])
         X_plus_X = x_plus_x_definition.get_constructor()
 
         program += x_plus_x_definition
@@ -419,12 +419,12 @@ class TestProgramConverter:
         program = pyquil.Program()
 
         expected_matrix = np.eye(4)
-        expected_matrix = expected_matrix[:, [1,0,3,2]]
+        expected_matrix = expected_matrix[:, [1, 0, 3, 2]]
 
         expected_controlled_matrix = np.eye(8)
-        expected_controlled_matrix[4:, 4:] =expected_matrix 
+        expected_controlled_matrix[4:, 4:] = expected_matrix
 
-        x_plus_x_definition = pyquil.quil.DefPermutationGate("X+X", [1,0,3,2])
+        x_plus_x_definition = pyquil.quil.DefPermutationGate("X+X", [1, 0, 3, 2])
         X_plus_X = x_plus_x_definition.get_constructor()
 
         program += x_plus_x_definition
@@ -472,5 +472,6 @@ class TestProgramConverter:
             match="Forked gates can not be imported into PennyLane, as this functionality is not supported",
         ):
             load_program(program)
+
 
 # TODO: Controlled gates out of scope (CS) and controlled defgates

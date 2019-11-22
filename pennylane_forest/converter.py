@@ -6,15 +6,18 @@ import pennylane_forest as plf
 import pyquil
 import pyquil.gates as g
 
+
 def direct_sum(A, B):
     sum = np.zeros(np.add(A.shape, B.shape), dtype=A.dtype)
-    sum[:A.shape[0], :A.shape[1]] = A
-    sum[A.shape[0]:, A.shape[1]:] = B
+    sum[: A.shape[0], : A.shape[1]] = A
+    sum[A.shape[0] :, A.shape[1] :] = B
 
     return sum
 
+
 def controlled_matrix(op):
     return direct_sum(np.eye(op.shape[0], dtype=op.dtype), op)
+
 
 pyquil_inv_operation_map = {
     "X": qml.PauliX,
@@ -66,9 +69,7 @@ def _simplify_controlled_operations(gate):
         if modifier == "CONTROLLED":
             print("_simplify_controlled_operations/i, modifier = ", i, ", ", modifier)
             if gate.name in _control_map:
-                stripped = g.Gate(_control_map[gate.name],
-                    gate.params,
-                    gate.qubits)
+                stripped = g.Gate(_control_map[gate.name], gate.params, gate.qubits)
                 stripped.modifiers = gate.modifiers.copy()
                 del stripped.modifiers[i]
 
@@ -80,6 +81,7 @@ def _simplify_controlled_operations(gate):
 
     return gate
 
+
 def _controlled_gate_matrix(gate):
     gate_matrix = _matrix_dictionary[gate.name]
     print("_controlled_gate_matrix/gate_matrix = ", gate_matrix)
@@ -89,6 +91,7 @@ def _controlled_gate_matrix(gate):
 
     print("_controlled_gate_matrix/gate_matrix after = ", gate_matrix)
     return gate_matrix
+
 
 def _get_qubit_index(qubit):
     if isinstance(qubit, int):
@@ -141,13 +144,17 @@ def load_program(program):
 
         simplified_gate = _simplify_controlled_operations(gate)
         print("simplified_gate = ", simplified_gate)
-        
+
         if "CONTROLLED" in simplified_gate.modifiers:
-            pl_gate = lambda wires: qml.QubitUnitary(_controlled_gate_matrix(simplified_gate), wires=wires)    
+            pl_gate = lambda wires: qml.QubitUnitary(
+                _controlled_gate_matrix(simplified_gate), wires=wires
+            )
         elif simplified_gate.name in defgate_to_matrix_map:
-            pl_gate = lambda wires: qml.QubitUnitary(defgate_to_matrix_map[simplified_gate.name], wires=wires)
+            pl_gate = lambda wires: qml.QubitUnitary(
+                defgate_to_matrix_map[simplified_gate.name], wires=wires
+            )
         else:
-            pl_gate = pyquil_inv_operation_map[simplified_gate.name]                          
+            pl_gate = pyquil_inv_operation_map[simplified_gate.name]
 
         wires = _qubits_to_wires(gate.qubits)
         pl_gate_instance = pl_gate(*gate.params, wires=wires)
