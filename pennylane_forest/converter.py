@@ -111,6 +111,15 @@ class ProgramLoader:
     def _is_inverted(self, gate):
         return gate.modifiers.count("DAGGER") % 2 == 1
 
+    def _load_qubit_to_wire_map(self, wires):
+        if len(wires) != len(self.qubits):
+            raise qml.DeviceError(
+                "The number of given wires does not match the number of qubits in the PyQuil Program. "
+                + "{} wires were given, Program has {} qubits".format(len(wires), len(self.qubits))
+            )
+
+        self._qubit_to_wire_map = dict(zip(self.qubits, wires))
+
     def _qubits_to_wires(self, qubits):
         if isinstance(qubits, Sequence):
             return [self._qubit_to_wire_map[_get_qubit_index(qubit)] for qubit in qubits]
@@ -128,11 +137,16 @@ class ProgramLoader:
 
     def __init__(self, program):
         self.program = program
+        self.qubits = program.get_qubits()
 
-        self._qubit_to_wire_map = dict(zip(program.get_qubits(), range(len(program.get_qubits()))))
         self._load_defined_gates()
 
-    def template(self):
+    def template(self, wires=None):
+        if not wires:
+            wires = range(len(self.qubits))
+
+        self._load_qubit_to_wire_map(wires)
+
         for i, gate in enumerate(self.program.instructions):
             if self._is_forked(gate):
                 raise qml.DeviceError(
@@ -151,15 +165,15 @@ class ProgramLoader:
             else:
                 pl_gate = pyquil_inv_operation_map[resolved_gate.name]
 
-            wires = self._qubits_to_wires(gate.qubits)
-            pl_gate_instance = pl_gate(*gate.params, wires=wires)
+            target_wires = self._qubits_to_wires(gate.qubits)
+            pl_gate_instance = pl_gate(*gate.params, wires=target_wires)
 
             if self._is_inverted(gate):
                 pl_gate_instance.inv()
 
 
-def load_program(program):
+def load_program(program, wires=None):
     """Load template from PyQuil Program instance."""
 
     loader = ProgramLoader(program)
-    loader.template()
+    loader.template(wires)

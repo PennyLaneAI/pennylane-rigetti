@@ -153,6 +153,10 @@ class TestProgramConverter:
         with OperationRecorder() as rec:
             load_program(program)
 
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 0  1  2  3  4
+
         expected_queue = [
             qml.Hadamard(0),
             qml.RZ(0.34, wires=[1]),
@@ -162,6 +166,41 @@ class TestProgramConverter:
             qml.PauliX(4),
             qml.PauliY(1),
             qml.RZ(0.34, wires=[1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
+
+    def test_convert_simple_program_wire_assignment(self):
+        program = pyquil.Program()
+
+        program += g.H(0)
+        program += g.RZ(0.34, 1)
+        program += g.CNOT(0, 3)
+        program += g.H(2)
+        program += g.H(7)
+        program += g.X(7)
+        program += g.Y(1)
+        program += g.RZ(0.34, 1)
+
+        with OperationRecorder() as rec:
+            load_program(program, wires=[3, 6, 4, 9, 1])
+
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 3  6  4  9  1
+
+        expected_queue = [
+            qml.Hadamard(3),
+            qml.RZ(0.34, wires=[6]),
+            qml.CNOT(wires=[3, 9]),
+            qml.Hadamard(4),
+            qml.Hadamard(1),
+            qml.PauliX(1),
+            qml.PauliY(6),
+            qml.RZ(0.34, wires=[6]),
         ]
 
         for converted, expected in zip(rec.queue, expected_queue):
