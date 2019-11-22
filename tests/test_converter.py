@@ -449,17 +449,6 @@ class TestProgramConverter:
             assert converted.wires == expected.wires
             assert np.array_equal(converted.params, expected.params)
 
-    # def test_unsupported_gate_error(self):
-    #     program = pyquil.Program()
-
-    #     program += g.CNOT(0, 1)
-    #     program += g.S(0).controlled(1)
-
-    #     with pytest.raises(
-    #         qml.DeviceError, match=r"Gate Nr\. .*, .*, can not be imported to PennyLane",
-    #     ):
-    #         load_program(program)
-
     def test_forked_gate_error(self):
         program = pyquil.Program()
 
@@ -473,5 +462,3 @@ class TestProgramConverter:
         ):
             load_program(program)
 
-
-# TODO: Controlled gates out of scope (CS) and controlled defgates
