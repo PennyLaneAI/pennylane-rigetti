@@ -6,6 +6,16 @@ import pennylane_forest as plf
 import pyquil
 import pyquil.gates as g
 
+def direct_sum(A, B):
+    sum = np.zeros(np.add(A.shape, B.shape), dtype=A.dtype)
+    sum[:A.shape[0], :A.shape[1]] = A
+    sum[A.shape[0]:, A.shape[1]:] = B
+
+    return sum
+
+def controlled_matrix(op):
+    return direct_sum(np.eye(op.shape[0], dtype=op.dtype), op)
+
 pyquil_inv_operation_map = {
     "X": qml.PauliX,
     "Y": qml.PauliY,
@@ -48,15 +58,35 @@ _control_map = {
 }
 
 
-def _resolve_operation_name(gate):
-    name = gate.name
-
-    for modifier in gate.modifiers:
+def _simplify_controlled_operations(gate):
+    print("_simplify_controlled_operations/gate = ", gate)
+    for i, modifier in enumerate(gate.modifiers):
         if modifier == "CONTROLLED":
-            name = _control_map[name]
+            print("_simplify_controlled_operations/i, modifier = ", i, ", ", modifier)
+            if gate.name in _control_map:
+                stripped = g.Gate(_control_map[gate.name],
+                    gate.params,
+                    gate.qubits)
+                stripped.modifiers = gate.modifiers.copy()
+                del stripped.modifiers[i]
 
-    return name
+                print("stripped.modifiers = ", stripped.modifiers)
 
+                return _simplify_controlled_operations(stripped)
+            else:
+                break
+
+    return gate
+
+def _controlled_gate_matrix(gate):
+    gate_matrix = pyquil.gate_matrices.QUANTUM_GATES[gate.name]
+    print("_controlled_gate_matrix/gate_matrix = ", gate_matrix)
+    for i, modifier in enumerate(gate.modifiers):
+        if modifier == "CONTROLLED":
+            gate_matrix = controlled_matrix(gate_matrix)
+
+    print("_controlled_gate_matrix/gate_matrix after = ", gate_matrix)
+    return gate_matrix
 
 def _get_qubit_index(qubit):
     if isinstance(qubit, int):
@@ -103,15 +133,19 @@ def load_program(program):
                 + "Gate Nr. {}, {} was forked.".format(i + 1, gate)
             )
 
+        print("gate.name = ", gate.name)
+
         if gate.name in defgate_to_matrix_map:
             pl_gate = lambda wires: qml.QubitUnitary(defgate_to_matrix_map[gate.name], wires=wires)
         else:
-            try:
-                pl_gate = pyquil_inv_operation_map[_resolve_operation_name(gate)]
-            except KeyError:
-                raise qml.DeviceError(
-                    "Gate Nr. {}, {}, can not be imported to PennyLane.".format(i + 1, gate)
-                ) from None
+            simplified_gate = _simplify_controlled_operations(gate)
+
+            print("simplified_gate = ", simplified_gate)
+
+            if "CONTROLLED" in simplified_gate.modifiers:
+                pl_gate = lambda wires: qml.QubitUnitary(_controlled_gate_matrix(simplified_gate), wires=wires)      
+            else:
+                pl_gate = pyquil_inv_operation_map[simplified_gate.name]                          
 
         wires = _qubits_to_wires(gate.qubits)
         pl_gate_instance = pl_gate(*gate.params, wires=wires)

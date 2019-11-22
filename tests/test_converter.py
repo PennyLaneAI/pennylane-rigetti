@@ -229,6 +229,39 @@ class TestProgramConverter:
             assert converted.wires == expected.wires
             assert converted.params == expected.params
 
+    def test_convert_program_with_controlled_operations_not_in_pl_core(self, tol):
+        program = pyquil.Program()
+
+        CS_matrix = np.eye(4, dtype=complex)
+        CS_matrix[3,3] = 1j
+
+        CCT_matrix = np.eye(8, dtype=complex)
+        CCT_matrix[7,7] = np.exp(1j * np.pi / 4)
+
+        program += g.CNOT(0, 1)
+        program += g.S(0).controlled(1)
+        program += g.S(1).controlled(0)
+        program += g.T(0).controlled(1).controlled(2)
+        program += g.T(1).controlled(0).controlled(2)
+        program += g.T(2).controlled(1).controlled(0)
+
+        with OperationRecorder() as rec:
+            load_program(program)
+
+        expected_queue = [
+            qml.CNOT(wires=[0, 1]),
+            qml.QubitUnitary(CS_matrix, wires=[1, 0]),
+            qml.QubitUnitary(CS_matrix, wires=[0, 1]),
+            qml.QubitUnitary(CCT_matrix, wires=[2, 1, 0]),
+            qml.QubitUnitary(CCT_matrix, wires=[2, 0, 1]),
+            qml.QubitUnitary(CCT_matrix, wires=[0, 1, 2]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert np.allclose(converted.params, expected.params, atol=tol, rtol=0)
+
     def test_convert_program_with_controlled_dagger_operations(self):
         program = pyquil.Program()
 
@@ -340,16 +373,16 @@ class TestProgramConverter:
             assert converted.wires == expected.wires
             assert np.array_equal(converted.params, expected.params)
 
-    def test_unsupported_gate_error(self):
-        program = pyquil.Program()
+    # def test_unsupported_gate_error(self):
+    #     program = pyquil.Program()
 
-        program += g.CNOT(0, 1)
-        program += g.S(0).controlled(1)
+    #     program += g.CNOT(0, 1)
+    #     program += g.S(0).controlled(1)
 
-        with pytest.raises(
-            qml.DeviceError, match=r"Gate Nr\. .*, .*, can not be imported to PennyLane",
-        ):
-            load_program(program)
+    #     with pytest.raises(
+    #         qml.DeviceError, match=r"Gate Nr\. .*, .*, can not be imported to PennyLane",
+    #     ):
+    #         load_program(program)
 
     def test_forked_gate_error(self):
         program = pyquil.Program()
@@ -363,3 +396,5 @@ class TestProgramConverter:
             match="Forked gates can not be imported into PennyLane, as this functionality is not supported",
         ):
             load_program(program)
+
+# TODO: Controlled gates out of scope (CS) and controlled defgates
