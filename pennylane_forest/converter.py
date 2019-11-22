@@ -93,7 +93,7 @@ class ProgramLoader:
 
             if isinstance(defgate, pyquil.quil.DefPermutationGate):
                 matrix = np.eye(defgate.permutation.shape[0])
-                matrix = permutation_matrix[:, defgate.permutation]
+                matrix = matrix[:, defgate.permutation]
             elif isinstance(defgate, pyquil.quil.DefGate):
                 matrix = defgate.matrix
 
