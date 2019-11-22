@@ -111,6 +111,9 @@ class ProgramLoader:
     def _is_inverted(self, gate):
         return gate.modifiers.count("DAGGER") % 2 == 1
 
+    def _is_declaration(self, instruction):
+        return isinstance(instruction, pyquil.quil.Declare)
+
     def _load_qubit_to_wire_map(self, wires):
         if len(wires) != len(self.qubits):
             raise qml.DeviceError(
@@ -135,23 +138,56 @@ class ProgramLoader:
 
         return gate_matrix
 
+    def _check_variable_map(self, variable_map):
+        declarations = [
+            instruction
+            for instruction in self.program.instructions
+            if self._is_declaration(instruction)
+        ]
+
+        for declaration in declarations:
+            if not declaration.name in variable_map:
+                raise qml.DeviceError(
+                    "The PyQuil program defines a variable {} that is not present in the given variable map. "
+                    + "Instruction: {}".format(declaration.name, declaration)
+                )
+
+    def _resolve_params(self, params, variable_map):
+        resolved_params = []
+
+        for param in params:
+            if isinstance(param, pyquil.quilatom.MemoryReference):
+                resolved_params.append(variable_map[param.name])
+            else:
+                resolved_params.append(param)
+
+        return resolved_params
+
     def __init__(self, program):
         self.program = program
         self.qubits = program.get_qubits()
 
         self._load_defined_gates()
 
-    def template(self, wires=None):
+    def template(self, wires=None, variable_map={}):
         if not wires:
             wires = range(len(self.qubits))
 
         self._load_qubit_to_wire_map(wires)
 
-        for i, gate in enumerate(self.program.instructions):
+        self._check_variable_map(variable_map)
+
+        for i, instruction in enumerate(self.program.instructions):
+            if self._is_declaration(instruction):
+                continue
+
+            # Rename for better readability
+            gate = instruction
+
             if self._is_forked(gate):
                 raise qml.DeviceError(
                     "Forked gates can not be imported into PennyLane, as this functionality is not supported. "
-                    + "Gate Nr. {}, {} was forked.".format(i + 1, gate)
+                    + "Instruction Nr. {}, {} was a forked gate.".format(i + 1, gate)
                 )
 
             resolved_gate = _resolve_gate(gate)
@@ -166,14 +202,16 @@ class ProgramLoader:
                 pl_gate = pyquil_inv_operation_map[resolved_gate.name]
 
             target_wires = self._qubits_to_wires(gate.qubits)
-            pl_gate_instance = pl_gate(*gate.params, wires=target_wires)
+            resolved_params = self._resolve_params(gate.params, variable_map)
+
+            pl_gate_instance = pl_gate(*resolved_params, wires=target_wires)
 
             if self._is_inverted(gate):
                 pl_gate_instance.inv()
 
 
-def load_program(program, wires=None):
+def load_program(program, wires=None, variable_map={}):
     """Load template from PyQuil Program instance."""
 
     loader = ProgramLoader(program)
-    loader.template(wires)
+    loader.template(wires, variable_map)
