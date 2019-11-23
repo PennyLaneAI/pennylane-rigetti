@@ -29,6 +29,11 @@ info = {
             'forest.wavefunction = pennylane_forest:WavefunctionDevice',
             'forest.numpy_wavefunction = pennylane_forest:NumpyWavefunctionDevice'
             ],
+        'pennylane.io': [
+            'pyquil_program = pennylane_forest:load_program',
+            'quil = pennylane_forest:load_quil',
+            'quil_file = pennylane_forest:load_quil_from_file',
+            ],
         },
     'description': 'Rigetti backend for the PennyLane library',
     'long_description': open('README.rst').read(),
