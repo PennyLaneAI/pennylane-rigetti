@@ -186,8 +186,16 @@ class ProgramLoader:
         return self.program.defined_gates
 
     @property
+    def defined_gate_names(self):
+        return self._defined_gate_names
+
+    @property
     def declarations(self):
         return self._declarations
+
+    @property
+    def defined_variable_names(self):
+        return [declaration.name for declaration in self._declarations]
 
     def template(self, variable_map={}, wires=None):
         if not wires:

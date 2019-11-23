@@ -824,12 +824,17 @@ class TestInspectionProperties:
         )
         
         sqrt_x = np.array([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]])
-        
+
         loader = load_quil(quil_str)
 
         assert loader.declarations[0].name == "alpha"
         assert loader.declarations[1].name == "beta"
         assert loader.declarations[2].name == "gamma"
 
+        assert loader.defined_variable_names[0] == "alpha"
+        assert loader.defined_variable_names[1] == "beta"
+        assert loader.defined_variable_names[2] == "gamma"
+
         assert loader.defined_gates[0].name == "SQRT-X"
-        assert np.array_equal(loader.defined_gates[0].matrix, sqrt_x)
+        
+        assert loader.defined_gate_names[0] == "SQRT-X"
