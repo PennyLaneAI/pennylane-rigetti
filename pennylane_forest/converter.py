@@ -258,7 +258,7 @@ def load_quil(quil_str: str):
 
 
 def load_quil_from_file(file_path: str):
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         quil_str = file.read()
 
     return load_quil(quil_str)

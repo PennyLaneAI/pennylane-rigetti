@@ -605,7 +605,6 @@ class TestProgramConverter:
 
 
 class TestQuilConverter:
-
     def test_convert_simple_program(self):
         quil_str = textwrap.dedent(
             """
@@ -642,7 +641,7 @@ class TestQuilConverter:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
-            
+
     def test_convert_complex_program(self):
         quil_str = textwrap.dedent(
             """
@@ -665,8 +664,7 @@ class TestQuilConverter:
         # 0  1  2  3  4
 
         CS_matrix = np.eye(4, dtype=complex)
-        CS_matrix[3,3] = 1j
-
+        CS_matrix[3, 3] = 1j
 
         expected_queue = [
             qml.Hadamard(0),
@@ -766,7 +764,6 @@ class TestQuilConverter:
 
 
 class TestQuilFileConverter:
-
     def test_convert_simple_program(self):
         cur_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -794,9 +791,7 @@ class TestQuilFileConverter:
             assert converted.params == expected.params
 
 
-
 class TestInspectionProperties:
-
     def test_inspection(self):
         quil_str = textwrap.dedent(
             """
@@ -822,7 +817,7 @@ class TestInspectionProperties:
             RZ(0.34) 1
         """
         )
-        
+
         sqrt_x = np.array([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]])
 
         loader = load_quil(quil_str)
@@ -836,7 +831,7 @@ class TestInspectionProperties:
         assert loader.defined_variable_names[2] == "gamma"
 
         assert loader.defined_gates[0].name == "SQRT-X"
-        
+
         assert loader.defined_gate_names[0] == "SQRT-X"
 
     def test_str(self):
