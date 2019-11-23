@@ -262,3 +262,12 @@ def load_quil_from_file(file_path: str):
         quil_str = file.read()
 
     return load_quil(quil_str)
+
+# TODO: 
+# * Add note on the current rewiring (match in ascending order)
+# * Can we support the rewiring pragmas?
+# * Ignore other pragmas
+# * Ignore reset
+# * Treat measurements -> remove measurement variables from the variable map
+# * Pre-compile template (with placeholders for variables)
+# * Only run that when template() is called
