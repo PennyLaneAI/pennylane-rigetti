@@ -214,12 +214,13 @@ class TestProgramConverter:
             assert converted.wires == expected.wires
             assert converted.params == expected.params
 
-    def test_convert_simple_program_with_parameters_instances_as_keys(self):
+    def test_convert_simple_program_with_parameters_mixed_keys(self):
         program = pyquil.Program()
 
         alpha = program.declare("alpha", "REAL")
         beta = program.declare("beta", "REAL")
         gamma = program.declare("gamma", "REAL")
+        delta = program.declare("delta", "REAL")
 
         program += g.H(0)
         program += g.CNOT(0, 1)
@@ -227,14 +228,16 @@ class TestProgramConverter:
         program += g.RZ(beta, 1)
         program += g.RX(gamma, 1)
         program += g.CNOT(0, 1)
+        program += g.RZ(delta, 0)
         program += g.H(0)
 
-        a, b, c = 0.1, 0.2, 0.3
+        a, b, c, d = 0.1, 0.2, 0.3, 0.4
 
         variable_map = {
-            alpha: a,
+            "alpha": a,
             beta: b,
             gamma: c,
+            "delta": d,
         }
 
         with OperationRecorder() as rec:
@@ -247,6 +250,7 @@ class TestProgramConverter:
             qml.RZ(0.2, wires=[1]),
             qml.RX(0.3, wires=[1]),
             qml.CNOT(wires=[0, 1]),
+            qml.RZ(0.4, wires=[0]),
             qml.Hadamard(0),
         ]
 
