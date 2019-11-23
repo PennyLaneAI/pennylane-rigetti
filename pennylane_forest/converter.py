@@ -221,12 +221,16 @@ class ProgramLoader:
             if self._is_inverted(gate):
                 pl_gate_instance.inv()
 
-        
-    def __call__(self, variable_map={}, wires=None):        
+    def __call__(self, variable_map={}, wires=None):
         self.template(variable_map, wires)
 
-def load_program(program):
+
+def load_program(program: pyquil.Program):
     """Load template from PyQuil Program instance."""
-    
-    ProgramLoader(program)
+
     return ProgramLoader(program)
+
+
+def load_quil(quil_str: str):
+
+    return load_program(pyquil.Program(quil_str))

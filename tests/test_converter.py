@@ -5,6 +5,7 @@ import pyquil.gates as g
 import pytest
 from pennylane.utils import OperationRecorder
 from pennylane_forest.converter import *
+import textwrap
 
 
 class TestProgramConverter:
@@ -600,3 +601,42 @@ class TestProgramConverter:
             match="Forked gates can not be imported into PennyLane, as this functionality is not supported",
         ):
             load_program(program)()
+
+
+class TestQuilConverter:
+    def test_convert_simple_program(self):
+        quil_str = textwrap.dedent(
+            """
+            H 0
+            RZ(0.34) 1
+            CNOT 0 3
+            H 2
+            H 7
+            X 7
+            Y 1
+            RZ(0.34) 1
+        """
+        )
+
+        with OperationRecorder() as rec:
+            load_quil(quil_str)()
+
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 0  1  2  3  4
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.RZ(0.34, wires=[1]),
+            qml.CNOT(wires=[0, 3]),
+            qml.Hadamard(2),
+            qml.Hadamard(4),
+            qml.PauliX(4),
+            qml.PauliY(1),
+            qml.RZ(0.34, wires=[1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
