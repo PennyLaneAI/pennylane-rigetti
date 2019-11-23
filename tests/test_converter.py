@@ -961,3 +961,86 @@ class TestIntegration:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
+            
+    @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
+    def test_program_in_qnode(self, angle):
+        program = pyquil.Program()
+
+        delta = program.declare("delta", "REAL")
+
+        program += g.RX(delta, 0)
+        program += g.CNOT(0, 1)
+
+        loader = qml.load(program, format="pyquil_program")
+        dev = qml.device("default.qubit", wires=2)
+
+        @qml.qnode(dev)
+        def circuit(a):
+            loader({delta : a})
+
+            return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
+
+        @qml.qnode(dev)
+        def circuit_reg(a):
+            qml.RX(a, wires=[0])
+            qml.CNOT(wires=[0, 1])
+
+            return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
+
+        assert np.array_equal(circuit(angle), circuit_reg(angle))
+            
+    @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
+    def test_quil_in_qnode(self, angle):
+        quil_str = textwrap.dedent(
+            """
+            DECLARE delta REAL[1]
+            RX(delta) 0
+            CNOT 0 1
+        """
+        )
+
+        loader = qml.load(quil_str, format="quil")
+        dev = qml.device("default.qubit", wires=2)
+
+        @qml.qnode(dev)
+        def circuit(a):
+            loader({"delta" : a})
+
+            return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
+
+        @qml.qnode(dev)
+        def circuit_reg(a):
+            qml.RX(a, wires=[0])
+            qml.CNOT(wires=[0, 1])
+
+            return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
+
+        assert np.array_equal(circuit(angle), circuit_reg(angle))
+            
+    @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
+    def test_differentiation_in_qnode(self, angle):
+        quil_str = textwrap.dedent(
+            """
+            DECLARE delta REAL[1]
+            RX(delta) 0
+            CNOT 0 1
+        """
+        )
+
+        loader = qml.load(quil_str, format="quil")
+        dev = qml.device("default.qubit", wires=2)
+
+        @qml.qnode(dev)
+        def circuit(a):
+            loader({"delta" : a})
+
+            return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
+
+        @qml.qnode(dev)
+        def circuit_reg(a):
+            qml.RX(a, wires=[0])
+            qml.CNOT(wires=[0, 1])
+
+            return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
+
+        assert np.array_equal(circuit.jacobian([angle]), circuit_reg.jacobian([angle]))
