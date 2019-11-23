@@ -183,7 +183,7 @@ class ProgramLoader:
 
     @property
     def defined_gates(self):
-        return self.program.defined_gates()
+        return self.program.defined_gates
 
     @property
     def declarations(self):

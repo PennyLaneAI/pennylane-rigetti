@@ -792,3 +792,44 @@ class TestQuilFileConverter:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
+
+
+
+class TestInspectionProperties:
+
+    def test_inspection(self):
+        quil_str = textwrap.dedent(
+            """
+            DECLARE alpha REAL[1]
+            DECLARE beta REAL[1]
+            DECLARE gamma REAL[1]
+
+            DEFGATE SQRT-X:
+                0.5+0.5i, 0.5-0.5i
+                0.5-0.5i, 0.5+0.5i
+            
+            H 0
+            DAGGER RZ(0.34) 1
+            CNOT 0 3
+            H 2
+            RX(alpha) 1
+            RZ(beta) 1
+            CONTROLLED S 1 7
+            DAGGER CONTROLLED X 3 7
+            DAGGER DAGGER Y 1
+            H 1
+            CONTROLLED SQRT-X 0 1
+            RZ(0.34) 1
+        """
+        )
+        
+        sqrt_x = np.array([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]])
+        
+        loader = load_quil(quil_str)
+
+        assert loader.declarations[0].name == "alpha"
+        assert loader.declarations[1].name == "beta"
+        assert loader.declarations[2].name == "gamma"
+
+        assert loader.defined_gates[0].name == "SQRT-X"
+        assert np.array_equal(loader.defined_gates[0].matrix, sqrt_x)
