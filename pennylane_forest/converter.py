@@ -85,7 +85,7 @@ def _get_qubit_index(qubit):
 class ProgramLoader:
     _matrix_dictionary = pyquil.gate_matrices.QUANTUM_GATES
 
-    def _load_defined_gates(self):
+    def _load_defined_gate_names(self):
         self._defined_gate_names = []
 
         for defgate in self.program.defined_gates:
@@ -98,6 +98,13 @@ class ProgramLoader:
                 matrix = defgate.matrix
 
             self._matrix_dictionary[defgate.name] = matrix
+
+    def _load_declarations(self):
+        self._declarations = [
+            instruction
+            for instruction in self.program.instructions
+            if self._is_declaration(instruction)
+        ]
 
     def _is_defined_gate(self, gate):
         return gate.name in self._defined_gate_names
@@ -149,13 +156,7 @@ class ProgramLoader:
         return dict(zip(new_keys, values))
 
     def _check_variable_map(self, variable_map):
-        declarations = [
-            instruction
-            for instruction in self.program.instructions
-            if self._is_declaration(instruction)
-        ]
-
-        for declaration in declarations:
+        for declaration in self._declarations:
             if not declaration.name in variable_map:
                 raise qml.DeviceError(
                     "The PyQuil program defines a variable {} that is not present in the given variable map. "
@@ -177,7 +178,16 @@ class ProgramLoader:
         self.program = program
         self.qubits = program.get_qubits()
 
-        self._load_defined_gates()
+        self._load_defined_gate_names()
+        self._load_declarations()
+
+    @property
+    def defined_gates(self):
+        return self.program.defined_gates()
+
+    @property
+    def declarations(self):
+        return self._declarations
 
     def template(self, variable_map={}, wires=None):
         if not wires:
@@ -234,3 +244,10 @@ def load_program(program: pyquil.Program):
 def load_quil(quil_str: str):
 
     return load_program(pyquil.Program(quil_str))
+
+
+def load_quil_from_file(file_path: str):
+    with open(file_path, 'r') as file:
+        quil_str = file.read()
+
+    return load_quil(quil_str)

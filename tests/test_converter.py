@@ -6,6 +6,7 @@ import pytest
 from pennylane.utils import OperationRecorder
 from pennylane_forest.converter import *
 import textwrap
+import os
 
 
 class TestProgramConverter:
@@ -605,7 +606,6 @@ class TestProgramConverter:
 
 class TestQuilConverter:
 
-
     def test_convert_simple_program(self):
         quil_str = textwrap.dedent(
             """
@@ -763,3 +763,32 @@ class TestQuilConverter:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert np.array_equal(converted.params, expected.params)
+
+
+class TestQuilFileConverter:
+
+    def test_convert_simple_program(self):
+        cur_dir = os.path.dirname(os.path.abspath(__file__))
+
+        with OperationRecorder() as rec:
+            load_quil_from_file(os.path.join(cur_dir, "simple_program.quil"))()
+
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 0  1  2  3  4
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.RZ(0.34, wires=[1]),
+            qml.CNOT(wires=[0, 3]),
+            qml.Hadamard(2),
+            qml.Hadamard(4),
+            qml.PauliX(4),
+            qml.PauliY(1),
+            qml.RZ(0.34, wires=[1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
