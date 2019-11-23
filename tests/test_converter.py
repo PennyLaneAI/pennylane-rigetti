@@ -604,6 +604,8 @@ class TestProgramConverter:
 
 
 class TestQuilConverter:
+
+
     def test_convert_simple_program(self):
         quil_str = textwrap.dedent(
             """
@@ -640,3 +642,124 @@ class TestQuilConverter:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
+            
+    def test_convert_complex_program(self):
+        quil_str = textwrap.dedent(
+            """
+            H 0
+            DAGGER RZ(0.34) 1
+            CNOT 0 3
+            H 2
+            CONTROLLED S 1 7
+            DAGGER CONTROLLED X 3 7
+            DAGGER DAGGER Y 1
+            RZ(0.34) 1
+        """
+        )
+
+        with OperationRecorder() as rec:
+            load_quil(quil_str)()
+
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 0  1  2  3  4
+
+        CS_matrix = np.eye(4, dtype=complex)
+        CS_matrix[3,3] = 1j
+
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.RZ(0.34, wires=[1]).inv(),
+            qml.CNOT(wires=[0, 3]),
+            qml.Hadamard(2),
+            qml.QubitUnitary(CS_matrix, wires=[1, 4]),
+            qml.CNOT(wires=[3, 4]).inv(),
+            qml.PauliY(1),
+            qml.RZ(0.34, wires=[1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert np.array_equal(converted.params, expected.params)
+
+    def test_convert_simple_program_with_parameters(self):
+        quil_str = textwrap.dedent(
+            """
+            DECLARE alpha REAL[1]
+            DECLARE beta REAL[1]
+            DECLARE gamma REAL[1]
+
+            H 0
+            CNOT 0 1
+            RX(alpha) 1
+            RZ(beta) 1
+            RX(gamma) 1
+            CNOT 0 1
+            H 0
+        """
+        )
+
+        a, b, c = 0.1, 0.2, 0.3
+
+        variable_map = {
+            "alpha": a,
+            "beta": b,
+            "gamma": c,
+        }
+
+        with OperationRecorder() as rec:
+            load_quil(quil_str)(variable_map=variable_map)
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.CNOT(wires=[0, 1]),
+            qml.RX(0.1, wires=[1]),
+            qml.RZ(0.2, wires=[1]),
+            qml.RX(0.3, wires=[1]),
+            qml.CNOT(wires=[0, 1]),
+            qml.Hadamard(0),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
+
+    def test_convert_program_with_defgates(self):
+        quil_str = textwrap.dedent(
+            """
+            DEFGATE SQRT-X:
+                0.5+0.5i, 0.5-0.5i
+                0.5-0.5i, 0.5+0.5i
+
+            H 0
+            CNOT 0 1
+            SQRT-X 0
+            SQRT-X 1
+            H 1
+            CONTROLLED SQRT-X 0 1
+        """
+        )
+
+        sqrt_x = np.array([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]])
+        c_sqrt_x = np.eye(4, dtype=complex)
+        c_sqrt_x[2:, 2:] = sqrt_x
+
+        with OperationRecorder() as rec:
+            load_quil(quil_str)()
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.CNOT(wires=[0, 1]),
+            qml.QubitUnitary(sqrt_x, wires=[0]),
+            qml.QubitUnitary(sqrt_x, wires=[1]),
+            qml.Hadamard(1),
+            qml.QubitUnitary(c_sqrt_x, wires=[0, 1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert np.array_equal(converted.params, expected.params)
