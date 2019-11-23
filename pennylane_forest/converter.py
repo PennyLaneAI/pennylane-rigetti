@@ -242,6 +242,9 @@ class ProgramLoader:
     def __call__(self, variable_map={}, wires=None):
         self.template(variable_map, wires)
 
+    def __str__(self):
+        return "PennyLane Program Loader for PyQuil Program:\n" + str(self.program)
+
 
 def load_program(program: pyquil.Program):
     """Load template from PyQuil Program instance."""

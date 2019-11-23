@@ -838,3 +838,31 @@ class TestInspectionProperties:
         assert loader.defined_gates[0].name == "SQRT-X"
         
         assert loader.defined_gate_names[0] == "SQRT-X"
+
+    def test_str(self):
+        quil_str = textwrap.dedent(
+            """
+            DECLARE alpha REAL[1]
+            DECLARE beta REAL[1]
+            DECLARE gamma REAL[1]
+            DEFGATE SQRT-X:
+                0.5+0.5i, 0.5-0.5i
+                0.5-0.5i, 0.5+0.5i            
+            H 0
+            DAGGER RZ(0.34) 1
+            CNOT 0 3
+            H 2
+            RX(alpha) 1
+            RZ(beta) 1
+            CONTROLLED S 1 7
+            DAGGER CONTROLLED X 3 7
+            DAGGER DAGGER Y 1
+            H 1
+            CONTROLLED SQRT-X 0 1
+            RZ(0.34) 1
+        """
+        )
+
+        loader = load_quil(quil_str)
+
+        assert str(loader) == "PennyLane Program Loader for PyQuil Program:\n" + str(loader.program)
