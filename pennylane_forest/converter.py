@@ -169,7 +169,7 @@ class ProgramLoader:
 
         self._load_defined_gates()
 
-    def template(self, wires=None, variable_map={}):
+    def template(self, variable_map={}, wires=None):
         if not wires:
             wires = range(len(self.qubits))
 
@@ -209,9 +209,13 @@ class ProgramLoader:
             if self._is_inverted(gate):
                 pl_gate_instance.inv()
 
+        
+    def __call__(self, variable_map={}, wires=None):
+        self.template(variable_map, wires)
 
-def load_program(program, wires=None, variable_map={}):
+
+def load_program(program):
     """Load template from PyQuil Program instance."""
-
-    loader = ProgramLoader(program)
-    loader.template(wires, variable_map)
+    
+    ProgramLoader(program)
+    return ProgramLoader(program)

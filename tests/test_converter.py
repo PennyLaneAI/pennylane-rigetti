@@ -132,7 +132,7 @@ class TestProgramConverter:
         program += pyquil_operation
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         assert rec.queue[0].name == expected_pl_operation.name
         assert rec.queue[0].wires == expected_pl_operation.wires
@@ -151,7 +151,7 @@ class TestProgramConverter:
         program += g.RZ(0.34, 1)
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -197,7 +197,7 @@ class TestProgramConverter:
         }
 
         with OperationRecorder() as rec:
-            load_program(program, variable_map=variable_map)
+            load_program(program)(variable_map=variable_map)
 
         expected_queue = [
             qml.Hadamard(0),
@@ -227,7 +227,7 @@ class TestProgramConverter:
         program += g.RZ(0.34, 1)
 
         with OperationRecorder() as rec:
-            load_program(program, wires=[3, 6, 4, 9, 1])
+            load_program(program)(wires=[3, 6, 4, 9, 1])
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -261,7 +261,7 @@ class TestProgramConverter:
             qml.DeviceError,
             match="The number of given wires does not match the number of qubits in the PyQuil Program",
         ):
-            load_program(program, wires=wires)
+            load_program(program)(wires=wires)
 
     def test_convert_program_with_inverses(self):
         program = pyquil.Program()
@@ -277,7 +277,7 @@ class TestProgramConverter:
         program += g.RZ(0.34, 1)
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         expected_queue = [
             qml.Hadamard(0),
@@ -307,7 +307,7 @@ class TestProgramConverter:
         program += g.X(3).controlled(4).controlled(1)
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         expected_queue = [
             qml.RZ(0.34, wires=[1]),
@@ -340,7 +340,7 @@ class TestProgramConverter:
         program += g.T(2).controlled(1).controlled(0)
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -372,7 +372,7 @@ class TestProgramConverter:
         program += g.X(0).dagger().controlled(4).dagger().dagger().controlled(1).dagger()
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         expected_queue = [
             plf.ops.CCNOT(wires=[2, 0, 1]),
@@ -421,7 +421,7 @@ class TestProgramConverter:
         program += g.CNOT(2, 0)
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -465,7 +465,7 @@ class TestProgramConverter:
         program += g.RX(0.4, 0)
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -496,7 +496,7 @@ class TestProgramConverter:
         program += g.CNOT(0, 1)
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -529,7 +529,7 @@ class TestProgramConverter:
         program += g.CNOT(0, 1)
 
         with OperationRecorder() as rec:
-            load_program(program)
+            load_program(program)()
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -554,4 +554,4 @@ class TestProgramConverter:
             qml.DeviceError,
             match="Forked gates can not be imported into PennyLane, as this functionality is not supported",
         ):
-            load_program(program)
+            load_program(program)()
