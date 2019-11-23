@@ -138,6 +138,16 @@ class ProgramLoader:
 
         return gate_matrix
 
+    def _normalize_variable_map(self, variable_map):
+        new_keys = list(variable_map.keys())
+        values = list(variable_map.values())
+
+        for i in range(len(new_keys)):
+            if isinstance(new_keys[i], pyquil.quil.MemoryReference):
+                new_keys[i] = new_keys[i].name
+
+        return dict(zip(new_keys, values))
+
     def _check_variable_map(self, variable_map):
         declarations = [
             instruction
@@ -172,6 +182,8 @@ class ProgramLoader:
     def template(self, variable_map={}, wires=None):
         if not wires:
             wires = range(len(self.qubits))
+
+        variable_map = self._normalize_variable_map(variable_map)
 
         self._load_qubit_to_wire_map(wires)
 
@@ -210,9 +222,8 @@ class ProgramLoader:
                 pl_gate_instance.inv()
 
         
-    def __call__(self, variable_map={}, wires=None):
+    def __call__(self, variable_map={}, wires=None):        
         self.template(variable_map, wires)
-
 
 def load_program(program):
     """Load template from PyQuil Program instance."""

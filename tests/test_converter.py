@@ -214,6 +214,47 @@ class TestProgramConverter:
             assert converted.wires == expected.wires
             assert converted.params == expected.params
 
+    def test_convert_simple_program_with_parameters_instances_as_keys(self):
+        program = pyquil.Program()
+
+        alpha = program.declare("alpha", "REAL")
+        beta = program.declare("beta", "REAL")
+        gamma = program.declare("gamma", "REAL")
+
+        program += g.H(0)
+        program += g.CNOT(0, 1)
+        program += g.RX(alpha, 1)
+        program += g.RZ(beta, 1)
+        program += g.RX(gamma, 1)
+        program += g.CNOT(0, 1)
+        program += g.H(0)
+
+        a, b, c = 0.1, 0.2, 0.3
+
+        variable_map = {
+            alpha: a,
+            beta: b,
+            gamma: c,
+        }
+
+        with OperationRecorder() as rec:
+            load_program(program)(variable_map=variable_map)
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.CNOT(wires=[0, 1]),
+            qml.RX(0.1, wires=[1]),
+            qml.RZ(0.2, wires=[1]),
+            qml.RX(0.3, wires=[1]),
+            qml.CNOT(wires=[0, 1]),
+            qml.Hadamard(0),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
+
     def test_convert_simple_program_wire_assignment(self):
         program = pyquil.Program()
 
