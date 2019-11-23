@@ -861,3 +861,103 @@ class TestInspectionProperties:
         loader = load_quil(quil_str)
 
         assert str(loader) == "PennyLane Program Loader for PyQuil Program:\n" + str(loader.program)
+
+class TestIntegration:
+
+    def test_load_program_via_entry_point(self):
+        program = pyquil.Program()
+
+        program += g.H(0)
+        program += g.RZ(0.34, 1)
+        program += g.CNOT(0, 3)
+        program += g.H(2)
+        program += g.H(7)
+        program += g.X(7)
+        program += g.Y(1)
+        program += g.RZ(0.34, 1)
+
+        with OperationRecorder() as rec:
+            qml.load(program, format="pyquil_program")()
+
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 0  1  2  3  4
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.RZ(0.34, wires=[1]),
+            qml.CNOT(wires=[0, 3]),
+            qml.Hadamard(2),
+            qml.Hadamard(4),
+            qml.PauliX(4),
+            qml.PauliY(1),
+            qml.RZ(0.34, wires=[1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
+
+    def test_load_quil_via_entry_point(self):
+        quil_str = textwrap.dedent(
+            """
+            H 0
+            RZ(0.34) 1
+            CNOT 0 3
+            H 2
+            H 7
+            X 7
+            Y 1
+            RZ(0.34) 1
+        """
+        )
+
+        with OperationRecorder() as rec:
+            qml.load(quil_str, format="quil")()
+
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 0  1  2  3  4
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.RZ(0.34, wires=[1]),
+            qml.CNOT(wires=[0, 3]),
+            qml.Hadamard(2),
+            qml.Hadamard(4),
+            qml.PauliX(4),
+            qml.PauliY(1),
+            qml.RZ(0.34, wires=[1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
+
+    def test_load_quil_file_via_entry_point(self):
+        cur_dir = os.path.dirname(os.path.abspath(__file__))
+
+        with OperationRecorder() as rec:
+            qml.load(os.path.join(cur_dir, "simple_program.quil"), format="quil_file")()
+
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 0  1  2  3  4
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.RZ(0.34, wires=[1]),
+            qml.CNOT(wires=[0, 3]),
+            qml.Hadamard(2),
+            qml.Hadamard(4),
+            qml.PauliX(4),
+            qml.PauliY(1),
+            qml.RZ(0.34, wires=[1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
