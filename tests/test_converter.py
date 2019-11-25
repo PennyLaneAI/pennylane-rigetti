@@ -771,6 +771,53 @@ class TestQuilConverter:
             assert converted.wires == expected.wires
             assert converted.params == expected.params
 
+    def test_convert_program_with_parameters_and_measurements(self):
+        quil_str = textwrap.dedent(
+            """
+            DECLARE alpha REAL[1]
+            DECLARE beta REAL[1]
+            DECLARE gamma REAL[1]
+            DECLARE ro BIT[2]
+
+            H 0
+            CNOT 0 1
+            RX(alpha) 1
+            RZ(beta) 1
+            RX(gamma) 1
+            CNOT 0 1
+            H 0
+
+            MEASURE 0 ro[0]
+            MEASURE 1 ro[1]
+        """
+        )
+
+        a, b, c = 0.1, 0.2, 0.3
+
+        variable_map = {
+            "alpha": a,
+            "beta": b,
+            "gamma": c,
+        }
+
+        with OperationRecorder() as rec:
+            load_quil(quil_str)(variable_map=variable_map)
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.CNOT(wires=[0, 1]),
+            qml.RX(0.1, wires=[1]),
+            qml.RZ(0.2, wires=[1]),
+            qml.RX(0.3, wires=[1]),
+            qml.CNOT(wires=[0, 1]),
+            qml.Hadamard(0),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
+
     def test_convert_program_with_defgates(self):
         quil_str = textwrap.dedent(
             """

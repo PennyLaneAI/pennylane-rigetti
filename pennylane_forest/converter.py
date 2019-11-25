@@ -107,8 +107,23 @@ class ProgramLoader:
             if self._is_declaration(instruction)
         ]
 
+    def _load_measurements(self):
+        self._measurements = [
+            instruction
+            for instruction in self.program.instructions
+            if self._is_measurement(instruction)
+        ]
+
+        self._measurement_variable_names = set([
+            measurement.classical_reg.name
+            for measurement in self._measurements
+        ])
+
     def _is_defined_gate(self, gate):
         return gate.name in self._defined_gate_names
+
+    def _is_measurement_variable(self, memory_placeholder):
+        return memory_placeholder in self._measurements
 
     def _is_controlled(self, gate):
         return "CONTROLLED" in gate.modifiers
@@ -124,6 +139,9 @@ class ProgramLoader:
 
     def _is_declaration(self, instruction):
         return isinstance(instruction, pyquil.quil.Declare)
+
+    def _is_measurement(self, instruction):
+        return isinstance(instruction, pyquil.quil.Measurement)
 
     def _load_qubit_to_wire_map(self, wires):
         if len(wires) != len(self.qubits):
@@ -162,10 +180,12 @@ class ProgramLoader:
     def _check_variable_map(self, variable_map):
         for declaration in self._declarations:
             if not declaration.name in variable_map:
-                raise qml.DeviceError(
-                    "The PyQuil program defines a variable {} that is not present in the given variable map. "
-                    + "Instruction: {}".format(declaration.name, declaration)
-                )
+                # If the variable is used in measurement we don't complain
+                if not declaration.name in self._measurement_variable_names:
+                    raise qml.DeviceError(
+                        ("The PyQuil program defines a variable {} that is not present in the given variable map. "
+                        + "Instruction: {}").format(declaration.name, declaration)
+                    )
 
     def _resolve_params(self, params, variable_map):
         resolved_params = []
@@ -184,6 +204,7 @@ class ProgramLoader:
 
         self._load_defined_gate_names()
         self._load_declarations()
+        self._load_measurements()
 
     @property
     def defined_gates(self):
