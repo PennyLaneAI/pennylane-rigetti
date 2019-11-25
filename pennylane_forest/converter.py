@@ -116,10 +116,9 @@ class ProgramLoader:
             if self._is_measurement(instruction)
         ]
 
-        self._measurement_variable_names = set([
-            measurement.classical_reg.name
-            for measurement in self._measurements
-        ])
+        self._measurement_variable_names = set(
+            [measurement.classical_reg.name for measurement in self._measurements]
+        )
 
     def _is_defined_gate(self, gate):
         return gate.name in self._defined_gate_names
@@ -185,8 +184,10 @@ class ProgramLoader:
                 # If the variable is used in measurement we don't complain
                 if not declaration.name in self._measurement_variable_names:
                     raise qml.DeviceError(
-                        ("The PyQuil program defines a variable {} that is not present in the given variable map. "
-                        + "Instruction: {}").format(declaration.name, declaration)
+                        (
+                            "The PyQuil program defines a variable {} that is not present in the given variable map. "
+                            + "Instruction: {}"
+                        ).format(declaration.name, declaration)
                     )
 
     def _resolve_params(self, params, variable_map):
@@ -238,7 +239,11 @@ class ProgramLoader:
             # Skip all statements that are not gates (RESET, MEASURE, PRAGMA)
             if not self._is_gate(instruction):
                 if not self._is_declaration(instruction):
-                    warnings.warn("Instruction Nr. {} is not supported by PennyLane and was ignored: {}".format(i + 1, instruction))
+                    warnings.warn(
+                        "Instruction Nr. {} is not supported by PennyLane and was ignored: {}".format(
+                            i + 1, instruction
+                        )
+                    )
 
                 continue
 
@@ -294,7 +299,8 @@ def load_quil_from_file(file_path: str):
 
     return load_quil(quil_str)
 
-# TODO: 
+
+# TODO:
 # * Add note on the current rewiring (match in ascending order)
 # * Can we support the rewiring pragmas?
 # * Ignore other pragmas

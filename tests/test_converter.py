@@ -642,7 +642,7 @@ class TestQuilConverter:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
-            
+
     def test_convert_program_with_classical_control_flow(self):
         quil_str = textwrap.dedent(
             """
@@ -661,7 +661,7 @@ class TestQuilConverter:
         flag = 0.0
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)(variable_map={"flag_register" : flag})
+            load_quil(quil_str)(variable_map={"flag_register": flag})
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -676,7 +676,6 @@ class TestQuilConverter:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
-
 
     def test_convert_program_with_pragmas(self):
         quil_str = textwrap.dedent(
@@ -989,8 +988,8 @@ class TestInspectionProperties:
 
         assert str(loader) == "PennyLane Program Loader for PyQuil Program:\n" + str(loader.program)
 
-class TestIntegration:
 
+class TestIntegration:
     def test_load_program_via_entry_point(self):
         program = pyquil.Program()
 
@@ -1088,7 +1087,7 @@ class TestIntegration:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
-            
+
     @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
     def test_program_in_qnode(self, angle):
         program = pyquil.Program()
@@ -1103,7 +1102,7 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(a):
-            loader({delta : a})
+            loader({delta: a})
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
@@ -1115,7 +1114,7 @@ class TestIntegration:
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
         assert np.array_equal(circuit(angle), circuit_reg(angle))
-            
+
     @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
     def test_quil_in_qnode(self, angle):
         quil_str = textwrap.dedent(
@@ -1131,7 +1130,7 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(a):
-            loader({"delta" : a})
+            loader({"delta": a})
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
@@ -1143,7 +1142,7 @@ class TestIntegration:
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
         assert np.array_equal(circuit(angle), circuit_reg(angle))
-            
+
     @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
     def test_differentiation_in_qnode(self, angle):
         quil_str = textwrap.dedent(
@@ -1159,7 +1158,7 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(a):
-            loader({"delta" : a})
+            loader({"delta": a})
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
