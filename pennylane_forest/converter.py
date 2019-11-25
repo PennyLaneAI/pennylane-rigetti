@@ -118,6 +118,9 @@ class ProgramLoader:
     def _is_inverted(self, gate):
         return gate.modifiers.count("DAGGER") % 2 == 1
 
+    def _is_gate(self, instruction):
+        return isinstance(instruction, pyquil.quil.Gate)
+
     def _is_declaration(self, instruction):
         return isinstance(instruction, pyquil.quil.Declare)
 
@@ -208,7 +211,8 @@ class ProgramLoader:
         self._check_variable_map(variable_map)
 
         for i, instruction in enumerate(self.program.instructions):
-            if self._is_declaration(instruction):
+            # Skip all statements that are not gates (RESET, MEASURE, PRAGMA)
+            if not self._is_gate(instruction):
                 continue
 
             # Rename for better readability

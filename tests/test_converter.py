@@ -642,6 +642,54 @@ class TestQuilConverter:
             assert converted.wires == expected.wires
             assert converted.params == expected.params
 
+
+    def test_convert_program_with_pragmas(self):
+        quil_str = textwrap.dedent(
+            """
+            PRAGMA INITIAL_REWIRING "GREEDY"
+            PRAGMA PRESERVE_BLOCK
+            I 0
+            I 1
+            PRAGMA END_PRESERVE_BLOCK
+            PRAGMA COMMUTING_BLOCKS
+            PRAGMA BLOCK
+            CNOT 0 1
+            RZ(0.4) 1
+            CNOT 0 1
+            PRAGMA END_BLOCK
+            PRAGMA BLOCK
+            CNOT 1 2
+            RZ(0.6) 2
+            CNOT 1 2
+            PRAGMA END_BLOCK
+            PRAGMA END_COMMUTING_BLOCKS
+            H 0
+        """
+        )
+
+        with OperationRecorder() as rec:
+            load_quil(quil_str)()
+
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 0  1  2  3  4
+
+        expected_queue = [
+            qml.Hadamard(0),
+            qml.RZ(0.34, wires=[1]),
+            qml.CNOT(wires=[0, 3]),
+            qml.Hadamard(2),
+            qml.Hadamard(4),
+            qml.PauliX(4),
+            qml.PauliY(1),
+            qml.RZ(0.34, wires=[1]),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
+
     def test_convert_complex_program(self):
         quil_str = textwrap.dedent(
             """
