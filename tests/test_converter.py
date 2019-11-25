@@ -15,6 +15,7 @@ class TestProgramConverter:
     @pytest.mark.parametrize(
         "pyquil_operation,expected_pl_operation",
         [
+            (g.I(0), qml.Identity(wires=[0])),
             (g.H(0), qml.Hadamard(0)),
             (g.H(0).dagger(), qml.Hadamard(0).inv()),
             (g.H(0).dagger().dagger(), qml.Hadamard(0).inv().inv()),
