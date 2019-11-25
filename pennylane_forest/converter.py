@@ -7,6 +7,7 @@ import pyquil
 import pyquil.gates as g
 
 pyquil_inv_operation_map = {
+    "I": qml.Identity,
     "X": qml.PauliX,
     "Y": qml.PauliY,
     "Z": qml.PauliZ,

@@ -670,19 +670,16 @@ class TestQuilConverter:
         with OperationRecorder() as rec:
             load_quil(quil_str)()
 
-        # The wires should be assigned as
-        # 0  1  2  3  7
-        # 0  1  2  3  4
-
         expected_queue = [
+            qml.Identity(wires=[0]),
+            qml.Identity(wires=[1]),
+            qml.CNOT(wires=[0, 1]),
+            qml.RZ(0.4, wires=[1]),
+            qml.CNOT(wires=[0, 1]),
+            qml.CNOT(wires=[1, 2]),
+            qml.RZ(0.6, wires=[2]),
+            qml.CNOT(wires=[1, 2]),
             qml.Hadamard(0),
-            qml.RZ(0.34, wires=[1]),
-            qml.CNOT(wires=[0, 3]),
-            qml.Hadamard(2),
-            qml.Hadamard(4),
-            qml.PauliX(4),
-            qml.PauliY(1),
-            qml.RZ(0.34, wires=[1]),
         ]
 
         for converted, expected in zip(rec.queue, expected_queue):
