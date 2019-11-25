@@ -6,6 +6,8 @@ import pennylane_forest as plf
 import pyquil
 import pyquil.gates as g
 
+import warnings
+
 pyquil_inv_operation_map = {
     "I": qml.Identity,
     "X": qml.PauliX,
@@ -235,6 +237,9 @@ class ProgramLoader:
         for i, instruction in enumerate(self.program.instructions):
             # Skip all statements that are not gates (RESET, MEASURE, PRAGMA)
             if not self._is_gate(instruction):
+                if not self._is_declaration(instruction):
+                    warnings.warn("Instruction Nr. {} is not supported by PennyLane and was ignored: {}".format(i + 1, instruction))
+
                 continue
 
             # Rename for better readability
