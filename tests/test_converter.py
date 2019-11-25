@@ -642,6 +642,40 @@ class TestQuilConverter:
             assert converted.name == expected.name
             assert converted.wires == expected.wires
             assert converted.params == expected.params
+            
+    def test_convert_program_with_classical_control_flow(self):
+        quil_str = textwrap.dedent(
+            """
+            DECLARE flag_register BIT[1]
+            MOVE flag_register 1
+            LABEL @START1
+            JUMP-UNLESS @END2 flag_register
+            X 0
+            H 0
+            MEASURE 0 flag_register
+            JUMP @START1
+            LABEL @END2
+        """
+        )
+
+        flag = 0.0
+
+        with OperationRecorder() as rec:
+            load_quil(quil_str)(variable_map={"flag_register" : flag})
+
+        # The wires should be assigned as
+        # 0  1  2  3  7
+        # 0  1  2  3  4
+
+        expected_queue = [
+            qml.PauliX(0),
+            qml.Hadamard(0),
+        ]
+
+        for converted, expected in zip(rec.queue, expected_queue):
+            assert converted.name == expected.name
+            assert converted.wires == expected.wires
+            assert converted.params == expected.params
 
 
     def test_convert_program_with_pragmas(self):
