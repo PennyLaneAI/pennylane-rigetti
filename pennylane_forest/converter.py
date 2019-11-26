@@ -77,7 +77,7 @@ def _resolve_gate(gate):
     return gate
 
 
-def _resolve_params(self, params, variable_map):
+def _resolve_params(params, variable_map):
     resolved_params = []
 
     for param in params:
@@ -240,7 +240,7 @@ class ProgramLoader:
         self._check_variable_map(variable_map)
 
         for i, instruction in enumerate(self.program.instructions):
-            # Skip all statements that are not gates (RESET, MEASURE, PRAGMA)
+            # Skip all statements that are not gates (RESET, MEASURE, PRAGMA, ...)
             if not _is_gate(instruction):
                 if not _is_declaration(instruction):
                     warnings.warn(
