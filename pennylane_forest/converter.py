@@ -112,7 +112,7 @@ def _resolve_params(params, variable_map):
     
     Args:
         params (List[Union[pyquil.quilatom.MemoryReference, object]]): The parameter list
-        variable_map (Dict[str, object]): The variable map for parameter resolution
+        variable_map (Dict[str, object]): The map that assigns values to variable names
     
     Returns:
         List[object]: The resolved parameters. This list does not contain MemoryReferences anymore.
@@ -259,6 +259,15 @@ def _qubits_to_wires(qubits, qubit_to_wire_map):
 
 
 class ParametrizedGate:
+    """Represent a parametrized PennyLane gate.
+    
+    Args:
+        pl_gate (type): The PennyLane gate
+        pyquil_qubits ([type]): The qubits the gate acts on in the corresponding pyquil Program
+        pyquil_params ([type]): The gate's parameters in the corresponding pyquil Program
+        is_inverted (bool): Indicates if the gate is inverted
+    """
+
     def __init__(self, pl_gate, pyquil_qubits, pyquil_params, is_inverted):
         self.pl_gate = pl_gate
         self.pyquil_qubits = pyquil_qubits
@@ -266,6 +275,15 @@ class ParametrizedGate:
         self.is_inverted = is_inverted
 
     def instantiate(self, variable_map, qubit_to_wire_map):
+        """Instantiate the parametrized gate.
+        
+        Args:
+            variable_map (Dict[str, object]): The map that assigns values to variable names
+            qubit_to_wire_map ([type]): The map that assigns wires to qubits
+        
+        Returns:
+            qml.Operation: The initiated instance of the parametrized PennyLane gate
+        """
         resolved_params = _resolve_params(self.pyquil_params, variable_map)
         resolved_wires = _qubits_to_wires(self.pyquil_qubits, qubit_to_wire_map)
 
@@ -278,17 +296,48 @@ class ParametrizedGate:
 
 
 class ParametrizedQubitUnitary:
+    """Represents a QubitUnitary instance already parametrized with a matrix.
+    
+    Args:
+        matrix (np.array): The unitary gate matrix
+    """
     def __init__(self, matrix):
         self.matrix = matrix
 
     def __call__(self, wires):
+        """Instantiate the QubitUnitary on the given wires.
+        
+        Args:
+            wires (List[int]): The wires the QubitUnitary acts on
+        
+        Returns:
+            qml.QubitUnitary: The instantiate QubitUnitary instance
+        """
         return qml.QubitUnitary(self.matrix, wires=wires)
 
 
 class ProgramLoader:
+    """Loads the given pyquil Program as a PennyLane template.
+
+    The pyquil Program is parsed once at instantiation and can be 
+    applied as often as desired.
+        
+    Args:
+        program (pyquil.quil.Program): The pyquil Program instance that should be loaded
+    """
     _matrix_dictionary = pyquil.gate_matrices.QUANTUM_GATES
 
+    def __init__(self, program):
+        self.program = program
+        self.qubits = program.get_qubits()
+
+        self._load_defined_gate_names()
+        self._load_declarations()
+        self._load_measurements()
+        self._load_template()
+
     def _load_defined_gate_names(self):
+        """Extract the names of all defined gates of the pyquil Program."""
         self._defined_gate_names = []
 
         for defgate in self.program.defined_gates:
@@ -303,11 +352,13 @@ class ProgramLoader:
             self._matrix_dictionary[defgate.name] = matrix
 
     def _load_declarations(self):
+        """Extract the declarations of the pyquil Program."""
         self._declarations = [
             instruction for instruction in self.program.instructions if _is_declaration(instruction)
         ]
 
-    def _load_measurements(self):
+    def _load_measurements(self):        
+        """Extract the measurements of the pyquil Program."""
         self._measurements = [
             instruction for instruction in self.program.instructions if _is_measurement(instruction)
         ]
@@ -317,12 +368,28 @@ class ProgramLoader:
         )
 
     def _is_defined_gate(self, gate):
+        """Determine if the given gate was defined in the pyquil Program.
+        
+        Args:
+            gate (pyquil.quil.Gate): The gate that shall be checked
+        
+        Returns:
+            bool: True if the gate is defined, False otherwise
+        """
         return gate.name in self._defined_gate_names
 
-    def _is_measurement_variable(self, memory_placeholder):
-        return memory_placeholder in self._measurements
-
     def _load_qubit_to_wire_map(self, wires):
+        """Build the map that assigns wires to qubits.
+        
+        Args:
+            wires (Sequence[int]): The wires that should be assigned to the qubits
+        
+        Raises:
+            qml.DeviceError: When the number of given wires does not match the number of qubits in the pyquil Program
+        
+        Returns:
+            Dict[int, int]: The map that assigns wires to qubits
+        """
         if len(wires) != len(self.qubits):
             raise qml.DeviceError(
                 "The number of given wires does not match the number of qubits in the PyQuil Program. "
@@ -334,6 +401,14 @@ class ProgramLoader:
         return self._qubit_to_wire_map
 
     def _resolve_gate_matrix(self, gate):
+        """Resolve the matrix of the given pyquil gate.
+        
+        Args:
+            gate (pyquil.quil.Gate): The gate whose matrix should be resolved
+        
+        Returns:
+            np.array: The matrix of the given gate
+        """
         gate_matrix = self._matrix_dictionary[gate.name]
 
         for i, modifier in enumerate(gate.modifiers):
@@ -343,6 +418,16 @@ class ProgramLoader:
         return gate_matrix
 
     def _check_variable_map(self, variable_map):
+        """Check that all variables of the program are defined.
+
+        Only variables used in measurements need not be defined.
+        
+        Args:
+            variable_map (Dict[str, object]): Map that assigns values to variables
+        
+        Raises:
+            qml.DeviceError: When not all variables are defined in the variable map
+        """
         for declaration in self._declarations:
             if not declaration.name in variable_map:
                 # If the variable is used in measurement we don't complain
@@ -353,15 +438,6 @@ class ProgramLoader:
                             + "Instruction: {}"
                         ).format(declaration.name, declaration)
                     )
-
-    def __init__(self, program):
-        self.program = program
-        self.qubits = program.get_qubits()
-
-        self._load_defined_gate_names()
-        self._load_declarations()
-        self._load_measurements()
-        self._load_template()
 
     @property
     def defined_gates(self):
