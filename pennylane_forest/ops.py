@@ -32,8 +32,8 @@ from pennylane.operation import Operation
 # as they are now part of PennyLane core
 S = qml.S
 T = qml.T
-CCNOT = qml.CCNOT
 CSWAP = qml.CSWAP
+CCNOT = qml.Toffoli
 
 class CPHASE(Operation):
     r"""CHPASE(phi, q, wires)
@@ -71,37 +71,37 @@ class CPHASE(Operation):
     def decomposition(phi, q, wires):
         if q == 0:
             return [
-                qml.X(wires[0]),
-                qml.X(wires[1]),
+                qml.PauliX(wires[0]),
+                qml.PauliX(wires[1]),
                 qml.PhaseShift(phi/2, wires=[wires[0]]),
                 qml.PhaseShift(phi/2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
                 qml.PhaseShift(-phi/2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
-                qml.X(wires[1]),
-                qml.X(wires[0]),
+                qml.PauliX(wires[1]),
+                qml.PauliX(wires[0]),
             ]
         
         elif q == 1:
             return [
-                qml.X(wires[0]),
+                qml.PauliX(wires[0]),
                 qml.PhaseShift(phi/2, wires=[wires[0]]),
                 qml.PhaseShift(phi/2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
                 qml.PhaseShift(-phi/2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
-                qml.X(wires[0]),
+                qml.PauliX(wires[0]),
             ]
 
         elif q == 2:
             return [
-                qml.X(wires[1]),
+                qml.PauliX(wires[1]),
                 qml.PhaseShift(phi/2, wires=[wires[0]]),
                 qml.PhaseShift(phi/2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
                 qml.PhaseShift(-phi/2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
-                qml.X(wires[1]),
+                qml.PauliX(wires[1]),
             ]
 
         elif q == 3:
