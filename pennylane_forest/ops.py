@@ -126,3 +126,11 @@ class PSWAP(Operation):
     num_wires = 2
     par_domain = "R"
     grad_method = "A"
+
+    def decomposition(phi, wires):
+        return [
+            qml.SWAP(wires=wires),
+            qml.PhaseShift(phi, wires=[wires[0]]),
+            qml.PhaseShift(phi, wires=[wires[1]]),
+            CPHASE(phi, wires=wires),
+        ]
