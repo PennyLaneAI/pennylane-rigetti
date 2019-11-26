@@ -441,21 +441,46 @@ class ProgramLoader:
 
     @property
     def defined_gates(self):
+        """The custom gates defined in the pyquil Program.
+        
+        Returns:
+            List[Union[pyquil.quil.DefGate, pyquil.quil.DefPermutationGate]]: The gates defined in the pyquil Program
+        """
         return self.program.defined_gates
 
     @property
     def defined_gate_names(self):
+        """The names of the custom gates defined in the pyquil Program.
+
+        Returns:
+            List[str]: The names of the gates defined in the pyquil Program
+        """
         return self._defined_gate_names
 
     @property
     def declarations(self):
+        """The declarations in the pyquil Program.
+
+        Returns:
+            List[pyquil.quil.Declaration]: The declarations in the pyquil Program
+        """
         return self._declarations
 
     @property
     def defined_variable_names(self):
+        """The names of the variables defined in the pyquil Program
+        
+        Returns:
+            List[str]: The names of the variables defined in the pyquil Program
+        """
         return [declaration.name for declaration in self._declarations]
 
     def _load_template(self):
+        """Load the template corresponding to the pyquil Program.
+        
+        Raises:
+            qml.DeviceError: When the import of a forked gate is attempted
+        """
         self._parametrized_gates = []
 
         for i, instruction in enumerate(self.program.instructions):
@@ -495,6 +520,14 @@ class ProgramLoader:
             self._parametrized_gates.append(parametrized_gate)
 
     def template(self, variable_map={}, wires=None):
+        """Executes the template extracted from the pyquil Program.
+        
+        Args:
+            variable_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
+                map that assigns values to variables. Defaults to {}.
+            wires (Sequence[int], optional): The wires on which the template shall be applied. 
+                Defaults to `range(N)` where `N` is the number of qubits.
+        """
         if not wires:
             wires = range(len(self.qubits))
 
@@ -507,9 +540,22 @@ class ProgramLoader:
             parametrized_gate.instantiate(variable_map, qubit_to_wire_map)
 
     def __call__(self, variable_map={}, wires=None):
+        """Executes the template extracted from the pyquil Program.
+        
+        Args:
+            variable_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
+                map that assigns values to variables. Defaults to {}.
+            wires (Sequence[int], optional): The wires on which the template shall be applied. 
+                Defaults to `range(N)` where `N` is the number of qubits.
+        """
         self.template(variable_map, wires)
 
     def __str__(self):
+        """Give the string representation of the ProgramLoader.
+        
+        Returns:
+            str: The string representation of the ProgramLoader
+        """
         return "PennyLane Program Loader for PyQuil Program:\n" + str(self.program)
 
 
