@@ -28,12 +28,13 @@ import pennylane as qml
 from pennylane.operation import Operation
 
 
-# We keep the following definitions for compatibility 
+# We keep the following definitions for compatibility
 # as they are now part of PennyLane core
 S = qml.S
 T = qml.T
 CSWAP = qml.CSWAP
 CCNOT = qml.Toffoli
+
 
 class CPHASE(Operation):
     r"""CHPASE(phi, q, wires)
@@ -73,22 +74,22 @@ class CPHASE(Operation):
             return [
                 qml.PauliX(wires[0]),
                 qml.PauliX(wires[1]),
-                qml.PhaseShift(phi/2, wires=[wires[0]]),
-                qml.PhaseShift(phi/2, wires=[wires[1]]),
+                qml.PhaseShift(phi / 2, wires=[wires[0]]),
+                qml.PhaseShift(phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
-                qml.PhaseShift(-phi/2, wires=[wires[1]]),
+                qml.PhaseShift(-phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
                 qml.PauliX(wires[1]),
                 qml.PauliX(wires[0]),
             ]
-        
+
         elif q == 1:
             return [
                 qml.PauliX(wires[0]),
-                qml.PhaseShift(phi/2, wires=[wires[0]]),
-                qml.PhaseShift(phi/2, wires=[wires[1]]),
+                qml.PhaseShift(phi / 2, wires=[wires[0]]),
+                qml.PhaseShift(phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
-                qml.PhaseShift(-phi/2, wires=[wires[1]]),
+                qml.PhaseShift(-phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
                 qml.PauliX(wires[0]),
             ]
@@ -96,22 +97,23 @@ class CPHASE(Operation):
         elif q == 2:
             return [
                 qml.PauliX(wires[1]),
-                qml.PhaseShift(phi/2, wires=[wires[0]]),
-                qml.PhaseShift(phi/2, wires=[wires[1]]),
+                qml.PhaseShift(phi / 2, wires=[wires[0]]),
+                qml.PhaseShift(phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
-                qml.PhaseShift(-phi/2, wires=[wires[1]]),
+                qml.PhaseShift(-phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
                 qml.PauliX(wires[1]),
             ]
 
         elif q == 3:
             return [
-                qml.PhaseShift(phi/2, wires=[wires[0]]),
-                qml.PhaseShift(phi/2, wires=[wires[1]]),
+                qml.PhaseShift(phi / 2, wires=[wires[0]]),
+                qml.PhaseShift(phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
-                qml.PhaseShift(-phi/2, wires=[wires[1]]),
+                qml.PhaseShift(-phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
             ]
+
 
 class ISWAP(Operation):
     r"""ISWAP(wires)
@@ -178,5 +180,4 @@ class PSWAP(Operation):
             qml.CNOT(wires=wires),
             qml.PhaseShift(phi, wires=[wires[1]]),
             qml.CNOT(wires=wires),
-        ] 
-        
+        ]
