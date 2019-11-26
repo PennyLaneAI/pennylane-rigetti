@@ -68,6 +68,51 @@ class CPHASE(Operation):
     par_domain = "R"
     grad_method = "A"
 
+    def decomposition(phi, q, wires):
+        if q == 0:
+            return [
+                qml.X(wires[0]),
+                qml.X(wires[1]),
+                qml.PhaseShift(phi/2, wires=[wires[0]]),
+                qml.PhaseShift(phi/2, wires=[wires[1]]),
+                qml.CNOT(wires=wires),
+                qml.PhaseShift(-phi/2, wires=[wires[1]]),
+                qml.CNOT(wires=wires),
+                qml.X(wires[1]),
+                qml.X(wires[0]),
+            ]
+        
+        elif q == 1:
+            return [
+                qml.X(wires[0]),
+                qml.PhaseShift(phi/2, wires=[wires[0]]),
+                qml.PhaseShift(phi/2, wires=[wires[1]]),
+                qml.CNOT(wires=wires),
+                qml.PhaseShift(-phi/2, wires=[wires[1]]),
+                qml.CNOT(wires=wires),
+                qml.X(wires[0]),
+            ]
+
+        elif q == 2:
+            return [
+                qml.X(wires[1]),
+                qml.PhaseShift(phi/2, wires=[wires[0]]),
+                qml.PhaseShift(phi/2, wires=[wires[1]]),
+                qml.CNOT(wires=wires),
+                qml.PhaseShift(-phi/2, wires=[wires[1]]),
+                qml.CNOT(wires=wires),
+                qml.X(wires[1]),
+            ]
+
+        elif q == 3:
+            return [
+                qml.PhaseShift(phi/2, wires=[wires[0]]),
+                qml.PhaseShift(phi/2, wires=[wires[1]]),
+                qml.CNOT(wires=wires),
+                qml.PhaseShift(-phi/2, wires=[wires[1]]),
+                qml.CNOT(wires=wires),
+            ]
+
 class ISWAP(Operation):
     r"""ISWAP(wires)
     iSWAP gate.
