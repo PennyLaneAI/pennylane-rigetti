@@ -131,6 +131,7 @@ class TestProgramConverter:
         ],
     )
     def test_convert_operation(self, pyquil_operation, expected_pl_operation):
+        """Test that single pyquil gates are properly converted."""
         program = pyquil.Program()
 
         program += pyquil_operation
@@ -143,6 +144,7 @@ class TestProgramConverter:
         assert rec.queue[0].params == expected_pl_operation.params
 
     def test_convert_simple_program(self):
+        """Test that a simple program is properly converted."""
         program = pyquil.Program()
 
         program += g.H(0)
@@ -178,6 +180,7 @@ class TestProgramConverter:
             assert converted.params == expected.params
 
     def test_convert_simple_program_with_parameters(self):
+        """Test that a simple program with parameters is properly converted."""
         program = pyquil.Program()
 
         alpha = program.declare("alpha", "REAL")
@@ -219,6 +222,8 @@ class TestProgramConverter:
             assert converted.params == expected.params
 
     def test_convert_simple_program_with_parameters_mixed_keys(self):
+        """Test that a parametrized program is properly converted when
+        the variable map contains mixed key types."""
         program = pyquil.Program()
 
         alpha = program.declare("alpha", "REAL")
@@ -264,6 +269,7 @@ class TestProgramConverter:
             assert converted.params == expected.params
 
     def test_convert_simple_program_wire_assignment(self):
+        """Test that the assignment of qubits to wires works as expected."""
         program = pyquil.Program()
 
         program += g.H(0)
@@ -300,6 +306,8 @@ class TestProgramConverter:
 
     @pytest.mark.parametrize("wires", [[0, 1, 2, 3], [4, 5]])
     def test_convert_wire_error(self, wires):
+        """Test that the conversion raises an error if the given number 
+        of wires doesn't match the number of qubits in the Program."""
         program = pyquil.Program()
 
         program += g.H(0)
@@ -313,6 +321,7 @@ class TestProgramConverter:
             load_program(program)(wires=wires)
 
     def test_convert_program_with_inverses(self):
+        """Test that a program with inverses is properly converted."""
         program = pyquil.Program()
 
         program += g.H(0)
@@ -346,6 +355,7 @@ class TestProgramConverter:
             assert converted.params == expected.params
 
     def test_convert_program_with_controlled_operations(self):
+        """Test that a program with controlled operations is properly converted."""
         program = pyquil.Program()
 
         program += g.RZ(0.34, 1)
@@ -373,6 +383,8 @@ class TestProgramConverter:
             assert converted.params == expected.params
 
     def test_convert_program_with_controlled_operations_not_in_pl_core(self, tol):
+        """Test that a program with controlled operations out of scope of PL core/PLF 
+        is properly converted, i.e. the operations are replaced with controlled operations."""
         program = pyquil.Program()
 
         CS_matrix = np.eye(4, dtype=complex)
@@ -406,6 +418,8 @@ class TestProgramConverter:
             assert np.allclose(converted.params, expected.params, atol=tol, rtol=0)
 
     def test_convert_program_with_controlled_dagger_operations(self):
+        """Test that a program that combines controlled and daggered operations
+        is properly converted."""
         program = pyquil.Program()
 
         program += g.CNOT(0, 1).controlled(2)
@@ -443,6 +457,7 @@ class TestProgramConverter:
             assert converted.params == expected.params
 
     def test_convert_program_with_defgates(self):
+        """Test that a program that defines its own gates is properly converted."""
         program = pyquil.Program()
 
         sqrt_x = np.array([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]])
@@ -488,6 +503,8 @@ class TestProgramConverter:
             assert converted.params == expected.params
 
     def test_convert_program_with_controlled_defgates(self, tol):
+        """Test that a program with controlled defined gates is properly
+        converted."""
         program = pyquil.Program()
 
         sqrt_x = np.array([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]])
@@ -530,6 +547,8 @@ class TestProgramConverter:
             assert np.allclose(converted.params, expected.params, atol=tol, rtol=0)
 
     def test_convert_program_with_defpermutationgates(self):
+        """Test that a program with gates defined via DefPermutationGate is 
+        properly converted."""
         program = pyquil.Program()
 
         expected_matrix = np.eye(4)
@@ -559,6 +578,8 @@ class TestProgramConverter:
             assert np.array_equal(converted.params, expected.params)
 
     def test_convert_program_with_controlled_defpermutationgates(self):
+        """Test that a program that uses controlled permutation gates 
+        is properly converted."""
         program = pyquil.Program()
 
         expected_matrix = np.eye(4)
@@ -593,6 +614,8 @@ class TestProgramConverter:
             assert np.array_equal(converted.params, expected.params)
 
     def test_forked_gate_error(self):
+        """Test that an error is raised if conversion of a 
+        forked gate is attempted."""
         program = pyquil.Program()
 
         program += g.CNOT(0, 1)
@@ -607,7 +630,10 @@ class TestProgramConverter:
 
 
 class TestQuilConverter:
+    """Test that quil instances passed as string are properly converted."""
+
     def test_convert_simple_program(self):
+        """Test that a simple program is properly converted."""
         quil_str = textwrap.dedent(
             """
             H 0
@@ -645,6 +671,7 @@ class TestQuilConverter:
             assert converted.params == expected.params
 
     def test_convert_program_with_classical_control_flow(self):
+        """Test that a program with classical control flow is properly converted."""
         quil_str = textwrap.dedent(
             """
             DECLARE flag_register BIT[1]
@@ -679,6 +706,7 @@ class TestQuilConverter:
             assert converted.params == expected.params
 
     def test_convert_program_with_pragmas(self):
+        """Test that a program with pragmas is properly converted."""
         quil_str = textwrap.dedent(
             """
             PRAGMA INITIAL_REWIRING "GREEDY"
@@ -723,6 +751,7 @@ class TestQuilConverter:
             assert converted.params == expected.params
 
     def test_convert_complex_program(self):
+        """Test that a more complicated program is properly converted."""
         quil_str = textwrap.dedent(
             """
             H 0
