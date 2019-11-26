@@ -77,6 +77,30 @@ def _resolve_gate(gate):
     return gate
 
 
+def _is_controlled(self, gate):
+    return "CONTROLLED" in gate.modifiers
+
+
+def _is_forked(self, gate):
+    return "FORKED" in gate.modifiers
+
+
+def _is_inverted(self, gate):
+    return gate.modifiers.count("DAGGER") % 2 == 1
+
+
+def _is_gate(self, instruction):
+    return isinstance(instruction, pyquil.quil.Gate)
+
+
+def _is_declaration(self, instruction):
+    return isinstance(instruction, pyquil.quil.Declare)
+
+
+def _is_measurement(self, instruction):
+    return isinstance(instruction, pyquil.quil.Measurement)
+
+
 def _get_qubit_index(qubit):
     if isinstance(qubit, int):
         return qubit
@@ -104,16 +128,12 @@ class ProgramLoader:
 
     def _load_declarations(self):
         self._declarations = [
-            instruction
-            for instruction in self.program.instructions
-            if self._is_declaration(instruction)
+            instruction for instruction in self.program.instructions if _is_declaration(instruction)
         ]
 
     def _load_measurements(self):
         self._measurements = [
-            instruction
-            for instruction in self.program.instructions
-            if self._is_measurement(instruction)
+            instruction for instruction in self.program.instructions if _is_measurement(instruction)
         ]
 
         self._measurement_variable_names = set(
@@ -125,24 +145,6 @@ class ProgramLoader:
 
     def _is_measurement_variable(self, memory_placeholder):
         return memory_placeholder in self._measurements
-
-    def _is_controlled(self, gate):
-        return "CONTROLLED" in gate.modifiers
-
-    def _is_forked(self, gate):
-        return "FORKED" in gate.modifiers
-
-    def _is_inverted(self, gate):
-        return gate.modifiers.count("DAGGER") % 2 == 1
-
-    def _is_gate(self, instruction):
-        return isinstance(instruction, pyquil.quil.Gate)
-
-    def _is_declaration(self, instruction):
-        return isinstance(instruction, pyquil.quil.Declare)
-
-    def _is_measurement(self, instruction):
-        return isinstance(instruction, pyquil.quil.Measurement)
 
     def _load_qubit_to_wire_map(self, wires):
         if len(wires) != len(self.qubits):
@@ -237,8 +239,8 @@ class ProgramLoader:
 
         for i, instruction in enumerate(self.program.instructions):
             # Skip all statements that are not gates (RESET, MEASURE, PRAGMA)
-            if not self._is_gate(instruction):
-                if not self._is_declaration(instruction):
+            if not _is_gate(instruction):
+                if not _is_declaration(instruction):
                     warnings.warn(
                         "Instruction Nr. {} is not supported by PennyLane and was ignored: {}".format(
                             i + 1, instruction
@@ -250,7 +252,7 @@ class ProgramLoader:
             # Rename for better readability
             gate = instruction
 
-            if self._is_forked(gate):
+            if _is_forked(gate):
                 raise qml.DeviceError(
                     "Forked gates can not be imported into PennyLane, as this functionality is not supported. "
                     + "Instruction Nr. {}, {} was a forked gate.".format(i + 1, gate)
@@ -260,7 +262,7 @@ class ProgramLoader:
 
             # If the gate is a DefGate or not all CONTROLLED statements can be resolved
             # we resort to QubitUnitary
-            if self._is_controlled(resolved_gate) or self._is_defined_gate(resolved_gate):
+            if _is_controlled(resolved_gate) or self._is_defined_gate(resolved_gate):
                 pl_gate = lambda wires: qml.QubitUnitary(
                     self._resolve_gate_matrix(resolved_gate), wires=wires
                 )
@@ -272,7 +274,7 @@ class ProgramLoader:
 
             pl_gate_instance = pl_gate(*resolved_params, wires=target_wires)
 
-            if self._is_inverted(gate):
+            if _is_inverted(gate):
                 pl_gate_instance.inv()
 
     def __call__(self, variable_map={}, wires=None):
