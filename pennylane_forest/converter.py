@@ -132,6 +132,23 @@ def _get_qubit_index(qubit):
         return qubit.index
 
 
+class ParametrizedGate:
+    def __init__(self, pl_gate, wires, pyquil_params, is_inverted):
+        self.pl_gate = pl_gate
+        self.wires = wires
+        self.pyquil_params = pyquil_params
+        self.is_inverted = is_inverted
+
+    def instantiate(self, variable_map):
+        resolved_params = _resolve_params(self.pyquil_params, variable_map)
+        pl_gate_instance = self.pl_gate(*resolved_params, wires=self.wires)
+
+        if self.is_inverted:
+            pl_gate_instance.inv()
+
+        return pl_gate_instance
+
+
 class ProgramLoader:
     _matrix_dictionary = pyquil.gate_matrices.QUANTUM_GATES
 
@@ -272,12 +289,10 @@ class ProgramLoader:
                 pl_gate = pyquil_inv_operation_map[resolved_gate.name]
 
             target_wires = self._qubits_to_wires(gate.qubits)
-            resolved_params = _resolve_params(gate.params, variable_map)
-
-            pl_gate_instance = pl_gate(*resolved_params, wires=target_wires)
-
-            if _is_inverted(gate):
-                pl_gate_instance.inv()
+            parametrized_gate = ParametrizedGate(
+                pl_gate, target_wires, gate.params, _is_inverted(gate)
+            )
+            parametrized_gate.instantiate(variable_map)
 
     def __call__(self, variable_map={}, wires=None):
         self.template(variable_map, wires)
