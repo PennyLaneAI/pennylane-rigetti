@@ -77,27 +77,50 @@ def _resolve_gate(gate):
     return gate
 
 
-def _is_controlled(self, gate):
+def _resolve_params(self, params, variable_map):
+    resolved_params = []
+
+    for param in params:
+        if isinstance(param, pyquil.quilatom.MemoryReference):
+            resolved_params.append(variable_map[param.name])
+        else:
+            resolved_params.append(param)
+
+    return resolved_params
+
+
+def _normalize_variable_map(variable_map):
+    new_keys = list(variable_map.keys())
+    values = list(variable_map.values())
+
+    for i in range(len(new_keys)):
+        if isinstance(new_keys[i], pyquil.quil.MemoryReference):
+            new_keys[i] = new_keys[i].name
+
+    return dict(zip(new_keys, values))
+
+
+def _is_controlled(gate):
     return "CONTROLLED" in gate.modifiers
 
 
-def _is_forked(self, gate):
+def _is_forked(gate):
     return "FORKED" in gate.modifiers
 
 
-def _is_inverted(self, gate):
+def _is_inverted(gate):
     return gate.modifiers.count("DAGGER") % 2 == 1
 
 
-def _is_gate(self, instruction):
+def _is_gate(instruction):
     return isinstance(instruction, pyquil.quil.Gate)
 
 
-def _is_declaration(self, instruction):
+def _is_declaration(instruction):
     return isinstance(instruction, pyquil.quil.Declare)
 
 
-def _is_measurement(self, instruction):
+def _is_measurement(instruction):
     return isinstance(instruction, pyquil.quil.Measurement)
 
 
@@ -170,16 +193,6 @@ class ProgramLoader:
 
         return gate_matrix
 
-    def _normalize_variable_map(self, variable_map):
-        new_keys = list(variable_map.keys())
-        values = list(variable_map.values())
-
-        for i in range(len(new_keys)):
-            if isinstance(new_keys[i], pyquil.quil.MemoryReference):
-                new_keys[i] = new_keys[i].name
-
-        return dict(zip(new_keys, values))
-
     def _check_variable_map(self, variable_map):
         for declaration in self._declarations:
             if not declaration.name in variable_map:
@@ -191,17 +204,6 @@ class ProgramLoader:
                             + "Instruction: {}"
                         ).format(declaration.name, declaration)
                     )
-
-    def _resolve_params(self, params, variable_map):
-        resolved_params = []
-
-        for param in params:
-            if isinstance(param, pyquil.quilatom.MemoryReference):
-                resolved_params.append(variable_map[param.name])
-            else:
-                resolved_params.append(param)
-
-        return resolved_params
 
     def __init__(self, program):
         self.program = program
@@ -231,7 +233,7 @@ class ProgramLoader:
         if not wires:
             wires = range(len(self.qubits))
 
-        variable_map = self._normalize_variable_map(variable_map)
+        variable_map = _normalize_variable_map(variable_map)
 
         self._load_qubit_to_wire_map(wires)
 
@@ -270,7 +272,7 @@ class ProgramLoader:
                 pl_gate = pyquil_inv_operation_map[resolved_gate.name]
 
             target_wires = self._qubits_to_wires(gate.qubits)
-            resolved_params = self._resolve_params(gate.params, variable_map)
+            resolved_params = _resolve_params(gate.params, variable_map)
 
             pl_gate_instance = pl_gate(*resolved_params, wires=target_wires)
 
