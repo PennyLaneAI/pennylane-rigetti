@@ -319,28 +319,66 @@ class ProgramLoader:
 
 
 def load_program(program: pyquil.Program):
-    """Load template from PyQuil Program instance."""
+    """Load a pyquil.Program instance as a PennyLane template.
+
+    During loading, gates are converted to PennyLane gates as far as possible. If
+    the gates are not supported they are replaced with QubitUnitary instances. The
+    import ignores all statements that are not declarations or gates (e.g. pragmas,
+    classical control flow and measurements).
+
+    Every variable that is present in the Program and that is not used as the target
+    register of a measurement has to be provided in the `variable_map` of the template. 
+    
+    Args:
+        program (pyquil.Program): The program that should be loaded
+    
+    Returns:
+        ProgramLoader: a ProgramLoader instance that can be called like a template
+    """
 
     return ProgramLoader(program)
 
 
 def load_quil(quil_str: str):
+    """Load a quil string as a PennyLane template.
+
+    During loading, gates are converted to PennyLane gates as far as possible. If
+    the gates are not supported they are replaced with QubitUnitary instances. The
+    import ignores all statements that are not declarations or gates (e.g. pragmas,
+    classical control flow and measurements).
+
+    Every variable that is present in the Program and that is not used as the target
+    register of a measurement has to be provided in the `variable_map` of the template. 
+    
+    Args:
+        quil_str (str): The program that should be loaded
+    
+    Returns:
+        ProgramLoader: a ProgramLoader instance that can be called like a template
+    """
 
     return load_program(pyquil.Program(quil_str))
 
 
 def load_quil_from_file(file_path: str):
+    """Load a quil file as a PennyLane template.
+
+    During loading, gates are converted to PennyLane gates as far as possible. If
+    the gates are not supported they are replaced with QubitUnitary instances. The
+    import ignores all statements that are not declarations or gates (e.g. pragmas,
+    classical control flow and measurements).
+
+    Every variable that is present in the Program and that is not used as the target
+    register of a measurement has to be provided in the `variable_map` of the template. 
+    
+    Args:
+        file_path (str): The path to the quil file that should be loaded
+    
+    Returns:
+        ProgramLoader: a ProgramLoader instance that can be called like a template
+    """
+
     with open(file_path, "r") as file:
         quil_str = file.read()
 
     return load_quil(quil_str)
-
-
-# TODO:
-# * Add note on the current rewiring (match in ascending order)
-# * Can we support the rewiring pragmas?
-# * Ignore other pragmas
-# * Ignore reset
-# * Treat measurements -> remove measurement variables from the variable map
-# * Pre-compile template (with placeholders for variables)
-# * Only run that when template() is called
