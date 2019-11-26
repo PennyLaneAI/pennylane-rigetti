@@ -132,21 +132,38 @@ def _get_qubit_index(qubit):
         return qubit.index
 
 
+def _qubits_to_wires(qubits, qubit_to_wire_map):
+    if isinstance(qubits, Sequence):
+        return [qubit_to_wire_map[_get_qubit_index(qubit)] for qubit in qubits]
+
+    return qubit_to_wire_map[_get_qubit_index(qubits)]
+
+
 class ParametrizedGate:
-    def __init__(self, pl_gate, wires, pyquil_params, is_inverted):
+    def __init__(self, pl_gate, pyquil_qubits, pyquil_params, is_inverted):
         self.pl_gate = pl_gate
-        self.wires = wires
+        self.pyquil_qubits = pyquil_qubits
         self.pyquil_params = pyquil_params
         self.is_inverted = is_inverted
 
-    def instantiate(self, variable_map):
+    def instantiate(self, variable_map, qubit_to_wire_map):
         resolved_params = _resolve_params(self.pyquil_params, variable_map)
-        pl_gate_instance = self.pl_gate(*resolved_params, wires=self.wires)
+        resolved_wires = _qubits_to_wires(self.pyquil_qubits, qubit_to_wire_map)
+
+        pl_gate_instance = self.pl_gate(*resolved_params, wires=resolved_wires)
 
         if self.is_inverted:
             pl_gate_instance.inv()
 
         return pl_gate_instance
+
+
+class ParametrizedQubitUnitary:
+    def __init__(self, matrix):
+        self.matrix = matrix
+
+    def __call__(self, wires):
+        return qml.QubitUnitary(self.matrix, wires=wires)
 
 
 class ProgramLoader:
@@ -195,11 +212,7 @@ class ProgramLoader:
 
         self._qubit_to_wire_map = dict(zip(self.qubits, wires))
 
-    def _qubits_to_wires(self, qubits):
-        if isinstance(qubits, Sequence):
-            return [self._qubit_to_wire_map[_get_qubit_index(qubit)] for qubit in qubits]
-
-        return self._qubit_to_wire_map[_get_qubit_index(qubits)]
+        return self._qubit_to_wire_map
 
     def _resolve_gate_matrix(self, gate):
         gate_matrix = self._matrix_dictionary[gate.name]
@@ -229,6 +242,7 @@ class ProgramLoader:
         self._load_defined_gate_names()
         self._load_declarations()
         self._load_measurements()
+        self._load_template()
 
     @property
     def defined_gates(self):
@@ -246,15 +260,8 @@ class ProgramLoader:
     def defined_variable_names(self):
         return [declaration.name for declaration in self._declarations]
 
-    def template(self, variable_map={}, wires=None):
-        if not wires:
-            wires = range(len(self.qubits))
-
-        variable_map = _normalize_variable_map(variable_map)
-
-        self._load_qubit_to_wire_map(wires)
-
-        self._check_variable_map(variable_map)
+    def _load_template(self):
+        self._parametrized_gates = []
 
         for i, instruction in enumerate(self.program.instructions):
             # Skip all statements that are not gates (RESET, MEASURE, PRAGMA, ...)
@@ -282,17 +289,27 @@ class ProgramLoader:
             # If the gate is a DefGate or not all CONTROLLED statements can be resolved
             # we resort to QubitUnitary
             if _is_controlled(resolved_gate) or self._is_defined_gate(resolved_gate):
-                pl_gate = lambda wires: qml.QubitUnitary(
-                    self._resolve_gate_matrix(resolved_gate), wires=wires
-                )
+                pl_gate = ParametrizedQubitUnitary(self._resolve_gate_matrix(resolved_gate))
             else:
                 pl_gate = pyquil_inv_operation_map[resolved_gate.name]
 
-            target_wires = self._qubits_to_wires(gate.qubits)
             parametrized_gate = ParametrizedGate(
-                pl_gate, target_wires, gate.params, _is_inverted(gate)
+                pl_gate, gate.qubits, gate.params, _is_inverted(gate)
             )
-            parametrized_gate.instantiate(variable_map)
+
+            self._parametrized_gates.append(parametrized_gate)
+
+    def template(self, variable_map={}, wires=None):
+        if not wires:
+            wires = range(len(self.qubits))
+
+        variable_map = _normalize_variable_map(variable_map)
+
+        qubit_to_wire_map = self._load_qubit_to_wire_map(wires)
+        self._check_variable_map(variable_map)
+
+        for parametrized_gate in self._parametrized_gates:
+            parametrized_gate.instantiate(variable_map, qubit_to_wire_map)
 
     def __call__(self, variable_map={}, wires=None):
         self.template(variable_map, wires)
