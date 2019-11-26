@@ -51,6 +51,15 @@ _matrix_dictionary = pyquil.gate_matrices.QUANTUM_GATES
 
 
 def _direct_sum(A, B):
+    """Return the direct sums of two arrays.
+    
+    Args:
+        A (np.array): The first array (upper left array)
+        B (np.array): The second array (lower right array)
+    
+    Returns:
+        np.array: The direct sum of the two input arrays
+    """
     sum = np.zeros(np.add(A.shape, B.shape), dtype=A.dtype)
     sum[: A.shape[0], : A.shape[1]] = A
     sum[A.shape[0] :, A.shape[1] :] = B
@@ -59,10 +68,31 @@ def _direct_sum(A, B):
 
 
 def _controlled_matrix(op):
+    """Return the matrix associated with the controlled operation.
+    
+    Args:
+        op (np.array): Array representing the operation 
+                       that should be controlled
+    
+    Returns:
+        np.array: Array representing the controlled operations. If the input
+                  array has shape (N, N) the output shape is (2*N, 2*N).
+    """
     return _direct_sum(np.eye(op.shape[0], dtype=op.dtype), op)
 
 
 def _resolve_gate(gate):
+    """Resolve the given pyquil Gate as far as possible.
+
+    For example, the gate `CONTROLLED CONTROLLED X` will be resolved to `CCNOT`. 
+    The gate `CONTROLLED CONTROLLED RX(0.3)` will be resolved to `CONTROLLED CRX(0.3)`.
+    
+    Args:
+        gate (pyquil.quil.Gate): The gate that should be resolved
+    
+    Returns:
+        pyquil.quil.Gate: The maximally resolved gate
+    """
     for i, modifier in enumerate(gate.modifiers):
         if modifier == "CONTROLLED":
             if gate.name in _control_map:
@@ -78,6 +108,15 @@ def _resolve_gate(gate):
 
 
 def _resolve_params(params, variable_map):
+    """Resolve a parameter list with a given variable map.
+    
+    Args:
+        params (List[Union[pyquil.quilatom.MemoryReference, object]]): The parameter list
+        variable_map (Dict[str, object]): The variable map for parameter resolution
+    
+    Returns:
+        List[object]: The resolved parameters. This list does not contain MemoryReferences anymore.
+    """
     resolved_params = []
 
     for param in params:
@@ -90,6 +129,18 @@ def _resolve_params(params, variable_map):
 
 
 def _normalize_variable_map(variable_map):
+    """Normalize the given variable map.
+
+    Variable maps can have keys that are either strings or
+    pyquil.quil.MemoryReference instances. This methods replaces
+    all MemoryReference instances with their name.
+    
+    Args:
+        variable_map (Dict[Union[str, pyquil.quil.MemoryReference], object]): The initial variable map.
+    
+    Returns:
+        Dict[str, object]: Variable map with all MemoryReference instances replaced by their name
+    """
     new_keys = list(variable_map.keys())
     values = list(variable_map.values())
 
@@ -101,30 +152,89 @@ def _normalize_variable_map(variable_map):
 
 
 def _is_controlled(gate):
+    """Determine if a gate is controlled.
+    
+    Args:
+        gate (pyquil.quil.Gate): The gate that should be checked
+    
+    Returns:
+        bool: True if the gate is controlled, False otherwise
+    """
     return "CONTROLLED" in gate.modifiers
 
 
 def _is_forked(gate):
+    """Determine if a gate is forked.
+    
+    Args:
+        gate (pyquil.quil.Gate): The gate that should be checked
+    
+    Returns:
+        bool: True if the gate is forked, False otherwise
+    """
     return "FORKED" in gate.modifiers
 
 
 def _is_inverted(gate):
+    """Determine if a gate is inverted.
+    
+    Args:
+        gate (pyquil.quil.Gate): The gate that should be checked
+    
+    Returns:
+        bool: True if the gate is inverted, False otherwise
+    """
     return gate.modifiers.count("DAGGER") % 2 == 1
 
 
 def _is_gate(instruction):
+    """Determine if an instruction is a gate.
+    
+    Args:
+        instruction (pyquil.quil.AbstractInstruction): The instruction that should be checked
+    
+    Returns:
+        bool: True if the instruction is a gate, False otherwise
+    """
     return isinstance(instruction, pyquil.quil.Gate)
 
 
 def _is_declaration(instruction):
+    """Determine if an instruction is a declaration.
+    
+    Args:
+        instruction (pyquil.quil.AbstractInstruction): The instruction that should be checked
+    
+    Returns:
+        bool: True if the instruction is a declaration, False otherwise
+    """
     return isinstance(instruction, pyquil.quil.Declare)
 
 
 def _is_measurement(instruction):
+    """Determine if an instruction is a measurement.
+    
+    Args:
+        instruction (pyquil.quil.AbstractInstruction): The instruction that should be checked
+    
+    Returns:
+        bool: True if the instruction is a measurement, False otherwise
+    """
     return isinstance(instruction, pyquil.quil.Measurement)
 
 
 def _get_qubit_index(qubit):
+    """Return the index of the given qubit.
+
+    This function accepts qubit instances and integers and returns
+    the integer index that is associated with the qubit.
+    
+    Args:
+        qubit (Union[pyquil.quilatom.Qubit, int]): The qubit whose index shall be determined
+    
+    Returns:
+        int: The qubit indexs
+    """
     if isinstance(qubit, int):
         return qubit
 
@@ -133,6 +243,15 @@ def _get_qubit_index(qubit):
 
 
 def _qubits_to_wires(qubits, qubit_to_wire_map):
+    """Transform the given qubits with the given map between qubits and wires.
+    
+    Args:
+        qubits (Union[Sequence[int], int]): The qubit(s) for which the wires shall be determined
+        qubit_to_wire_map (Dict[int, int]): The map between qubits and wires
+    
+    Returns:
+        Union[Sequence[int], int]: The wire(s) corresponding to the given qubit(s)
+    """
     if isinstance(qubits, Sequence):
         return [qubit_to_wire_map[_get_qubit_index(qubit)] for qubit in qubits]
 
