@@ -792,6 +792,7 @@ class TestQuilConverter:
             assert np.array_equal(converted.params, expected.params)
 
     def test_convert_simple_program_with_parameters(self):
+        """Test that a simple parametrized program is properly converted."""
         quil_str = textwrap.dedent(
             """
             DECLARE alpha REAL[1]
@@ -835,6 +836,7 @@ class TestQuilConverter:
             assert converted.params == expected.params
 
     def test_convert_program_with_parameters_and_measurements(self):
+        """Test that a program with parameters and measurements is properly converted."""
         quil_str = textwrap.dedent(
             """
             DECLARE alpha REAL[1]
@@ -882,6 +884,7 @@ class TestQuilConverter:
             assert converted.params == expected.params
 
     def test_convert_program_with_defgates(self):
+        """Test that a program with defined gates is properly converted."""
         quil_str = textwrap.dedent(
             """
             DEFGATE SQRT-X:
@@ -920,7 +923,10 @@ class TestQuilConverter:
 
 
 class TestQuilFileConverter:
+    """Test that quil files are properly converted."""
+
     def test_convert_simple_program(self):
+        """Test that a simple program in a quil file is properly converted."""
         cur_dir = os.path.dirname(os.path.abspath(__file__))
 
         with OperationRecorder() as rec:
@@ -948,7 +954,10 @@ class TestQuilFileConverter:
 
 
 class TestInspectionProperties:
+    """Test that the inspection properties of ProgramLoader return the expected values."""
+
     def test_inspection(self):
+        """Test the combined inspection properties."""
         quil_str = textwrap.dedent(
             """
             DECLARE alpha REAL[1]
@@ -991,6 +1000,7 @@ class TestInspectionProperties:
         assert loader.defined_gate_names[0] == "SQRT-X"
 
     def test_str(self):
+        """Test that the string representation of ProgramLoader is correct."""
         quil_str = textwrap.dedent(
             """
             DECLARE alpha REAL[1]
@@ -1020,7 +1030,10 @@ class TestInspectionProperties:
 
 
 class TestIntegration:
+    """Test that the program loader integrates properly with PennyLane."""
+
     def test_load_program_via_entry_point(self):
+        """Test that a pyquil Program instance can be loaded via the load entrypoint."""
         program = pyquil.Program()
 
         program += g.H(0)
@@ -1056,6 +1069,7 @@ class TestIntegration:
             assert converted.params == expected.params
 
     def test_load_quil_via_entry_point(self):
+        """Test that a quil string can be loaded via the load entrypoint."""
         quil_str = textwrap.dedent(
             """
             H 0
@@ -1093,6 +1107,7 @@ class TestIntegration:
             assert converted.params == expected.params
 
     def test_load_quil_file_via_entry_point(self):
+        """Test that a quil file can be loaded via the load entrypoint."""
         cur_dir = os.path.dirname(os.path.abspath(__file__))
 
         with OperationRecorder() as rec:
@@ -1120,6 +1135,7 @@ class TestIntegration:
 
     @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
     def test_program_in_qnode(self, angle):
+        """Test how a simple program is used inside a QNode."""
         program = pyquil.Program()
 
         delta = program.declare("delta", "REAL")
@@ -1147,6 +1163,7 @@ class TestIntegration:
 
     @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
     def test_quil_in_qnode(self, angle):
+        """Test how a simple quil string is used inside a QNode."""
         quil_str = textwrap.dedent(
             """
             DECLARE delta REAL[1]
@@ -1175,6 +1192,7 @@ class TestIntegration:
 
     @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
     def test_differentiation_in_qnode(self, angle):
+        """Test a quil string used in a QNode can be differentiated."""
         quil_str = textwrap.dedent(
             """
             DECLARE delta REAL[1]
