@@ -175,7 +175,8 @@ class PSWAP(Operation):
     def decomposition(phi, wires):
         return [
             qml.SWAP(wires=wires),
-            qml.PhaseShift(phi, wires=[wires[0]]),
+            qml.CNOT(wires=wires),
             qml.PhaseShift(phi, wires=[wires[1]]),
-            CPHASE(phi, wires=wires),
-        ]
+            qml.CNOT(wires=wires),
+        ] 
+        
