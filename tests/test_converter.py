@@ -1,3 +1,6 @@
+import os
+import textwrap
+
 import numpy as np
 import pennylane as qml
 import pyquil
@@ -5,8 +8,6 @@ import pyquil.gates as g
 import pytest
 from pennylane.utils import OperationRecorder
 from pennylane_forest.converter import *
-import textwrap
-import os
 
 
 class TestProgramConverter:

@@ -1,12 +1,11 @@
+import warnings
 from collections.abc import Sequence
-import numpy as np
 
+import numpy as np
 import pennylane as qml
 import pennylane_forest as plf
 import pyquil
 import pyquil.gates as g
-
-import warnings
 
 pyquil_inv_operation_map = {
     "I": qml.Identity,
