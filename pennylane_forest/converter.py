@@ -301,6 +301,7 @@ class ParametrizedQubitUnitary:
     Args:
         matrix (np.array): The unitary gate matrix
     """
+
     def __init__(self, matrix):
         self.matrix = matrix
 
@@ -325,6 +326,7 @@ class ProgramLoader:
     Args:
         program (pyquil.quil.Program): The pyquil Program instance that should be loaded
     """
+
     _matrix_dictionary = pyquil.gate_matrices.QUANTUM_GATES
 
     def __init__(self, program):
@@ -357,7 +359,7 @@ class ProgramLoader:
             instruction for instruction in self.program.instructions if _is_declaration(instruction)
         ]
 
-    def _load_measurements(self):        
+    def _load_measurements(self):
         """Extract the measurements of the pyquil Program."""
         self._measurements = [
             instruction for instruction in self.program.instructions if _is_measurement(instruction)
