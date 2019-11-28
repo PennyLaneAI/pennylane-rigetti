@@ -360,12 +360,12 @@ class ProgramLoader:
 
     def _load_measurements(self):
         """Extract the measurements of the pyquil Program."""
-        self._measurements = [
+        measurements = [
             instruction for instruction in self.program.instructions if _is_measurement(instruction)
         ]
 
         self._measurement_variable_names = set(
-            [measurement.classical_reg.name for measurement in self._measurements]
+            [measurement.classical_reg.name for measurement in measurements]
         )
 
     def _is_defined_gate(self, gate):
