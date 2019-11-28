@@ -232,7 +232,7 @@ def _get_qubit_index(qubit):
         qubit (Union[pyquil.quilatom.Qubit, int]): The qubit whose index shall be determined
     
     Returns:
-        int: The qubit indexs
+        int: The qubit index
     """
     if isinstance(qubit, int):
         return qubit
