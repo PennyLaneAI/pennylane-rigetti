@@ -137,7 +137,8 @@ class TestProgramConverter:
         program += pyquil_operation
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            loader = load_program(program)
+            loader(wires=range(len(loader.defined_qubits)))
 
         assert rec.queue[0].name == expected_pl_operation.name
         assert rec.queue[0].wires == expected_pl_operation.wires
@@ -157,7 +158,7 @@ class TestProgramConverter:
         program += g.RZ(0.34, 1)
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            load_program(program)(wires=range(5))
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -204,7 +205,7 @@ class TestProgramConverter:
         }
 
         with OperationRecorder() as rec:
-            load_program(program)(variable_map=variable_map)
+            load_program(program)(wires=range(2), variable_map=variable_map)
 
         expected_queue = [
             qml.Hadamard(0),
@@ -250,7 +251,7 @@ class TestProgramConverter:
         }
 
         with OperationRecorder() as rec:
-            load_program(program)(variable_map=variable_map)
+            load_program(program)(wires=range(2), variable_map=variable_map)
 
         expected_queue = [
             qml.Hadamard(0),
@@ -335,7 +336,7 @@ class TestProgramConverter:
         program += g.RZ(0.34, 1)
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            load_program(program)(wires=range(5))
 
         expected_queue = [
             qml.Hadamard(0),
@@ -366,7 +367,7 @@ class TestProgramConverter:
         program += g.X(3).controlled(4).controlled(1)
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            load_program(program)(wires=range(6))
 
         expected_queue = [
             qml.RZ(0.34, wires=[1]),
@@ -401,7 +402,7 @@ class TestProgramConverter:
         program += g.T(2).controlled(1).controlled(0)
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            load_program(program)(wires=range(3))
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -435,7 +436,7 @@ class TestProgramConverter:
         program += g.X(0).dagger().controlled(4).dagger().dagger().controlled(1).dagger()
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            load_program(program)(wires=range(5))
 
         expected_queue = [
             plf.ops.CCNOT(wires=[2, 0, 1]),
@@ -485,7 +486,7 @@ class TestProgramConverter:
         program += g.CNOT(2, 0)
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            load_program(program)(wires=range(3))
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -531,7 +532,7 @@ class TestProgramConverter:
         program += g.RX(0.4, 0)
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            load_program(program)(wires=range(3))
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -564,7 +565,7 @@ class TestProgramConverter:
         program += g.CNOT(0, 1)
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            load_program(program)(wires=range(2))
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -599,7 +600,7 @@ class TestProgramConverter:
         program += g.CNOT(0, 1)
 
         with OperationRecorder() as rec:
-            load_program(program)()
+            load_program(program)(wires=range(3))
 
         expected_queue = [
             qml.CNOT(wires=[0, 1]),
@@ -626,7 +627,7 @@ class TestProgramConverter:
             qml.DeviceError,
             match="Forked gates can not be imported into PennyLane, as this functionality is not supported",
         ):
-            load_program(program)()
+            load_program(program)(wires=range(3))
 
 
 class TestQuilConverter:
@@ -648,7 +649,7 @@ class TestQuilConverter:
         )
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)()
+            load_quil(quil_str)(wires=range(5))
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -689,11 +690,7 @@ class TestQuilConverter:
         flag = 0.0
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)(variable_map={"flag_register": flag})
-
-        # The wires should be assigned as
-        # 0  1  2  3  7
-        # 0  1  2  3  4
+            load_quil(quil_str)(wires=[0], variable_map={"flag_register": flag})
 
         expected_queue = [
             qml.PauliX(0),
@@ -731,7 +728,7 @@ class TestQuilConverter:
         )
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)()
+            load_quil(quil_str)(wires=range(3))
 
         expected_queue = [
             qml.Identity(wires=[0]),
@@ -766,7 +763,7 @@ class TestQuilConverter:
         )
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)()
+            load_quil(quil_str)(wires=range(5))
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -818,7 +815,7 @@ class TestQuilConverter:
         }
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)(variable_map=variable_map)
+            load_quil(quil_str)(wires=range(2), variable_map=variable_map)
 
         expected_queue = [
             qml.Hadamard(0),
@@ -866,7 +863,7 @@ class TestQuilConverter:
         }
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)(variable_map=variable_map)
+            load_quil(quil_str)(wires=range(2), variable_map=variable_map)
 
         expected_queue = [
             qml.Hadamard(0),
@@ -905,7 +902,7 @@ class TestQuilConverter:
         c_sqrt_x[2:, 2:] = sqrt_x
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)()
+            load_quil(quil_str)(wires=range(2))
 
         expected_queue = [
             qml.Hadamard(0),
@@ -930,7 +927,7 @@ class TestQuilFileConverter:
         cur_dir = os.path.dirname(os.path.abspath(__file__))
 
         with OperationRecorder() as rec:
-            load_quil_from_file(os.path.join(cur_dir, "simple_program.quil"))()
+            load_quil_from_file(os.path.join(cur_dir, "simple_program.quil"))(wires=range(5))
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -1048,7 +1045,7 @@ class TestIntegration:
         program += g.RZ(0.34, 1)
 
         with OperationRecorder() as rec:
-            qml.load(program, format="pyquil_program")()
+            qml.load(program, format="pyquil_program")(wires=range(5))
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -1086,7 +1083,7 @@ class TestIntegration:
         )
 
         with OperationRecorder() as rec:
-            qml.load(quil_str, format="quil")()
+            qml.load(quil_str, format="quil")(wires=range(5))
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -1113,7 +1110,9 @@ class TestIntegration:
         cur_dir = os.path.dirname(os.path.abspath(__file__))
 
         with OperationRecorder() as rec:
-            qml.load(os.path.join(cur_dir, "simple_program.quil"), format="quil_file")()
+            qml.load(os.path.join(cur_dir, "simple_program.quil"), format="quil_file")(
+                wires=range(5)
+            )
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -1150,7 +1149,7 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(a):
-            loader({delta: a})
+            loader(wires=[0, 1], variable_map={delta: a})
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
@@ -1179,7 +1178,7 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(a):
-            loader({"delta": a})
+            loader(wires=[0, 1], variable_map={"delta": a})
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
@@ -1208,7 +1207,7 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(a):
-            loader({"delta": a})
+            loader(wires=[0, 1], variable_map={"delta": a})
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 

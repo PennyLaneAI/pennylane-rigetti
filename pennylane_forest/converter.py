@@ -529,36 +529,40 @@ class ProgramLoader:
 
             self._parametrized_gates.append(parametrized_gate)
 
-    def template(self, variable_map={}, wires=None):
+    def template(self, wires, variable_map={}):
         """Executes the template extracted from the pyquil Program.
         
         Args:
+            wires (Sequence[int]): The wires on which the template shall be applied. 
             variable_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
                 map that assigns values to variables. Defaults to {}.
-            wires (Sequence[int], optional): The wires on which the template shall be applied. 
-                Defaults to ``range(N)`` where ``N`` is the number of qubits.
-        """
-        if not wires:
-            wires = range(len(self.qubits))
 
+        Returns:
+            List[qml.Operation]: A list of all applied gates
+        """
         variable_map = _normalize_variable_map(variable_map)
 
         qubit_to_wire_map = self._load_qubit_to_wire_map(wires)
         self._check_variable_map(variable_map)
 
+        applied_gates = []
         for parametrized_gate in self._parametrized_gates:
-            parametrized_gate.instantiate(variable_map, qubit_to_wire_map)
+            applied_gates.append(parametrized_gate.instantiate(variable_map, qubit_to_wire_map))
 
-    def __call__(self, variable_map={}, wires=None):
+        return applied_gates
+
+    def __call__(self, wires, variable_map={}):
         """Executes the template extracted from the pyquil Program.
         
         Args:
+            wires (Sequence[int]): The wires on which the template shall be applied.
             variable_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
                 map that assigns values to variables. Defaults to {}.
-            wires (Sequence[int], optional): The wires on which the template shall be applied. 
-                Defaults to ``range(N)`` where ``N`` is the number of qubits.
+
+        Returns:
+            List[qml.Operation]: A list of all applied gates
         """
-        self.template(variable_map, wires)
+        return self.template(wires, variable_map)
 
     def __str__(self):
         """Give the string representation of the ProgramLoader.
