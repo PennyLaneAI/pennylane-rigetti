@@ -198,14 +198,14 @@ class TestProgramConverter:
 
         a, b, c = 0.1, 0.2, 0.3
 
-        variable_map = {
+        parameter_map = {
             "alpha": a,
             "beta": b,
             "gamma": c,
         }
 
         with OperationRecorder() as rec:
-            load_program(program)(wires=range(2), variable_map=variable_map)
+            load_program(program)(wires=range(2), parameter_map=parameter_map)
 
         expected_queue = [
             qml.Hadamard(0),
@@ -243,7 +243,7 @@ class TestProgramConverter:
 
         a, b, c, d = 0.1, 0.2, 0.3, 0.4
 
-        variable_map = {
+        parameter_map = {
             "alpha": a,
             beta: b,
             gamma: c,
@@ -251,7 +251,7 @@ class TestProgramConverter:
         }
 
         with OperationRecorder() as rec:
-            load_program(program)(wires=range(2), variable_map=variable_map)
+            load_program(program)(wires=range(2), parameter_map=parameter_map)
 
         expected_queue = [
             qml.Hadamard(0),
@@ -690,7 +690,7 @@ class TestQuilConverter:
         flag = 0.0
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)(wires=[0], variable_map={"flag_register": flag})
+            load_quil(quil_str)(wires=[0], parameter_map={"flag_register": flag})
 
         expected_queue = [
             qml.PauliX(0),
@@ -808,14 +808,14 @@ class TestQuilConverter:
 
         a, b, c = 0.1, 0.2, 0.3
 
-        variable_map = {
+        parameter_map = {
             "alpha": a,
             "beta": b,
             "gamma": c,
         }
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)(wires=range(2), variable_map=variable_map)
+            load_quil(quil_str)(wires=range(2), parameter_map=parameter_map)
 
         expected_queue = [
             qml.Hadamard(0),
@@ -856,14 +856,14 @@ class TestQuilConverter:
 
         a, b, c = 0.1, 0.2, 0.3
 
-        variable_map = {
+        parameter_map = {
             "alpha": a,
             "beta": b,
             "gamma": c,
         }
 
         with OperationRecorder() as rec:
-            load_quil(quil_str)(wires=range(2), variable_map=variable_map)
+            load_quil(quil_str)(wires=range(2), parameter_map=parameter_map)
 
         expected_queue = [
             qml.Hadamard(0),
@@ -1149,7 +1149,7 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(a):
-            loader(wires=[0, 1], variable_map={delta: a})
+            loader(wires=[0, 1], parameter_map={delta: a})
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
@@ -1178,7 +1178,7 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(a):
-            loader(wires=[0, 1], variable_map={"delta": a})
+            loader(wires=[0, 1], parameter_map={"delta": a})
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
@@ -1207,7 +1207,7 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(a):
-            loader(wires=[0, 1], variable_map={"delta": a})
+            loader(wires=[0, 1], parameter_map={"delta": a})
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
