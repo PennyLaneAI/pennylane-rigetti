@@ -59,11 +59,11 @@ def _direct_sum(A, B):
     Returns:
         np.array: The direct sum of the two input arrays
     """
-    sum = np.zeros(np.add(A.shape, B.shape), dtype=A.dtype)
-    sum[: A.shape[0], : A.shape[1]] = A
-    sum[A.shape[0] :, A.shape[1] :] = B
+    sum_matrix = np.zeros(np.add(A.shape, B.shape), dtype=A.dtype)
+    sum_matrix[: A.shape[0], : A.shape[1]] = A
+    sum_matrix[A.shape[0] :, A.shape[1] :] = B
 
-    return sum
+    return sum_matrix
 
 
 def _controlled_matrix(op):
