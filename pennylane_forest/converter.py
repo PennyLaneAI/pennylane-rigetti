@@ -46,8 +46,6 @@ _control_map = {
     "PHASE": "CPHASE",
 }
 
-_matrix_dictionary = pyquil.gate_matrices.QUANTUM_GATES
-
 
 def _direct_sum(A, B):
     """Return the direct sums of two arrays.
