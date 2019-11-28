@@ -75,7 +75,7 @@ def _controlled_matrix(op):
     
     Returns:
         np.array: Array representing the controlled operations. If the input
-                  array has shape (N, N) the output shape is (2*N, 2*N).
+        array has shape (N, N) the output shape is (2*N, 2*N).
     """
     return _direct_sum(np.eye(op.shape[0], dtype=op.dtype), op)
 
