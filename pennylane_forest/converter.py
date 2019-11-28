@@ -83,8 +83,8 @@ def _controlled_matrix(op):
 def _resolve_gate(gate):
     """Resolve the given pyquil Gate as far as possible.
 
-    For example, the gate `CONTROLLED CONTROLLED X` will be resolved to `CCNOT`. 
-    The gate `CONTROLLED CONTROLLED RX(0.3)` will be resolved to `CONTROLLED CRX(0.3)`.
+    For example, the gate ``CONTROLLED CONTROLLED X`` will be resolved to ``CCNOT``. 
+    The gate ``CONTROLLED CONTROLLED RX(0.3)`` will be resolved to ``CONTROLLED CRX(0.3)``.
     
     Args:
         gate (pyquil.quil.Gate): The gate that should be resolved
@@ -527,7 +527,7 @@ class ProgramLoader:
             variable_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
                 map that assigns values to variables. Defaults to {}.
             wires (Sequence[int], optional): The wires on which the template shall be applied. 
-                Defaults to `range(N)` where `N` is the number of qubits.
+                Defaults to ``range(N)`` where ``N`` is the number of qubits.
         """
         if not wires:
             wires = range(len(self.qubits))
@@ -547,7 +547,7 @@ class ProgramLoader:
             variable_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
                 map that assigns values to variables. Defaults to {}.
             wires (Sequence[int], optional): The wires on which the template shall be applied. 
-                Defaults to `range(N)` where `N` is the number of qubits.
+                Defaults to ``range(N)`` where ``N`` is the number of qubits.
         """
         self.template(variable_map, wires)
 
@@ -569,7 +569,7 @@ def load_program(program: pyquil.Program):
     classical control flow and measurements).
 
     Every variable that is present in the Program and that is not used as the target
-    register of a measurement has to be provided in the `variable_map` of the template. 
+    register of a measurement has to be provided in the ``variable_map`` of the template. 
     
     Args:
         program (pyquil.Program): The program that should be loaded
@@ -590,7 +590,7 @@ def load_quil(quil_str: str):
     classical control flow and measurements).
 
     Every variable that is present in the Program and that is not used as the target
-    register of a measurement has to be provided in the `variable_map` of the template. 
+    register of a measurement has to be provided in the ``variable_map`` of the template. 
     
     Args:
         quil_str (str): The program that should be loaded
@@ -611,7 +611,7 @@ def load_quil_from_file(file_path: str):
     classical control flow and measurements).
 
     Every variable that is present in the Program and that is not used as the target
-    register of a measurement has to be provided in the `variable_map` of the template. 
+    register of a measurement has to be provided in the ``variable_map`` of the template. 
     
     Args:
         file_path (str): The path to the quil file that should be loaded
