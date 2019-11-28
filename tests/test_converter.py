@@ -999,6 +999,8 @@ class TestInspectionProperties:
 
         assert loader.defined_gate_names[0] == "SQRT-X"
 
+        assert loader.defined_qubits == [0, 1, 2, 3, 7]
+
     def test_str(self):
         """Test that the string representation of ProgramLoader is correct."""
         quil_str = textwrap.dedent(
