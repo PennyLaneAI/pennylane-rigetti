@@ -450,6 +450,15 @@ class ProgramLoader:
         return self.program.defined_gates
 
     @property
+    def defined_qubits(self):
+        """The qubit indices defined in the pyquil Program.
+        
+        Returns:
+            List[int]: The qubit indices defined in the pyquil Program
+        """
+        return list(self.program.qubits)
+
+    @property
     def defined_gate_names(self):
         """The names of the custom gates defined in the pyquil Program.
 
