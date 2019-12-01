@@ -527,17 +527,20 @@ class ProgramLoader:
 
             self._parametrized_gates.append(parametrized_gate)
 
-    def template(self, wires, parameter_map={}):
+    def template(self, wires, parameter_map=None):
         """Executes the template extracted from the pyquil Program.
         
         Args:
             wires (Sequence[int]): The wires on which the template shall be applied. 
             parameter_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
-                map that assigns values to variables. Defaults to {}.
+                map that assigns values to variables. Defaults to an empty dictionary.
 
         Returns:
             List[qml.Operation]: A list of all applied gates
         """
+        if parameter_map is None:
+            parameter_map = {}
+
         parameter_map = _normalize_parameter_map(parameter_map)
 
         qubit_to_wire_map = self._load_qubit_to_wire_map(wires)
@@ -549,13 +552,13 @@ class ProgramLoader:
 
         return applied_gates
 
-    def __call__(self, wires, parameter_map={}):
+    def __call__(self, wires, parameter_map=None):
         """Executes the template extracted from the pyquil Program.
         
         Args:
             wires (Sequence[int]): The wires on which the template shall be applied.
             parameter_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
-                map that assigns values to variables. Defaults to {}.
+                map that assigns values to variables. Defaults to an empty dictionary.
 
         Returns:
             List[qml.Operation]: A list of all applied gates
