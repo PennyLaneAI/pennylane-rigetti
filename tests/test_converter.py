@@ -222,6 +222,28 @@ class TestProgramConverter:
             assert converted.wires == expected.wires
             assert converted.params == expected.params
 
+    def test_parameter_not_given_error(self):
+        """Test that the correct error is raised if a parameter is not given."""
+        program = pyquil.Program()
+
+        alpha = program.declare("alpha", "REAL")
+        beta = program.declare("beta", "REAL")
+
+        program += g.H(0)
+        program += g.CNOT(0, 1)
+        program += g.RX(alpha, 1)
+        program += g.RZ(beta, 1)
+
+        a = 0.1
+
+        parameter_map = {"alpha": a}
+
+        with pytest.raises(
+            qml.DeviceError,
+            match="The PyQuil program defines a variable .* that is not present in the given variable map",
+        ):
+            load_program(program)(wires=range(2), parameter_map=parameter_map)
+
     def test_convert_simple_program_with_parameters_mixed_keys(self):
         """Test that a parametrized program is properly converted when
         the variable map contains mixed key types."""
