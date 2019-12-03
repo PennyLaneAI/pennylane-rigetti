@@ -5,7 +5,7 @@ import numpy as np
 import pennylane as qml
 import pennylane_forest as plf
 import pyquil
-import pyquil.gates as g
+from pyquil.gates import Gate
 
 pyquil_inv_operation_map = {
     "I": qml.Identity,
@@ -93,7 +93,7 @@ def _resolve_gate(gate):
     for i, modifier in enumerate(gate.modifiers):
         if modifier == "CONTROLLED":
             if gate.name in _control_map:
-                stripped_gate = g.Gate(_control_map[gate.name], gate.params, gate.qubits)
+                stripped_gate = Gate(_control_map[gate.name], gate.params, gate.qubits)
                 stripped_gate.modifiers = gate.modifiers.copy()
                 del stripped_gate.modifiers[i]
 
