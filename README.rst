@@ -71,7 +71,7 @@ We also encourage bug reports, suggestions for new features and enhancements, an
 Authors
 =======
 
-`Josh Izaac <https://github.com/josh146>`_, `Keri A. McKiernan <https://github.com/kmckiern>`_, `M. Sohaib Alam <https://github.com/msohaibalam>`_
+`Josh Izaac <https://github.com/josh146>`_, `Keri A. McKiernan <https://github.com/kmckiern>`_, `M. Sohaib Alam <https://github.com/msohaibalam>`_, `Johannes Jakob Meyer <https://github.com/johannesjmeyer>`_
 
 
 Support
