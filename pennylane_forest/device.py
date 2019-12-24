@@ -184,6 +184,7 @@ class ForestDevice(Device):
     author = "Josh Izaac"
 
     _operation_map = pyquil_operation_map
+    _capabilities = {"model": "qubit"}
 
     def __init__(self, wires, shots=1000, analytic=False,  **kwargs):
         super().__init__(wires, shots)
@@ -225,7 +226,7 @@ class ForestDevice(Device):
 
     def apply(self, operation, wires, par):
         # pylint: disable=attribute-defined-outside-init
-        self.prog += self._operation_map[operation](*par, *wires)
+        self.prog += self._operation_map[operation](*par, *[int(w) for w in wires])
 
         # keep track of the active wires. This is required, as the
         # pyQuil wavefunction simulator creates qubits dynamically.
