@@ -150,3 +150,16 @@ class TestQPUBasic(BaseTest):
 
         assert np.allclose(results[:3], 1.0, atol=2e-2)
         assert np.allclose(results[3:], -1.0, atol=2e-2)
+
+    def test_2q_gate(self):
+        device = np.random.choice(VALID_QPU_LATTICES)
+        dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
+                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig")
+
+        @qml.qnode(dev_qpu)
+        def circuit():
+            qml.RY(np.pi/2, wires=[0])
+            qml.CNOT(wires=[0, 1])
+            return qml.expval(qml.PauliZ(0))
+
+        assert np.allclose(circuit(), 0.0, atol=2e-2)

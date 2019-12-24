@@ -130,9 +130,15 @@ class QPUDevice(QVMDevice):
                 prep_prog = Program()
                 for instr in self.program.instructions:
                     if isinstance(instr, Gate):
-                        # assumes single qubit gates
-                        gate, _ = instr.out().split(' ')
-                        prep_prog += Program(str(gate) + ' ' + str(qubit))
+                        # split gate and wires -- assumes 1q and 2q gates
+                        tup_gate_wires = instr.out().split(' ')
+                        gate = tup_gate_wires[0]
+                        str_instr = str(gate)
+                        # map wires to qubits
+                        for w in tup_gate_wires[1:]:
+                            str_instr += f' {self.wiring[int(w)]}'
+                        prep_prog += Program(str_instr)
+
                 if self.readout_error is not None:
                     prep_prog.define_noisy_readout(qubit, p00=self.readout_error[0],
                                                           p11=self.readout_error[1])
