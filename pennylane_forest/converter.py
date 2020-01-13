@@ -324,7 +324,7 @@ class ProgramLoader:
         program (pyquil.quil.Program): The pyquil Program instance that should be loaded
     """
 
-    _matrix_dictionary = pyquil.gate_matrices.QUANTUM_GATES
+    _matrix_dictionary = pyquil.simulation.matrices.QUANTUM_GATES
 
     def __init__(self, program):
         self.program = program

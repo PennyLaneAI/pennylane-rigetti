@@ -24,7 +24,7 @@ import itertools
 import numpy as np
 
 from pyquil.pyqvm import PyQVM
-from pyquil.numpy_simulator import NumpyWavefunctionSimulator
+from pyquil.simulation import NumpyWavefunctionSimulator
 
 from .wavefunction import WavefunctionDevice
 from ._version import __version__
