@@ -110,6 +110,7 @@ class QVMDevice(ForestDevice):
         elif isinstance(device, str):
             self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
 
+        self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
 
     def pre_rotations(self, observable, wires):
@@ -127,7 +128,6 @@ class QVMDevice(ForestDevice):
         elif observable == "Hadamard":
             # H = Ry(-pi/4)^.Z.Ry(-pi/4)
             self.apply("RY", wires, [-np.pi / 4])
-
 
     def pre_measure(self):
         """Run the QVM"""
@@ -188,6 +188,7 @@ class QVMDevice(ForestDevice):
         return np.var(self.sample(observable, wires, par))
 
     def sample(self, observable, wires, par):
+        wires = [self.wiring[i] for i in wires]
         n = self.shots
 
         if observable == "Identity":
