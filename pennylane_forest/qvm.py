@@ -65,6 +65,8 @@ class QVMDevice(ForestDevice):
         compiler_url (str): the compiler server URL. Can also be set by the environment
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
+        compiler_timeout (int): the time in seconds allowed to run on compiler before
+            resulting in a timeout. Default value is 100 seconds.
     """
     name = "Forest QVM Device"
     short_name = "forest.qvm"
@@ -110,6 +112,8 @@ class QVMDevice(ForestDevice):
         elif isinstance(device, str):
             self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
 
+        self.qc.client.timeout = kwargs.pop("compiler_timeout", 100)
+            
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
         self.compiled = None
@@ -158,7 +162,7 @@ class QVMDevice(ForestDevice):
                 # Perform a change of basis before measuring by applying U^ to the circuit
                 self.apply("QubitUnitary", wires, [U.conj().T])
 
-        prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
+        prag = Program(Pragma("INITIAL_REWIRING", ['"NAIVE"']))
 
         if self.active_reset:
             prag += RESET()
