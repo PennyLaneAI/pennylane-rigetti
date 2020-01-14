@@ -112,6 +112,7 @@ class QVMDevice(ForestDevice):
 
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
+        self.compiled = None
 
     def pre_rotations(self, observable, wires):
         """Apply pre-rotations in the case of observales other than 'Hermitian'"""
@@ -174,8 +175,8 @@ class QVMDevice(ForestDevice):
         if "pyqvm" in self.qc.name:
             bitstring_array = self.qc.run(self.prog)
         else:
-            executable = self.qc.compile(self.prog)
-            bitstring_array = self.qc.run(executable=executable)
+            self.compiled = self.qc.compile(self.prog)
+            bitstring_array = self.qc.run(executable=self.compiled)
 
         self.state = {}
         for i, q in enumerate(qubits):
