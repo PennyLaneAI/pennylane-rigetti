@@ -158,7 +158,7 @@ class QVMDevice(ForestDevice):
                 # Perform a change of basis before measuring by applying U^ to the circuit
                 self.apply("QubitUnitary", wires, [U.conj().T])
 
-        prag = Program()
+        prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
 
         if self.active_reset:
             prag += RESET()
