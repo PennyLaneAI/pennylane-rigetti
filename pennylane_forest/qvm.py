@@ -112,7 +112,7 @@ class QVMDevice(ForestDevice):
         elif isinstance(device, str):
             self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
 
-        self.qc.client.timeout = kwargs.pop("compiler_timeout", 100)
+        #self.qc.client.timeout = kwargs.pop("compiler_timeout", 100)
             
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
