@@ -136,7 +136,7 @@ class QPUDevice(QVMDevice):
                         str_instr = str(gate)
                         # map wires to qubits
                         for w in tup_gate_wires[1:]:
-                            str_instr += f' {self.wiring[int(w)]}'
+                            str_instr += f' {int(w)}'
                         prep_prog += Program(str_instr)
 
                 if self.readout_error is not None:
