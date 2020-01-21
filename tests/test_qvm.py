@@ -8,6 +8,8 @@ import pytest
 
 import pennylane as qml
 from pennylane import numpy as np
+from pennylane.operation import Tensor
+from pennylane.circuit_graph import CircuitGraph
 
 from conftest import BaseTest
 from conftest import I, Z, H, U, U2, test_operation_map
@@ -33,17 +35,26 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        dev.apply("RX", wires=[0], par=[theta])
-        dev.apply("RX", wires=[1], par=[phi])
-        dev.apply("CNOT", wires=[0, 1], par=[])
 
-        O = qml.Identity
-        name = "Identity"
+        O1 = qml.expval(qml.Identity(wires=[0], do_queue=False))
+        O2 = qml.expval(qml.Identity(wires=[1], do_queue=False))
 
-        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        res = dev.pre_measure()
+        circuit_graph = CircuitGraph([
+                                       qml.RX(theta, wires=[0]),
+                                       qml.RX(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ],
+                                         [
+                                        O1,
+                                        O2
+                                        ]
+                                    )
 
-        res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+
+        dev.generate_samples()
+
+        res = np.array([dev.expval(O1), dev.expval(O2)])
 
         # below are the analytic expectation values for this circuit (trace should always be 1)
         self.assertAllAlmostEqual(res, np.array([1, 1]), delta=3 / np.sqrt(shots))
@@ -54,17 +65,26 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        dev.apply("RX", wires=[0], par=[theta])
-        dev.apply("RX", wires=[1], par=[phi])
-        dev.apply("CNOT", wires=[0, 1], par=[])
 
-        O = qml.PauliZ
-        name = "PauliZ"
+        O1 = qml.expval(qml.PauliZ(wires=[0], do_queue=False))
+        O2 = qml.expval(qml.PauliZ(wires=[1], do_queue=False))
 
-        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        res = dev.pre_measure()
+        circuit_graph = CircuitGraph([
+                                       qml.RX(theta, wires=[0]),
+                                       qml.RX(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ],
+                                         [
+                                        O1,
+                                        O2
+                                        ]
+                                    )
 
-        res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+
+        dev.generate_samples()
+
+        res = np.array([dev.expval(O1), dev.expval(O2)])
 
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(
@@ -77,17 +97,24 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        dev.apply("RY", wires=[0], par=[theta])
-        dev.apply("RY", wires=[1], par=[phi])
-        dev.apply("CNOT", wires=[0, 1], par=[])
+        O1 = qml.expval(qml.PauliX(wires=[0]))
+        O2 = qml.expval(qml.PauliX(wires=[1]))
 
-        O = qml.PauliX
-        name = "PauliX"
+        circuit_graph = CircuitGraph([
+                                       qml.RY(theta, wires=[0]),
+                                       qml.RY(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ]
+                                     +
+                                     [O1, O2],
+                                    {}
+                                    )
 
-        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        dev.pre_measure()
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
 
-        res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
+        dev.generate_samples()
+
+        res = np.array([dev.expval(O1), dev.expval(O2)])
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(
             res, np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]), delta=3 / np.sqrt(shots)
@@ -99,18 +126,25 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        dev.apply("RX", wires=[0], par=[theta])
-        dev.apply("RX", wires=[1], par=[phi])
-        dev.apply("CNOT", wires=[0, 1], par=[])
+        O1 = qml.expval(qml.PauliY(wires=[0], do_queue=False))
+        O2 = qml.expval(qml.PauliY(wires=[1], do_queue=False))
 
-        O = qml.PauliY
-        name = "PauliY"
+        circuit_graph = CircuitGraph([
+                                       qml.RX(theta, wires=[0]),
+                                       qml.RX(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ] + 
+                                         [O1, O2],
+                                        {}
+                                    )
 
-        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        dev.pre_measure()
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+
+        dev.generate_samples()
+
+        res = np.array([dev.expval(O1), dev.expval(O2)])
 
         # below are the analytic expectation values for this circuit
-        res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
         self.assertAllAlmostEqual(
             res, np.array([0, -np.cos(theta) * np.sin(phi)]), delta=3 / np.sqrt(shots)
         )
@@ -121,17 +155,24 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        dev.apply("RY", wires=[0], par=[theta])
-        dev.apply("RY", wires=[1], par=[phi])
-        dev.apply("CNOT", wires=[0, 1], par=[])
+        O1 = qml.expval(qml.Hadamard(wires=[0], do_queue=False))
+        O2 = qml.expval(qml.Hadamard(wires=[1], do_queue=False))
 
-        O = qml.Hadamard
-        name = "Hadamard"
+        circuit_graph = CircuitGraph([
+                                       qml.RY(theta, wires=[0]),
+                                       qml.RY(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ] + 
+                                         [O1, O2],
+                                        {}
+                                    )
 
-        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        dev.pre_measure()
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
 
-        res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
+        dev.generate_samples()
+
+        res = np.array([dev.expval(O1), dev.expval(O2)])
+
         # below are the analytic expectation values for this circuit
         expected = np.array(
             [np.sin(theta) * np.sin(phi) + np.cos(theta), np.cos(theta) * np.cos(phi) + np.sin(phi)]
@@ -144,17 +185,23 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        dev.apply("RY", wires=[0], par=[theta])
-        dev.apply("RY", wires=[1], par=[phi])
-        dev.apply("CNOT", wires=[0, 1], par=[])
+        O1 = qml.expval(qml.Hermitian(H, wires=[0], do_queue=False))
+        O2 = qml.expval(qml.Hermitian(H, wires=[1], do_queue=False))
 
-        O = qml.Hermitian
-        name = "Hermitian"
+        circuit_graph = CircuitGraph([
+                                       qml.RY(theta, wires=[0]),
+                                       qml.RY(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ] + 
+                                         [O1, O2],
+                                        {}
+                                    )
 
-        dev._obs_queue = [O(H, wires=[0], do_queue=False), O(H, wires=[1], do_queue=False)]
-        dev.pre_measure()
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
 
-        res = np.array([dev.expval(name, [0], [H]), dev.expval(name, [1], [H])])
+        dev.generate_samples()
+
+        res = np.array([dev.expval(O1), dev.expval(O2)])
 
         # below are the analytic expectation values for this circuit with arbitrary
         # Hermitian observable H
@@ -167,18 +214,10 @@ class TestQVMBasic(BaseTest):
 
         self.assertAllAlmostEqual(res, expected, delta=4 / np.sqrt(shots))
 
-    def test_multi_mode_hermitian_expectation(self, shots, qvm, compiler):
-        """Test that arbitrary multi-mode Hermitian expectation values are correct"""
+    def test_multi_qubit_hermitian_expectation(self, shots, qvm, compiler):
+        """Test that arbitrary multi-qubit Hermitian expectation values are correct"""
         theta = 0.432
         phi = 0.123
-
-        dev = plf.QVMDevice(device="2q-qvm", shots=10 * shots)
-        dev.apply("RY", wires=[0], par=[theta])
-        dev.apply("RY", wires=[1], par=[phi])
-        dev.apply("CNOT", wires=[0, 1], par=[])
-
-        O = qml.Hermitian
-        name = "Hermitian"
 
         A = np.array(
             [
@@ -189,11 +228,23 @@ class TestQVMBasic(BaseTest):
             ]
         )
 
-        dev._obs_queue = [O(A, wires=[0, 1], do_queue=False)]
-        dev.pre_measure()
+        dev = plf.QVMDevice(device="2q-qvm", shots=10 * shots)
+        O1 = qml.expval(qml.Hermitian(A, wires=[0, 1], do_queue=False))
 
-        res = np.array([dev.expval(name, [0, 1], [A])])
+        circuit_graph = CircuitGraph([
+                                       qml.RY(theta, wires=[0]),
+                                       qml.RY(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ] + 
+                                         [O1],
+                                        {}
+                                    )
 
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+
+        dev.generate_samples()
+
+        res = np.array([dev.expval(O1)])
         # below is the analytic expectation value for this circuit with arbitrary
         # Hermitian observable A
         expected = 0.5 * (
@@ -213,17 +264,22 @@ class TestQVMBasic(BaseTest):
         phi = 0.543
         theta = 0.6543
 
+        O1 = qml.var(qml.PauliZ(wires=[0], do_queue=False))
+
+        circuit_graph = CircuitGraph([
+                                       qml.RX(phi, wires=[0]),
+                                       qml.RY(theta, wires=[0]),
+                                       ] + 
+                                         [O1],
+                                        {}
+                                    )
+
         # test correct variance for <Z> of a rotated state
-        dev.apply("RX", wires=[0], par=[phi])
-        dev.apply("RY", wires=[0], par=[theta])
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
 
-        O = qml.PauliZ
-        name = "PauliZ"
+        dev.generate_samples()
 
-        dev._obs_queue = [O(wires=[0], do_queue=False)]
-        dev.pre_measure()
-
-        var = dev.var(name, [0], [])
+        var = np.array([dev.var(O1)])
         expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
 
         self.assertAlmostEqual(var, expected, delta=3 / np.sqrt(shots))
@@ -235,18 +291,24 @@ class TestQVMBasic(BaseTest):
         phi = 0.543
         theta = 0.6543
 
-        # test correct variance for <A> of a rotated state
         A = np.array([[4, -1 + 6j], [-1 - 6j, 2]])
-        dev.apply("RX", wires=[0], par=[phi])
-        dev.apply("RY", wires=[0], par=[theta])
 
-        O = qml.Hermitian
-        name = "Hermitian"
+        O1 = qml.var(qml.Hermitian(A, wires=[0], do_queue=False))
 
-        dev._obs_queue = [O(A, wires=[0], do_queue=False)]
-        dev.pre_measure()
+        circuit_graph = CircuitGraph([
+                                       qml.RX(phi, wires=[0]),
+                                       qml.RY(theta, wires=[0]),
+                                       ] + 
+                                         [O1],
+                                        {}
+                                    )
 
-        var = dev.var("Hermitian", [0], [A])
+        # test correct variance for <A> of a rotated state
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+
+        dev.generate_samples()
+
+        var = np.array([dev.var(O1)])
         expected = 0.5 * (
             2 * np.sin(2 * theta) * np.cos(phi) ** 2
             + 24 * np.sin(phi) * np.cos(phi) * (np.sin(theta) - np.cos(theta))
@@ -297,11 +359,15 @@ class TestQVMBasic(BaseTest):
             # calculate the expected output
             state = apply_unitary(O, 3)
 
-        dev.apply(gate, wires=w, par=p)
-        dev._obs_queue = []
-        dev.pre_measure()
+        print(op)
+        obs = qml.expval(qml.PauliZ(0))
+        circuit_graph = CircuitGraph([
+                                       op
+                                       ] + [obs],
+                                        {}
+                                    )
 
-        res = dev.expval("PauliZ", wires=[0], par=None)
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
         expected = np.vdot(state, np.kron(np.kron(Z, I), I) @ state)
 
         # verify the device is now in the expected state
