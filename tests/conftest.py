@@ -83,7 +83,7 @@ test_operation_map = {
     # the following gates are provided by the PL-Forest plugin
     "S": np.array([[1, 0], [0, 1j]]),
     "T": np.array([[1, 0], [0, np.exp(1j * np.pi / 4)]]),
-    "CCNOT": block_diag(I, I, I, X),
+    "Toffoli": block_diag(I, I, I, X),
     "CPHASE": controlled_phase,
     "CSWAP": block_diag(I, I, SWAP),
     "ISWAP": np.array([[1, 0, 0, 0], [0, 0, 1j, 0], [0, 1j, 0, 0], [0, 0, 0, 1]]),

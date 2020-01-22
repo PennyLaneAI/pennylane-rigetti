@@ -64,7 +64,7 @@ def basis_state(par, *wires):
         list: list of PauliX matrix operators acting on each wire
     """
     # pylint: disable=unused-argument
-    return [X(w) for w, p in enumerate(par) if p == 1]
+    return [X(w) for w, p in zip(wires, par) if p == 1]
 
 
 def qubit_unitary(par, *wires):
@@ -151,7 +151,7 @@ pyquil_operation_map = {
     # the following gates are provided by the PL-Forest plugin
     "S": S,
     "T": T,
-    "CCNOT": CCNOT,
+    "Toffoli": CCNOT,
     "CPHASE": controlled_phase,
     "CSWAP": CSWAP,
     "ISWAP": ISWAP,
@@ -225,7 +225,6 @@ class ForestDevice(QubitDevice):
         return self.prog
 
     def apply_wiring(self, wires):
-        print(wires)
         if hasattr(self, "wiring"):
             return [int(self.wiring[i]) for i in wires]
         else:
@@ -237,7 +236,6 @@ class ForestDevice(QubitDevice):
         # apply the circuit operations
         for i, operation in enumerate(operations):
             # number of wires on device
-            print(operation)
             wires = self.apply_wiring(operation.wires)
             par = operation.parameters
 
@@ -359,7 +357,6 @@ class ForestDevice(QubitDevice):
 
         wires = wires or range(self.num_wires)
         wires = self.apply_wiring(wires)
-        print(self._state)
         prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
         return prob
 
@@ -369,7 +366,7 @@ class ForestDevice(QubitDevice):
         probs[:, 0] = np.arange(2 ** len(wires))
 
         # extract the measured samples
-        res = np.array([self.state[w] for w in wires]).T
+        res = np.array([self._state[w] for w in wires]).T
         for i in res:
             # for each sample, calculate which
             # computational basis state it corresponds to

@@ -7,6 +7,7 @@ import networkx as nx
 import pytest
 
 import pennylane as qml
+from pennylane.circuit_graph import CircuitGraph
 from pennylane import numpy as np
 
 from conftest import BaseTest
@@ -33,17 +34,26 @@ class TestPyQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-pyqvm", shots=shots)
-        dev.apply("RX", wires=[0], par=[theta])
-        dev.apply("RX", wires=[1], par=[phi])
-        dev.apply("CNOT", wires=[0, 1], par=[])
 
-        O = qml.ops.Identity
-        name = "Identity"
+        O1 = qml.expval(qml.Identity(wires=[0]))
+        O2 = qml.expval(qml.Identity(wires=[1]))
 
-        dev._obs_queue = [O(wires=[0], do_queue=False), O(wires=[1], do_queue=False)]
-        res = dev.pre_measure()
+        circuit_graph = CircuitGraph([
+                                       qml.RX(theta, wires=[0]),
+                                       qml.RX(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ],
+                                         [
+                                        O1,
+                                        O2
+                                        ]
+                                    )
 
-        res = np.array([dev.expval(name, [0], []), dev.expval(name, [1], [])])
+        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+
+        dev.generate_samples()
+
+        res = np.array([dev.expval(O1), dev.expval(O2)])
 
         # below are the analytic expectation values for this circuit (trace should always be 1)
         self.assertAllAlmostEqual(res, np.array([1, 1]), delta=3 / np.sqrt(shots))
