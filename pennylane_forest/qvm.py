@@ -126,7 +126,7 @@ class QVMDevice(ForestDevice):
 
         self.prog = prag + self.prog
 
-        qubits = sorted(self.prog.get_qubits())
+        qubits = sorted(self.wiring.values())
         ro = self.prog.declare("ro", "BIT", len(qubits))
         for i, q in enumerate(qubits):
             self.prog.inst(MEASURE(q, ro[i]))
@@ -139,4 +139,3 @@ class QVMDevice(ForestDevice):
         else:
             self.compiled = self.qc.compile(self.prog)
             self._samples = self.qc.run(executable=self.compiled)
-

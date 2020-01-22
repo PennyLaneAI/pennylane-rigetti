@@ -131,7 +131,7 @@ class TestQVMBasic(BaseTest):
                                        qml.RX(theta, wires=[0]),
                                        qml.RX(phi, wires=[1]),
                                        qml.CNOT(wires=[0, 1])
-                                       ] + 
+                                       ] +
                                          [O1, O2],
                                         {}
                                     )
@@ -160,7 +160,7 @@ class TestQVMBasic(BaseTest):
                                        qml.RY(theta, wires=[0]),
                                        qml.RY(phi, wires=[1]),
                                        qml.CNOT(wires=[0, 1])
-                                       ] + 
+                                       ] +
                                          [O1, O2],
                                         {}
                                     )
@@ -190,7 +190,7 @@ class TestQVMBasic(BaseTest):
                                        qml.RY(theta, wires=[0]),
                                        qml.RY(phi, wires=[1]),
                                        qml.CNOT(wires=[0, 1])
-                                       ] + 
+                                       ] +
                                          [O1, O2],
                                         {}
                                     )
@@ -233,7 +233,7 @@ class TestQVMBasic(BaseTest):
                                        qml.RY(theta, wires=[0]),
                                        qml.RY(phi, wires=[1]),
                                        qml.CNOT(wires=[0, 1])
-                                       ] + 
+                                       ] +
                                          [O1],
                                         {}
                                     )
@@ -267,7 +267,7 @@ class TestQVMBasic(BaseTest):
         circuit_graph = CircuitGraph([
                                        qml.RX(phi, wires=[0]),
                                        qml.RY(theta, wires=[0]),
-                                       ] + 
+                                       ] +
                                          [O1],
                                         {}
                                     )
@@ -296,7 +296,7 @@ class TestQVMBasic(BaseTest):
         circuit_graph = CircuitGraph([
                                        qml.RX(phi, wires=[0]),
                                        qml.RY(theta, wires=[0]),
-                                       ] + 
+                                       ] +
                                          [O1],
                                         {}
                                     )

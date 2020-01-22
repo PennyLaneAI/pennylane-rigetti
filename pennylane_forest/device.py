@@ -184,7 +184,7 @@ class ForestDevice(QubitDevice):
     author = "Josh Izaac"
 
     _operation_map = pyquil_operation_map
-    _capabilities = {"model": "qubit"}
+    _capabilities = {"model": "qubit", "tensor_observables": True}
 
     def __init__(self, wires, shots=1000, analytic=False,  **kwargs):
         super().__init__(wires, shots, analytic=analytic)
