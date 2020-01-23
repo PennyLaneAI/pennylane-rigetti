@@ -64,7 +64,7 @@ def basis_state(par, *wires):
         list: list of PauliX matrix operators acting on each wire
     """
     # pylint: disable=unused-argument
-    return [X(w) for w, p in enumerate(par) if p == 1]
+    return [X(w) for w, p in zip(wires, par) if p == 1]
 
 
 def qubit_unitary(par, *wires):
