@@ -257,7 +257,7 @@ class TestQVMBasic(BaseTest):
 
     def test_var(self, shots, qvm, compiler):
         """Tests for variance calculation"""
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
 
         phi = 0.543
         theta = 0.6543

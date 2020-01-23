@@ -253,7 +253,7 @@ class ForestDevice(QubitDevice):
 
     def reset(self):
         self.prog = Program()
-        self.active_wires = set()
+        self._active_wires = set()
         self._state = None
 
     @property
@@ -359,25 +359,3 @@ class ForestDevice(QubitDevice):
         wires = self.apply_wiring(wires)
         prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
         return prob
-
-        # create an array of size [2^len(wires), 2] to store
-        # the resulting probability of each computational basis state
-        probs = np.zeros([2 ** len(wires), 2])
-        probs[:, 0] = np.arange(2 ** len(wires))
-
-        # extract the measured samples
-        res = np.array([self._state[w] for w in wires]).T
-        for i in res:
-            # for each sample, calculate which
-            # computational basis state it corresponds to
-            cb = np.sum(2 ** np.arange(len(wires) - 1, -1, -1) * i)
-            # add a tally for this computational basis state
-            # to our array of basis probabilities
-            probs[cb, 1] += 1
-
-        # sort the probabilities by the first column,
-        # and divide by the number of shots
-        probs = probs[probs[:, 0].argsort()] / self.shots
-        probs = probs[:, 1]
-
-        return probs
