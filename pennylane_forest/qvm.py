@@ -118,49 +118,10 @@ class QVMDevice(ForestDevice):
         self.active_reset = False
         self.compiled = None
 
-    def pre_rotations(self, observable, wires):
-        """Apply pre-rotations in the case of observales other than 'Hermitian'"""
-        if observable == "PauliX":
-            # X = H.Z.H
-            self.apply("Hadamard", wires, [])
-
-        elif observable == "PauliY":
-            # Y = (HS^)^.Z.(HS^) and S^=SZ
-            self.apply("PauliZ", wires, [])
-            self.apply("S", wires, [])
-            self.apply("Hadamard", wires, [])
-
-        elif observable == "Hadamard":
-            # H = Ry(-pi/4)^.Z.Ry(-pi/4)
-            self.apply("RY", wires, [-np.pi / 4])
-
-    def pre_measure(self):
+    def apply(self, operations, rotations=None):
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
-        for e in self.obs_queue:
-            wires = e.wires
-
-            if e.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
-                self.pre_rotations(e.name, wires)
-
-            elif e.name == "Hermitian":
-                # For arbitrary Hermitian matrix H, let U be the unitary matrix
-                # that diagonalises it, and w_i be the eigenvalues.
-                H = e.parameters[0]
-                Hkey = tuple(H.flatten().tolist())
-
-                if Hkey in self._eigs:
-                    # retrieve eigenvectors
-                    U = self._eigs[Hkey]["eigvec"]
-                else:
-                    # store the eigenvalues corresponding to H
-                    # in a dictionary, so that they do not need to
-                    # be calculated later
-                    w, U = np.linalg.eigh(H)
-                    self._eigs[Hkey] = {"eigval": w, "eigvec": U}
-
-                # Perform a change of basis before measuring by applying U^ to the circuit
-                self.apply("QubitUnitary", wires, [U.conj().T])
+        super().apply(operations, rotations)
 
         prag = Program(Pragma("INITIAL_REWIRING", ['"NAIVE"']))
 
@@ -169,80 +130,16 @@ class QVMDevice(ForestDevice):
 
         self.prog = prag + self.prog
 
-        qubits = sorted(self.prog.get_qubits())
+        qubits = sorted(self.wiring.values())
         ro = self.prog.declare("ro", "BIT", len(qubits))
         for i, q in enumerate(qubits):
             self.prog.inst(MEASURE(q, ro[i]))
 
         self.prog.wrap_in_numshots_loop(self.shots)
 
+    def generate_samples(self):
         if "pyqvm" in self.qc.name:
-            bitstring_array = self.qc.run(self.prog)
+            self._samples = self.qc.run(self.prog)
         else:
             self.compiled = self.qc.compile(self.prog)
-            bitstring_array = self.qc.run(executable=self.compiled)
-
-        self.state = {}
-        for i, q in enumerate(qubits):
-            self.state[q] = bitstring_array[:, i]
-
-    def expval(self, observable, wires, par):
-        return np.mean(self.sample(observable, wires, par))
-
-    def var(self, observable, wires, par):
-        return np.var(self.sample(observable, wires, par))
-
-    def sample(self, observable, wires, par):
-        wires = [self.wiring[i] for i in wires]
-        n = self.shots
-
-        if observable == "Identity":
-            return np.ones([n])
-
-        if observable == "Hermitian":
-            Hkey = tuple(par[0].flatten().tolist())
-            eigvals = self._eigs[Hkey]["eigval"]
-            res = np.array([self.state[i] for i in wires]).T
-
-            samples = np.zeros([n])
-
-            for w, b in zip(eigvals, itertools.product([0, 1], repeat=len(wires))):
-                samples = np.where(np.all(res == b, axis=1), w, samples)
-
-            return samples
-
-        return 1 - 2 * self.state[wires[0]]
-
-    def probabilities(self, wires):
-        """Returns the (marginal) probabilities of the quantum state.
-
-        Args:
-            wires (Sequence[int]): sequence of wires to return
-                marginal probabilities for. Wires not provided
-                are traced out of the system.
-
-        Returns:
-            array: array of shape ``[2**len(wires)]`` containing
-            the probabilities of each computational basis state
-        """
-        # create an array of size [2^len(wires), 2] to store
-        # the resulting probability of each computational basis state
-        probs = np.zeros([2 ** len(wires), 2])
-        probs[:, 0] = np.arange(2 ** len(wires))
-
-        # extract the measured samples
-        res = np.array([self.state[w] for w in wires]).T
-        for i in res:
-            # for each sample, calculate which
-            # computational basis state it corresponds to
-            cb = np.sum(2 ** np.arange(len(wires) - 1, -1, -1) * i)
-            # add a tally for this computational basis state
-            # to our array of basis probabilities
-            probs[cb, 1] += 1
-
-        # sort the probabilities by the first column,
-        # and divide by the number of shots
-        probs = probs[probs[:, 0].argsort()] / self.shots
-        probs = probs[:, 1]
-
-        return probs
+            self._samples = self.qc.run(executable=self.compiled)
