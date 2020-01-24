@@ -226,7 +226,12 @@ class ForestDevice(Device):
 
     def apply(self, operation, wires, par):
         # pylint: disable=attribute-defined-outside-init
-        self.prog += self._operation_map[operation](*par, *[int(w) for w in wires])
+        if hasattr(self, "wiring"):
+            qubits = [int(self.wiring[i]) for i in wires]
+        else:
+            qubits = [int(w) for w in wires]
+
+        self.prog += self._operation_map[operation](*par, *qubits)
 
         # keep track of the active wires. This is required, as the
         # pyQuil wavefunction simulator creates qubits dynamically.

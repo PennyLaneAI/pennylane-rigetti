@@ -33,7 +33,7 @@ from pyquil.api._quantum_computer import _get_qvm_with_topology
 from pyquil.gates import MEASURE, RESET
 from pyquil.quil import Pragma, Program
 from pyquil.paulis import sI, sX, sY, sZ
-from pyquil.operator_estimation import ExperimentSetting, TensorProductState, TomographyExperiment, measure_observables, group_experiments
+from pyquil.operator_estimation import ExperimentSetting, TensorProductState, Experiment, measure_observables, group_experiments
 from pyquil.quilbase import Gate
 
 
@@ -136,13 +136,13 @@ class QPUDevice(QVMDevice):
                         str_instr = str(gate)
                         # map wires to qubits
                         for w in tup_gate_wires[1:]:
-                            str_instr += f' {self.wiring[int(w)]}'
+                            str_instr += f' {int(w)}'
                         prep_prog += Program(str_instr)
 
                 if self.readout_error is not None:
                     prep_prog.define_noisy_readout(qubit, p00=self.readout_error[0],
                                                           p11=self.readout_error[1])
-                tomo_expt = TomographyExperiment(settings=d_expt_settings[observable], program=prep_prog)
+                tomo_expt = Experiment(settings=d_expt_settings[observable], program=prep_prog)
                 grouped_tomo_expt = group_experiments(tomo_expt)
                 meas_obs = list(measure_observables(self.qc, grouped_tomo_expt,
                                                     active_reset=self.active_reset,
