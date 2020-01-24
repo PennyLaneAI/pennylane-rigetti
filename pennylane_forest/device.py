@@ -233,7 +233,14 @@ class ForestDevice(QubitDevice):
     def apply(self, operations, rotations=None):
         # pylint: disable=attribute-defined-outside-init
         rotations = rotations or []
-        # apply the circuit operations
+
+        # Storing the active wires
+        if rotations:
+            self._active_wires = ForestDevice.active_wires(operations + rotations)
+        else:
+            self._active_wires = ForestDevice.active_wires(operations)
+
+        # Apply the circuit operations
         for i, operation in enumerate(operations):
             # number of wires on device
             wires = self.apply_wiring(operation.wires)
@@ -245,7 +252,7 @@ class ForestDevice(QubitDevice):
 
             self.prog += self._operation_map[operation.name](*par, *wires)
 
-        # apply the circuit rotations
+        # Apply the circuit rotations
         for operation in rotations:
             wires = self.apply_wiring(operation.wires)
             par = operation.parameters

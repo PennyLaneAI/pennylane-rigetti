@@ -26,7 +26,6 @@ VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not 
 
 class TestQVMBasic(BaseTest):
     """Unit tests for the QVM simulator."""
-
     # pylint: disable=protected-access
 
     def test_identity_expectation(self, shots, qvm, compiler):
@@ -257,7 +256,7 @@ class TestQVMBasic(BaseTest):
 
     def test_var(self, shots, qvm, compiler):
         """Tests for variance calculation"""
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
         phi = 0.543
         theta = 0.6543
@@ -493,6 +492,13 @@ class TestQVMBasic(BaseTest):
         expected = (88*np.sin(theta) + 24*np.sin(2*theta) - 40*np.sin(3*theta)
             + 5*np.cos(theta) - 6*np.cos(2*theta) + 27*np.cos(3*theta) + 6)/32
         assert np.allclose(np.mean(s1), expected, atol=0.1, rtol=0)
+
+    def test_raise_error_if_analytic_true(self, shots):
+        """Test that instantiating a QVMDevice in analytic=True mode raises an error"""
+        with pytest.raises(
+            ValueError, match="QVM device cannot be run in analytic=True mode."
+        ):
+            dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
 
 
 class TestQVMIntegration(BaseTest):

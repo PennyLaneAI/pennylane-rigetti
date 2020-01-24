@@ -79,8 +79,6 @@ class WavefunctionDevice(ForestDevice):
     def apply(self, operations, rotations=None, **kwargs):
         super().apply(operations, rotations)
 
-        # Storing the active wires
-        self._active_wires = self._wires_measured.union(self.active_wires(operations))
         self._state = self.qc.wavefunction(self.prog).amplitudes
 
         # pyQuil uses the convention that the first qubit is the least significant

@@ -139,6 +139,8 @@ class QPUDevice(QVMDevice):
                 if self.readout_error is not None:
                     prep_prog.define_noisy_readout(qubit, p00=self.readout_error[0],
                                                           p11=self.readout_error[1])
+
+                # Currently rotations are carried out into the PauliZ basis
                 tomo_expt = Experiment(settings=d_expt_settings["PauliZ"], program=prep_prog)
                 grouped_tomo_expt = group_experiments(tomo_expt)
                 meas_obs = list(measure_observables(self.qc, grouped_tomo_expt,

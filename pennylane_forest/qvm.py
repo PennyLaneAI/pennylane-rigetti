@@ -80,6 +80,10 @@ class QVMDevice(ForestDevice):
 
         # ignore any 'wires' keyword argument passed to the device
         kwargs.pop("wires", None)
+        analytic = kwargs.get("analytic", False)
+
+        if analytic:
+            raise ValueError("QVM device cannot be run in analytic=True mode.")
 
         # get the number of wires
         if isinstance(device, nx.Graph):
@@ -102,7 +106,7 @@ class QVMDevice(ForestDevice):
                 "a valid QVM quantum computer, or a NetworkX graph object."
             )
 
-        super().__init__(num_wires, shots, **kwargs)
+        super().__init__(num_wires, shots, analytic=analytic, **kwargs)
 
         # get the qc
         if isinstance(device, nx.Graph):

@@ -7,7 +7,6 @@ import pytest
 
 import pennylane as qml
 from pennylane import numpy as np
-from pennylane.circuit_graph import CircuitGraph
 
 from conftest import BaseTest
 from conftest import I, Z, H, U, U2, SWAP, CNOT, U_toffoli, H, test_operation_map
@@ -52,7 +51,7 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.var(qml.PauliZ(wires=[0]))
 
         observables = [O]
-        circuit_graph = CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
         # test correct variance for <Z> of a rotated state
         dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
@@ -65,7 +64,6 @@ class TestWavefunctionBasic(BaseTest):
     def test_var_hermitian(self, tol, qvm):
         """Tests for variance calculation using an arbitrary Hermitian observable"""
         dev = plf.WavefunctionDevice(wires=2)
-        dev._active_wires = {0}
 
         phi = 0.543
         theta = 0.6543
@@ -81,7 +79,7 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.var(qml.Hermitian(H, wires=[0]))
 
         observables = [O]
-        circuit_graph = CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
         dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
         
@@ -124,7 +122,7 @@ class TestWavefunctionBasic(BaseTest):
                 state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
                 w = list(range(dev.num_wires))
 
-            circuit_graph = CircuitGraph([
+            circuit_graph = qml.CircuitGraph([
                                            op(p, wires=w)
                                            ] + [obs],
                                             {}
@@ -144,14 +142,14 @@ class TestWavefunctionBasic(BaseTest):
             state = apply_unitary(O, 3)
             # Creating the circuit graph using a parametrized operation
             if p:
-                circuit_graph = CircuitGraph([
+                circuit_graph = qml.CircuitGraph([
                                                op(*p, wires=w)
                                                ] + [obs],
                                                 {}
                                             )
             # Creating the circuit graph using an operation that take no parameters
             else:
-                circuit_graph = CircuitGraph([
+                circuit_graph = qml.CircuitGraph([
                                                op(wires=w)
                                                ] + [obs],
                                                 {}
@@ -178,12 +176,10 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.sample(qml.PauliZ(0))
 
         observables = [O]
-        circuit_graph = CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
         dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
-        dev._wires_measured = dev.active_wires(circuit_graph.observables)
         dev.generate_samples()
-        
         s1 = dev.sample(O)
 
         # s1 should only contain 1 and -1
@@ -205,13 +201,12 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.sample(qml.Hermitian(A, wires=[0]))
 
         observables = [O]
-        circuit_graph = CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
         dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
 
-        dev._wires_measured = dev.active_wires(circuit_graph.observables)
         dev.generate_samples()
-        
+
         s1 = dev.sample(O)
 
         # s1 should only contain the eigenvalues of
@@ -229,10 +224,8 @@ class TestWavefunctionBasic(BaseTest):
         """Tests if the samples of a multi-qubit Hermitian observable returned by sample have
         the correct values
         """
-        shots = 100000 #1000_000
-        dev = qml.device('default.qubit', wires=2)
-        # dev = plf.WavefunctionDevice(wires=2, shots=shots)
-        # dev = plf.WavefunctionDevice(wires=2, shots=shots)
+        shots = 1000_000
+        dev = plf.WavefunctionDevice(wires=2, shots=shots)
         theta = 0.543
 
         A = np.array([
@@ -251,14 +244,12 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.sample(qml.Hermitian(A, wires=[0, 1]))
 
         observables = [O]
-        circuit_graph = CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
         dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
 
-        dev._wires_measured = dev.active_wires(circuit_graph.observables)
-        print(dev._wires_measured)
         dev.generate_samples()
-        
+
         s1 = dev.sample(O)
 
         # s1 should only contain the eigenvalues of
@@ -269,7 +260,6 @@ class TestWavefunctionBasic(BaseTest):
         # make sure the mean matches the analytic mean
         expected = (88*np.sin(theta) + 24*np.sin(2*theta) - 40*np.sin(3*theta)
             + 5*np.cos(theta) - 6*np.cos(2*theta) + 27*np.cos(3*theta) + 6)/32
-        print(expected)
         assert np.allclose(np.mean(s1), expected, atol=0.1, rtol=0)
 
 
