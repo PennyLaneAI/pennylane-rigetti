@@ -7,7 +7,7 @@ import pytest
 import pyquil
 import pennylane as qml
 from pennylane import numpy as np
-from conftest import BaseTest
+from conftest import BaseTest, QVM_SHOTS
 
 
 log = logging.getLogger(__name__)
@@ -154,7 +154,7 @@ class TestQPUBasic(BaseTest):
     def test_2q_gate(self):
         device = np.random.choice(VALID_QPU_LATTICES)
         dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig")
+                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig", shots=QVM_SHOTS)
 
         @qml.qnode(dev_qpu)
         def circuit():
@@ -167,7 +167,7 @@ class TestQPUBasic(BaseTest):
     def test_2q_gate_pauliz_identity_tensor(self):
         device = np.random.choice(VALID_QPU_LATTICES)
         dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig")
+                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig", shots=QVM_SHOTS)
 
         @qml.qnode(dev_qpu)
         def circuit():
@@ -180,7 +180,7 @@ class TestQPUBasic(BaseTest):
     def test_2q_gate_pauliz_pauliz_tensor(self):
         device = np.random.choice(VALID_QPU_LATTICES)
         dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig")
+                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig", shots=QVM_SHOTS)
 
         @qml.qnode(dev_qpu)
         def circuit():
