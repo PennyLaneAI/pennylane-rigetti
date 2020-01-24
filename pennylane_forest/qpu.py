@@ -96,8 +96,10 @@ class QPUDevice(QVMDevice):
 
         if load_qc:
             self.qc = get_qc(device, as_qvm=False, connection=self.connection)
+            self.qc.compiler.quilc_client.timeout = 100
         else:
             self.qc = get_qc(device, as_qvm=True, connection=self.connection)
+            self.qc.compiler.client.timeout = 100
 
         self.active_reset = active_reset
         self.symmetrize_readout = symmetrize_readout
@@ -109,7 +111,8 @@ class QPUDevice(QVMDevice):
         # Single-qubit observable
         if len(wires) == 1:
             # identify Experiment Settings for each of the possible single-qubit observables
-            wire = wires[0]
+            wire = wires[0][0]
+            
             qubit = self.wiring[wire]
             d_expt_settings = {
                 "Identity": [ExperimentSetting(TensorProductState(), sI(qubit))],
