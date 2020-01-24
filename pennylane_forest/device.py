@@ -225,7 +225,11 @@ class ForestDevice(QubitDevice):
         return self.prog
 
     def apply_wiring(self, wires):
-        """Use the wiring specified for the device if applicable."""
+        """Use the wiring specified for the device if applicable.
+
+        Returns:
+            list: wires as integers corresponding to the wiring if applicable
+        """
         if hasattr(self, "wiring"):
             return [int(self.wiring[i]) for i in wires]
 
