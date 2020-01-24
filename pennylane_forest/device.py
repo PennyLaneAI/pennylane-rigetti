@@ -240,7 +240,7 @@ class ForestDevice(QubitDevice):
         else:
             self._active_wires = ForestDevice.active_wires(operations)
 
-        # apply the circuit operations
+        # Apply the circuit operations
         for i, operation in enumerate(operations):
             # number of wires on device
             wires = self.apply_wiring(operation.wires)
@@ -252,7 +252,7 @@ class ForestDevice(QubitDevice):
 
             self.prog += self._operation_map[operation.name](*par, *wires)
 
-        # apply the circuit rotations
+        # Apply the circuit rotations
         for operation in rotations:
             wires = self.apply_wiring(operation.wires)
             par = operation.parameters

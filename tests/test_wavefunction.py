@@ -64,7 +64,6 @@ class TestWavefunctionBasic(BaseTest):
     def test_var_hermitian(self, tol, qvm):
         """Tests for variance calculation using an arbitrary Hermitian observable"""
         dev = plf.WavefunctionDevice(wires=2)
-        dev._active_wires = {0}
 
         phi = 0.543
         theta = 0.6543

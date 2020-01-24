@@ -58,5 +58,4 @@ class NumpyWavefunctionDevice(ForestDevice):
         # 0 as the rightmost bit). This may change in the future, so in the future this
         # might need to get udpated to be similar to the pre_measure function of
         # pennylane_forest/wavefunction.py
-
         self._state = self.qc.execute(self.prog).wf_simulator.wf.flatten()
