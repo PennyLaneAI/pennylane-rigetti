@@ -12,7 +12,7 @@ from pennylane.operation import Tensor
 from pennylane.circuit_graph import CircuitGraph
 
 from conftest import BaseTest
-from conftest import I, Z, H, U, U2, test_operation_map
+from conftest import I, Z, H, U, U2, test_operation_map, QVM_SHOTS
 
 import pennylane_forest as plf
 
@@ -49,7 +49,7 @@ class TestQVMBasic(BaseTest):
                                         ]
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -77,7 +77,7 @@ class TestQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -107,7 +107,7 @@ class TestQVMBasic(BaseTest):
                                     {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -135,7 +135,7 @@ class TestQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -164,7 +164,7 @@ class TestQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -194,7 +194,7 @@ class TestQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -237,7 +237,7 @@ class TestQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -272,7 +272,7 @@ class TestQVMBasic(BaseTest):
                                     )
 
         # test correct variance for <Z> of a rotated state
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -301,7 +301,7 @@ class TestQVMBasic(BaseTest):
                                     )
 
         # test correct variance for <A> of a rotated state
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -377,7 +377,7 @@ class TestQVMBasic(BaseTest):
                                                 {}
                                             )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -404,7 +404,7 @@ class TestQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -433,7 +433,7 @@ class TestQVMBasic(BaseTest):
                                      {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -477,7 +477,7 @@ class TestQVMBasic(BaseTest):
                                      {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -574,7 +574,7 @@ class TestQVMIntegration(BaseTest):
     def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
         """Test that the wavefunction plugin provides correct result for simple circuit"""
         shots = 100000
-        dev = qml.device("forest.qvm", device=device, shots=shots)
+        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
 
         a = 0.543
         b = 0.123
@@ -589,3 +589,27 @@ class TestQVMIntegration(BaseTest):
             return qml.expval(qml.PauliZ(0))
 
         self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=3 / np.sqrt(shots))
+
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_2q_gate_pauliz_identity_tensor(self, device, qvm, compiler):
+        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
+
+        @qml.qnode(dev)
+        def circuit():
+            qml.RY(np.pi/2, wires=[0])
+            qml.CNOT(wires=[0, 1])
+            return qml.expval(qml.PauliZ(0) @ qml.Identity(1))
+
+        assert np.allclose(circuit(), 0.0, atol=2e-2)
+
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_2q_gate_pauliz_pauliz_tensor(self, device, qvm, compiler):
+        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
+
+        @qml.qnode(dev)
+        def circuit():
+            qml.Hadamard(0)
+            qml.CNOT(wires=[0, 1])
+            return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
+
+        assert np.allclose(circuit(), 1.0, atol=2e-2)

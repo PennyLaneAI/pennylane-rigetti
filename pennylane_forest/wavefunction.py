@@ -76,8 +76,8 @@ class WavefunctionDevice(ForestDevice):
         self.qc = WavefunctionSimulator(connection=self.connection)
         self._state = None
 
-    def apply(self, operations, rotations=None, **kwargs):
-        super().apply(operations, rotations)
+    def apply(self, operations, **kwargs):
+        super().apply(operations, **kwargs)
 
         self._state = self.qc.wavefunction(self.prog).amplitudes
 

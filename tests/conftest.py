@@ -18,7 +18,7 @@ from pyquil.api._qvm import QVMNotRunning
 
 # defaults
 TOLERANCE = 1e-5
-QVM_SHOTS = 10000
+QVM_SHOTS = 100000
 
 
 # pyquil specific global variables and functions

@@ -235,9 +235,9 @@ class ForestDevice(QubitDevice):
 
         return [int(w) for w in wires]
 
-    def apply(self, operations, rotations=None):
+    def apply(self, operations, **kwargs):
         # pylint: disable=attribute-defined-outside-init
-        rotations = rotations or []
+        rotations = kwargs.get("rotations", [])
 
         # Storing the active wires
         self._active_wires = ForestDevice.active_wires(operations + rotations)
