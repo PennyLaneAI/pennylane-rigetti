@@ -500,6 +500,9 @@ class TestQVMBasic(BaseTest):
         ):
             dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
 
+class TestParametricCompilation(BaseTest):
+    """Test that parametric comiplation works fine and the same program only compiles once."""
+
 
 class TestQVMIntegration(BaseTest):
     """Test the QVM simulator works correctly from the PennyLane frontend."""

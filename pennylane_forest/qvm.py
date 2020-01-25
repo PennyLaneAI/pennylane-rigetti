@@ -71,6 +71,7 @@ class QVMDevice(ForestDevice):
     observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
     def __init__(self, device, *, shots=1024, noisy=False, **kwargs):
+        self._lookup_table = {}
         self._eigs = {}
 
         if shots <= 0:
@@ -116,13 +117,13 @@ class QVMDevice(ForestDevice):
 
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
-        self.compiled = None
 
-    def apply(self, operations, rotations=None):
+    def apply(self, operations, rotations=None, **kwargs):
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
         super().apply(operations, rotations)
 
+        self._circuit_hash = kwargs.pop("hash", None)
         prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
 
         if self.active_reset:
@@ -141,5 +142,9 @@ class QVMDevice(ForestDevice):
         if "pyqvm" in self.qc.name:
             self._samples = self.qc.run(self.prog)
         else:
-            self.compiled = self.qc.compile(self.prog)
-            self._samples = self.qc.run(executable=self.compiled)
+            # Store the compiled program with the corresponding hash
+            if self.circuit_hash is not None and self.circuit_hash not in self._lookup_table:
+                self._lookup_table[self.circuit_hash] = self.qc.compile(self.prog)
+
+            compiled_program = self._lookup_table[self.circuit_hash]
+            self._samples = self.qc.run(executable=compiled_program)
