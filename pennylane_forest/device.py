@@ -44,7 +44,7 @@ from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT
 # following gates are not supported by PennyLane
 from pyquil.gates import S, T, CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, CSWAP, ISWAP, PSWAP
 
-from pennylane import QubitDevice, QubitStateVector, BasisState
+from pennylane import QubitDevice
 
 from ._version import __version__
 
@@ -225,20 +225,22 @@ class ForestDevice(QubitDevice):
         return self.prog
 
     def apply_wiring(self, wires):
+        """Use the wiring specified for the device if applicable.
+
+        Returns:
+            list: wires as integers corresponding to the wiring if applicable
+        """
         if hasattr(self, "wiring"):
             return [int(self.wiring[i]) for i in wires]
-        else:
-            return [int(w) for w in wires]
 
-    def apply(self, operations, rotations=None):
+        return [int(w) for w in wires]
+
+    def apply(self, operations, **kwargs):
         # pylint: disable=attribute-defined-outside-init
-        rotations = rotations or []
+        rotations = kwargs.get("rotations", [])
 
         # Storing the active wires
-        if rotations:
-            self._active_wires = ForestDevice.active_wires(operations + rotations)
-        else:
-            self._active_wires = ForestDevice.active_wires(operations)
+        self._active_wires = ForestDevice.active_wires(operations + rotations)
 
         # Apply the circuit operations
         for i, operation in enumerate(operations):
@@ -246,7 +248,7 @@ class ForestDevice(QubitDevice):
             wires = self.apply_wiring(operation.wires)
             par = operation.parameters
 
-            if i > 0 and isinstance(operation, (QubitStateVector, BasisState)):
+            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
                 raise DeviceError("Operation {} cannot be used after other Operations have already been applied "
                                   "on a {} device.".format(operation.name, self.short_name))
 

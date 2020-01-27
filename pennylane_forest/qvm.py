@@ -122,10 +122,10 @@ class QVMDevice(ForestDevice):
         self.active_reset = False
         self.compiled = None
 
-    def apply(self, operations, rotations=None):
+    def apply(self, operations, **kwargs):
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
-        super().apply(operations, rotations)
+        super().apply(operations, **kwargs)
 
         prag = Program(Pragma("INITIAL_REWIRING", ['"NAIVE"']))
 

@@ -21,7 +21,7 @@ class TestDecompositions:
         calculated_matrix = np.eye(4, dtype=complex)
         default_qubit = qml.device("default.qubit", wires=2)
         for gate in decomposition:
-            gate_matrix = default_qubit._get_operator_matrix(gate.name, gate.params)
+            gate_matrix = gate.matrix
 
             if gate.num_wires == 1:
                 if gate.wires[0] == 0:
@@ -44,7 +44,7 @@ class TestDecompositions:
         calculated_matrix = np.eye(4, dtype=complex)
         default_qubit = qml.device("default.qubit", wires=2)
         for gate in decomposition:
-            gate_matrix = default_qubit._get_operator_matrix(gate.name, gate.params)
+            gate_matrix = gate.matrix
 
             if gate.num_wires == 1:
                 if gate.wires[0] == 0:
@@ -66,7 +66,7 @@ class TestDecompositions:
         calculated_matrix = np.eye(4, dtype=complex)
         default_qubit = qml.device("default.qubit", wires=2)
         for gate in decomposition:
-            gate_matrix = default_qubit._get_operator_matrix(gate.name, gate.params)
+            gate_matrix = gate.matrix
 
             if gate.num_wires == 1:
                 if gate.wires[0] == 0:
