@@ -141,9 +141,17 @@ class QVMDevice(ForestDevice):
         if "pyqvm" in self.qc.name:
             self._samples = self.qc.run(self.prog)
         else:
-            # Store the compiled program with the corresponding hash
-            if self.circuit_hash is not None and self.circuit_hash not in self._lookup_table:
-                self._lookup_table[self.circuit_hash] = self.qc.compile(self.prog)
+            # No hash provided, compile the program
+            if self.circuit_hash is None:
+                compiled_program = self.qc.compile(self.prog)
 
-            compiled_program = self._lookup_table[self.circuit_hash]
+            # Store the compiled program with the corresponding hash
+            elif self.circuit_hash not in self._lookup_table:
+                compiled_program = self.qc.compile(self.prog)
+                self._lookup_table[self.circuit_hash] = compiled_program
+
+            # The program has been compiled already
+            else:
+                compiled_program = self._lookup_table[self.circuit_hash]
+
             self._samples = self.qc.run(executable=compiled_program)

@@ -11,6 +11,9 @@ from pennylane import numpy as np
 from pennylane.operation import Tensor
 from pennylane.circuit_graph import CircuitGraph
 
+from pyquil.quil import Pragma, Program
+from pyquil.api._quantum_computer import QuantumComputer
+
 from conftest import BaseTest
 from conftest import I, Z, H, U, U2, test_operation_map, QVM_SHOTS
 
@@ -501,8 +504,90 @@ class TestQVMBasic(BaseTest):
             dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
 
 class TestParametricCompilation(BaseTest):
-    """Test that parametric comiplation works fine and the same program only compiles once."""
+    """Test that parametric compilation works fine and the same program only compiles once."""
 
+    def test_compiled_program_was_stored(self, qvm, monkeypatch):
+        """Test that QVM device stores the compiled program correctly"""
+        dev = qml.device("forest.qvm", device="2q-qvm")
+        theta = 0.432
+        phi = 0.123
+
+        O1 = qml.expval(qml.Identity(wires=[0]))
+        O2 = qml.expval(qml.Identity(wires=[1]))
+
+        circuit_graph = CircuitGraph([
+                                       qml.RX(theta, wires=[0]),
+                                       qml.RX(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ],
+                                         [
+                                        O1,
+                                        O2
+                                        ]
+                                    )
+
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+
+        dev._circuit_hash = circuit_graph.hash
+
+        call_history = []
+
+        with monkeypatch.context() as m:
+            m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
+            m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
+            dev.generate_samples()
+
+        assert dev.circuit_hash in dev._lookup_table
+        assert len(dev._lookup_table.items()) == 1
+        assert len(call_history) == 1
+
+        # Testing that the compile() method was not called
+        # Calling generate_samples with unchanged hash
+        for i in range(6):
+            with monkeypatch.context() as m:
+                m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
+                m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
+                dev.generate_samples()
+
+            assert dev.circuit_hash in dev._lookup_table
+            assert len(dev._lookup_table.items()) == 1
+            assert len(call_history) == 1
+
+    def test_circuit_hash_nonecompiled_program_was_stored(self, qvm, monkeypatch):
+        """Test that QVM device does not store the compiled program if the _circuit_hash
+        attribute is None"""
+        dev = qml.device("forest.qvm", device="2q-qvm")
+        theta = 0.432
+        phi = 0.123
+
+        O1 = qml.expval(qml.Identity(wires=[0]))
+        O2 = qml.expval(qml.Identity(wires=[1]))
+
+        circuit_graph = CircuitGraph([
+                                       qml.RX(theta, wires=[0]),
+                                       qml.RX(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ],
+                                         [
+                                        O1,
+                                        O2
+                                        ]
+                                    )
+
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+
+        dev._circuit_hash = None
+
+        call_history = []
+
+        with monkeypatch.context() as m:
+            m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
+            m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
+            dev.generate_samples()
+
+        assert dev.circuit_hash is None
+        assert len(dev._lookup_table.items()) == 0
+        assert len(call_history) == 1
 
 class TestQVMIntegration(BaseTest):
     """Test the QVM simulator works correctly from the PennyLane frontend."""
@@ -616,3 +701,23 @@ class TestQVMIntegration(BaseTest):
             return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
 
         assert np.allclose(circuit(), 1.0, atol=2e-2)
+
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_compiled_program_was_stored(self, qvm, device):
+        """Test that QVM device stores the compiled program correctly"""
+        dev = qml.device("forest.qvm", device=device)
+
+        def circuit():
+            qml.Hadamard(0)
+            qml.CNOT(wires=[0, 1])
+
+        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
+        obs_list = obs * 6
+
+        qnodes = qml.map(circuit, obs_list, dev)
+
+        for qnode in qnodes:
+            qnode.evaluate([],{})
+            assert dev.circuit_hash in dev._lookup_table
+            assert len(dev._lookup_table.items()) == 1
+
