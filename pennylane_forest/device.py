@@ -45,6 +45,7 @@ from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT
 from pyquil.gates import S, T, CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, CSWAP, ISWAP, PSWAP
 
 from pennylane import QubitDevice
+from pennylane.variable import Variable
 
 from ._version import __version__
 
@@ -184,6 +185,8 @@ class ForestDevice(QubitDevice):
     author = "Josh Izaac"
 
     _operation_map = pyquil_operation_map
+    _parameter_map = {}
+    _parameter_reference_map = {}
     _capabilities = {"model": "qubit", "tensor_observables": True}
 
     def __init__(self, wires, shots=1000, analytic=False,  **kwargs):
@@ -251,6 +254,24 @@ class ForestDevice(QubitDevice):
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
                 raise DeviceError("Operation {} cannot be used after other Operations have already been applied "
                                   "on a {} device.".format(operation.name, self.short_name))
+
+            # Prepare for parametric compilation
+            if self.short_name in {"forest.qvm", "forest.qpu"}:
+                par = []
+                for param in operation.params:
+                    if isinstance(param, Variable):
+                        # Using the idx for each Variable instance
+                        parameter_string = "theta" + str(param.idx)
+                        if parameter_string not in self._parameter_map:
+                            current_ref = self.prog.declare(parameter_string, "REAL")
+                            ForestDevice._parameter_reference_map[parameter_string] = current_ref
+
+                        ForestDevice._parameter_map[parameter_string] = [param.val]
+
+                        # Appending the parameter reference
+                        par.append(ForestDevice._parameter_reference_map[parameter_string])
+                    else:
+                        par.append(param)
 
             self.prog += self._operation_map[operation.name](*par, *wires)
 

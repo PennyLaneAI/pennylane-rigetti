@@ -10,6 +10,7 @@ import pennylane as qml
 from pennylane import numpy as np
 from pennylane.operation import Tensor
 from pennylane.circuit_graph import CircuitGraph
+from pennylane.variable import Variable
 
 from pyquil.quil import Pragma, Program
 from pyquil.api._quantum_computer import QuantumComputer
@@ -589,6 +590,61 @@ class TestParametricCompilation(BaseTest):
         assert len(dev._lookup_table.items()) == 0
         assert len(call_history) == 1
 
+    variable1 = Variable(1)
+    variable2 = Variable(2)
+    Variable.free_param_values = {}
+
+    multiple_symbolic_queue = [
+                        ([
+                            qml.RX(variable1, wires=[0]),
+                            qml.RX(variable2, wires=[1])
+                            ],
+                         [],
+                        'RX!V1![0]' +
+                        'RX!V2![1]' +
+                        '|||'
+                        ),
+                        ]
+
+    @pytest.mark.parametrize("queue, observable_queue, expected_string", multiple_symbolic_queue)
+    def test_parametric_compilation_with_numeric_and_symbolic_queue(self, queue, observable_queue, expected_string, monkeypatch):
+        """Tests that a program containing numeric and symbolic variables as well is only compiled once."""
+
+        dev = qml.device("forest.qvm", device="2q-qvm")
+
+        dev._circuit_hash = None
+
+        number_of_runs = 10 
+
+        first = True
+
+        call_history = []
+        for run_idx in range(number_of_runs):
+            print(run_idx)
+            Variable.free_param_values[1] = 0.232 *run_idx
+            Variable.free_param_values[2] = 0.8764 *run_idx 
+            circuit_graph = CircuitGraph(queue,observable_queue)
+
+            dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+
+            assert circuit_graph.serialize() == expected_string
+
+            if first:
+                dev._circuit_hash = circuit_graph.hash
+                first = False
+            else:
+                # Check that we are still producing the same circuit hash
+                assert dev._circuit_hash == circuit_graph.hash
+
+
+            with monkeypatch.context() as m:
+                m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
+                m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
+                dev.generate_samples()
+
+        assert len(dev._lookup_table.items()) == 1 
+        assert len(call_history) == 1
+
 class TestQVMIntegration(BaseTest):
     """Test the QVM simulator works correctly from the PennyLane frontend."""
 
@@ -707,7 +763,7 @@ class TestQVMIntegration(BaseTest):
         """Test that QVM device stores the compiled program correctly"""
         dev = qml.device("forest.qvm", device=device)
 
-        def circuit():
+        def circuit(params, wires):
             qml.Hadamard(0)
             qml.CNOT(wires=[0, 1])
 
@@ -716,8 +772,84 @@ class TestQVMIntegration(BaseTest):
 
         qnodes = qml.map(circuit, obs_list, dev)
 
-        for qnode in qnodes:
-            qnode.evaluate([],{})
-            assert dev.circuit_hash in dev._lookup_table
-            assert len(dev._lookup_table.items()) == 1
+        qnodes([])
+        assert dev.circuit_hash in dev._lookup_table
+        assert len(dev._lookup_table.items()) == 1
+
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_compiled_program_was_used(self, qvm, device, monkeypatch):
+        """Test that QVM device stores the compiled program correctly"""
+        dev = qml.device("forest.qvm", device=device)
+
+        def circuit(params, wires):
+            qml.RX(params[0], wires=[0])
+            qml.RZ(params[1], wires=[0])
+            qml.Hadamard(0)
+            qml.CNOT(wires=[0, 1])
+
+        number_of_qnodes = 6
+        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
+        obs_list = obs * number_of_qnodes
+
+        qnodes = qml.map(circuit, obs_list, dev)
+
+        a_params = np.linspace(0, 1.5, number_of_qnodes)
+        b_params = np.linspace(-1.5, 0, number_of_qnodes)
+        params = list(zip(a_params, b_params))
+
+        # For the first evaluation, use the real compile method
+        qnodes[0](params[0])
+
+
+        call_history = []
+        with monkeypatch.context() as m:
+            m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
+
+            for i in range(1,6):
+                qnodes[i](params[i])
+
+        # Then use the mocked one to see if it was called
+
+        results = qnodes(params)
+
+        assert len(call_history) == 0
+        assert dev.circuit_hash in dev._lookup_table
+        assert len(dev._lookup_table.items()) == 1
+
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_compiled_program_was_correct(self, qvm, device, tol):
+        """Test that QVM device stores the compiled program correctly"""
+        def circuit(a, b):
+            qml.RX(a, wires=[0])
+            qml.RZ(b, wires=[0])
+            qml.Hadamard(0)
+            qml.CNOT(wires=[0, 1])
+
+        number_of_qnodes = 6
+        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
+        obs_list = obs * number_of_qnodes
+
+        a_params = np.linspace(0, 1.5, number_of_qnodes)
+        b_params = np.linspace(-1.5, 0, number_of_qnodes)
+
+        params = list(zip(a_params, b_params))
+
+        print(params)
+        dev = qml.device("forest.qvm", device=device)        
+        qnodes = qml.map(circuit, obs_list, dev)
+
+        results = []
+        for idx, qnode in enumerate(qnodes):
+            results.append(qnode(*params[idx]))
+        
+        dev2 = qml.device("default.qubit")
+        qnodes2 = qml.map(circuit, obs_list, dev2)
+
+        results2 = []
+        for idx, qnode in enumerate(qnodes2):
+            results2.append(qnode(*params[idx]))
+
+        assert np.allclose(results, results2, atol=tol, rtol=0)
+        assert dev.circuit_hash in dev._lookup_table
+        assert len(dev._lookup_table.items()) == 1
 

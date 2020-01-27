@@ -154,4 +154,5 @@ class QVMDevice(ForestDevice):
             else:
                 compiled_program = self._lookup_table[self.circuit_hash]
 
-            self._samples = self.qc.run(executable=compiled_program)
+            print(ForestDevice._parameter_map)
+            self._samples = self.qc.run(executable=compiled_program, memory_map=self._parameter_map)
