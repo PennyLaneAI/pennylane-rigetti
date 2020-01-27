@@ -620,13 +620,9 @@ class TestParametricCompilation(BaseTest):
                             qml.RX(variable2, wires=[1])
                             ],
                          [],
-                        'RX!V1![0]' +
-                        'RX!V2![1]' +
-                        '|||'
-                        ),
                         ]
 
-    @pytest.mark.parametrize("queue, observable_queue, expected_string", multiple_symbolic_queue)
+    @pytest.mark.parametrize("queue, observable_queue", multiple_symbolic_queue)
     def test_parametric_compilation_with_numeric_and_symbolic_queue(self, queue, observable_queue, expected_string, monkeypatch):
         """Tests that a program containing numeric and symbolic variables as well is only compiled once."""
 
@@ -645,8 +641,6 @@ class TestParametricCompilation(BaseTest):
             circuit_graph = CircuitGraph(queue,observable_queue)
 
             dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-
-            assert circuit_graph.serialize() == expected_string
 
             if first:
                 dev._circuit_hash = circuit_graph.hash
@@ -736,7 +730,10 @@ class TestQVMIntegration(BaseTest):
     @flaky(max_runs=10, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
-        """Test that the wavefunction plugin provides correct result for simple circuit"""
+        """Test that the wavefunction plugin provides correct result for simple circuit.
+
+        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        """
         shots = 100000
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
 
@@ -757,6 +754,10 @@ class TestQVMIntegration(BaseTest):
     @flaky(max_runs=10, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_2q_gate_pauliz_identity_tensor(self, device, qvm, compiler):
+        """Test that the PauliZ tensor Identity observable works correctly.
+
+        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        """
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
 
         @qml.qnode(dev)
@@ -770,6 +771,11 @@ class TestQVMIntegration(BaseTest):
     @flaky(max_runs=10, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_2q_gate_pauliz_pauliz_tensor(self, device, qvm, compiler):
+        """Test that the PauliZ tensor PauliZ observable works correctly.
+
+        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        """
+
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
 
         @qml.qnode(dev)
@@ -859,7 +865,7 @@ class TestQVMIntegration(BaseTest):
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_compiled_program_was_used(self, qvm, device, monkeypatch):
-        """Test that QVM device stores the compiled program correctly"""
+        """Test that QVM device used the compiled program correctly, after it was stored"""
         dev = qml.device("forest.qvm", device=device, timeout=100)
 
         number_of_qnodes = 6
@@ -888,9 +894,13 @@ class TestQVMIntegration(BaseTest):
         assert dev.circuit_hash in dev._lookup_table
         assert len(dev._lookup_table.items()) == 1
 
+    @flaky(max_runs=5, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
-    def test_compiled_program_was_correct(self, qvm, device, tol):
-        """Test that QVM device stores the compiled program correctly"""
+    def test_compiled_program_was_correct_compared_with_default_qubit(self, qvm, device, tol):
+        """Test that QVM device stores the compiled program correctly by comparing it with default.qubit.
+
+        As the results coming from the qvm are stochastic, a constraint of 1 out of 5 runs was added.
+        """
         number_of_qnodes = 6
         obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
         obs_list = obs * number_of_qnodes
