@@ -620,7 +620,6 @@ class TestParametricCompilation(BaseTest):
 
         call_history = []
         for run_idx in range(number_of_runs):
-            print(run_idx)
             Variable.free_param_values[1] = 0.232 *run_idx
             Variable.free_param_values[2] = 0.8764 *run_idx 
             circuit_graph = CircuitGraph(queue,observable_queue)
@@ -781,32 +780,23 @@ class TestQVMIntegration(BaseTest):
         """Test that QVM device stores the compiled program correctly"""
         dev = qml.device("forest.qvm", device=device)
 
-        def circuit(params, wires):
-            qml.RX(params[0], wires=[0])
-            qml.RZ(params[1], wires=[0])
-            qml.Hadamard(0)
-            qml.CNOT(wires=[0, 1])
-
         number_of_qnodes = 6
         obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
         obs_list = obs * number_of_qnodes
 
-        qnodes = qml.map(circuit, obs_list, dev)
-
-        a_params = np.linspace(0, 1.5, number_of_qnodes)
-        b_params = np.linspace(-1.5, 0, number_of_qnodes)
-        params = list(zip(a_params, b_params))
+        qnodes = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev)
+        params = qml.init.strong_ent_layers_normal(n_layers=4, n_wires=dev.num_wires)
 
         # For the first evaluation, use the real compile method
-        qnodes[0](params[0])
+        qnodes[0](params)
 
 
         call_history = []
         with monkeypatch.context() as m:
             m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
 
-            for i in range(1,6):
-                qnodes[i](params[i])
+            for i in range(1,number_of_qnodes):
+                qnodes[i](params)
 
         # Then use the mocked one to see if it was called
 
@@ -834,7 +824,6 @@ class TestQVMIntegration(BaseTest):
 
         params = list(zip(a_params, b_params))
 
-        print(params)
         dev = qml.device("forest.qvm", device=device)        
         qnodes = qml.map(circuit, obs_list, dev)
 

@@ -185,8 +185,6 @@ class ForestDevice(QubitDevice):
     author = "Josh Izaac"
 
     _operation_map = pyquil_operation_map
-    _parameter_map = {}
-    _parameter_reference_map = {}
     _capabilities = {"model": "qubit", "tensor_observables": True}
 
     def __init__(self, wires, shots=1000, analytic=False,  **kwargs):
@@ -219,6 +217,8 @@ class ForestDevice(QubitDevice):
 
         # if 'qpu_url' in kwargs:
         #     os.environ['QPU_URL'] = kwargs['qpu_url']
+        self._parameter_map = {}
+        self._parameter_reference_map = {}
 
         self.reset()
 
@@ -264,12 +264,12 @@ class ForestDevice(QubitDevice):
                         parameter_string = "theta" + str(param.idx)
                         if parameter_string not in self._parameter_map:
                             current_ref = self.prog.declare(parameter_string, "REAL")
-                            ForestDevice._parameter_reference_map[parameter_string] = current_ref
+                            self._parameter_reference_map[parameter_string] = current_ref
 
-                        ForestDevice._parameter_map[parameter_string] = [param.val]
+                        self._parameter_map[parameter_string] = [param.val]
 
                         # Appending the parameter reference
-                        par.append(ForestDevice._parameter_reference_map[parameter_string])
+                        par.append(self._parameter_reference_map[parameter_string])
                     else:
                         par.append(param)
 
@@ -285,6 +285,8 @@ class ForestDevice(QubitDevice):
         self.prog = Program()
         self._active_wires = set()
         self._state = None
+        self._parameter_map = {}
+        self._parameter_reference_map = {}
 
     @property
     def operations(self):
