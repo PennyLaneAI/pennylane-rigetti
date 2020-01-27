@@ -227,7 +227,7 @@ class ForestDevice(QubitDevice):
         """View the last evaluated Quil program"""
         return self.prog
 
-    def apply_wiring(self, wires):
+    def remap_wires(self, wires):
         """Use the wiring specified for the device if applicable.
 
         Returns:
@@ -248,7 +248,7 @@ class ForestDevice(QubitDevice):
         # Apply the circuit operations
         for i, operation in enumerate(operations):
             # number of wires on device
-            wires = self.apply_wiring(operation.wires)
+            wires = self.remap_wires(operation.wires)
             par = operation.parameters
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
@@ -277,7 +277,7 @@ class ForestDevice(QubitDevice):
 
         # Apply the circuit rotations
         for operation in rotations:
-            wires = self.apply_wiring(operation.wires)
+            wires = self.remap_wires(operation.wires)
             par = operation.parameters
             self.prog += self._operation_map[operation.name](*par, *wires)
 
@@ -388,6 +388,6 @@ class ForestDevice(QubitDevice):
             return None
 
         wires = wires or range(self.num_wires)
-        wires = self.apply_wiring(wires)
+        wires = self.remap_wires(wires)
         prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
         return prob
