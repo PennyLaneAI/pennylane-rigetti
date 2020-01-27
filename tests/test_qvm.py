@@ -505,6 +505,25 @@ class TestQVMBasic(BaseTest):
         ):
             dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
 
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_timeout_set_correctly(self, shots, device):
+        """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
+        is set correctly when passing a value as keyword argument"""
+        dev = plf.QVMDevice(device=device, shots=shots, timeout=100)
+        assert dev.qc.compiler.client.timeout == 100
+
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_timeout_default(self, shots, device):
+        """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
+        is set correctly when passing a value as keyword argument"""
+        dev = plf.QVMDevice(device=device, shots=shots)
+        qc = pyquil.get_qc(device, as_qvm=True)
+
+        # Check that the timeouts are equal (it has not been changed as a side effect of
+        # instantiation
+        assert dev.qc.compiler.client.timeout == qc.compiler.client.timeout
+
+
 class TestParametricCompilation(BaseTest):
     """Test that parametric compilation works fine and the same program only compiles once."""
 

@@ -81,6 +81,8 @@ class QVMDevice(ForestDevice):
         kwargs.pop("wires", None)
         analytic = kwargs.get("analytic", False)
 
+        timeout = kwargs.pop("timeout", None)
+
         if analytic:
             raise ValueError("QVM device cannot be run in analytic=True mode.")
 
@@ -114,6 +116,9 @@ class QVMDevice(ForestDevice):
             )
         elif isinstance(device, str):
             self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
+
+        if timeout:
+            self.qc.compiler.client.timeout = timeout
 
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
