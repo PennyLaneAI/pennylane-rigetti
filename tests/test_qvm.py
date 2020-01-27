@@ -574,7 +574,7 @@ class TestParametricCompilation(BaseTest):
             assert len(dev._lookup_table.items()) == 1
             assert len(call_history) == 1
 
-    def test_circuit_hash_nonecompiled_program_was_stored(self, qvm, monkeypatch):
+    def test_circuit_hash_none_no_compiled_program_was_stored(self, qvm, monkeypatch):
         """Test that QVM device does not store the compiled program if the _circuit_hash
         attribute is None"""
         dev = qml.device("forest.qvm", device="2q-qvm")
@@ -630,7 +630,7 @@ class TestParametricCompilation(BaseTest):
     def test_parametric_compilation_with_numeric_and_symbolic_queue(self, queue, observable_queue, expected_string, monkeypatch):
         """Tests that a program containing numeric and symbolic variables as well is only compiled once."""
 
-        dev = qml.device("forest.qvm", device="2q-qvm")
+        dev = qml.device("forest.qvm", device="2q-qvm", timeout=100)
 
         dev._circuit_hash = None
 
@@ -783,7 +783,9 @@ class TestQVMIntegration(BaseTest):
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_compiled_program_was_stored(self, qvm, device):
         """Test that QVM device stores the compiled program correctly"""
-        dev = qml.device("forest.qvm", device=device)
+        dev = qml.device("forest.qvm", device=device, timeout=100)
+
+        assert len(dev._lookup_table.items()) == 0
 
         def circuit(params, wires):
             qml.Hadamard(0)
@@ -798,10 +800,67 @@ class TestQVMIntegration(BaseTest):
         assert dev.circuit_hash in dev._lookup_table
         assert len(dev._lookup_table.items()) == 1
 
+    @pytest.mark.parametrize("statements", [
+                                            [True, True, True, True, True, True],
+                                            [True, False, True, False, True, False],
+                                            [True, False, False, False, True, False],
+                                            [False, False, False, False, False, True],
+                                            [True, False, False, False, False, False],
+                                            [False, False, False, False, False, False],
+                                            ])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_compiled_program_was_stored_mutable_qnode_with_if_statement(self, qvm, device, statements):
+        """Test that QVM device stores the compiled program when the QNode is mutated correctly"""
+        dev = qml.device("forest.qvm", device=device, timeout=100)
+
+        assert len(dev._lookup_table.items()) == 0
+
+        def circuit(params, wires, statement=None):
+            if statement:
+                qml.Hadamard(0)
+            qml.CNOT(wires=[0, 1])
+
+        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
+        obs_list = obs * 6
+
+        qnodes = qml.map(circuit, obs_list, dev)
+
+        for idx, stmt in enumerate(statements):
+            qnodes[idx]([], statement=stmt)
+            assert dev.circuit_hash in dev._lookup_table
+
+        # Using that True evaluates to 1
+        number_of_true = sum(statements)
+        length = 1 if (number_of_true == 6 or number_of_true == 0) else 2
+        assert len(dev._lookup_table.items()) == length
+
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_compiled_program_was_stored_mutable_qnode_with_loop(self, qvm, device):
+        """Test that QVM device stores the compiled program when the QNode is mutated correctly"""
+        dev = qml.device("forest.qvm", device=device, timeout=100)
+
+        assert len(dev._lookup_table.items()) == 0
+
+        def circuit(params, wires, rounds=1):
+            for i in range(rounds):
+                qml.Hadamard(0)
+                qml.CNOT(wires=[0, 1])
+
+        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
+        obs_list = obs * 6
+
+        qnodes = qml.map(circuit, obs_list, dev)
+
+        for idx, qnode in enumerate(qnodes):
+            qnode([], rounds=idx)
+            assert dev.circuit_hash in dev._lookup_table
+
+        assert len(dev._lookup_table.items()) == len(qnodes)
+
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_compiled_program_was_used(self, qvm, device, monkeypatch):
         """Test that QVM device stores the compiled program correctly"""
-        dev = qml.device("forest.qvm", device=device)
+        dev = qml.device("forest.qvm", device=device, timeout=100)
 
         number_of_qnodes = 6
         obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
@@ -832,36 +891,23 @@ class TestQVMIntegration(BaseTest):
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_compiled_program_was_correct(self, qvm, device, tol):
         """Test that QVM device stores the compiled program correctly"""
-        def circuit(a, b):
-            qml.RX(a, wires=[0])
-            qml.RZ(b, wires=[0])
-            qml.Hadamard(0)
-            qml.CNOT(wires=[0, 1])
-
         number_of_qnodes = 6
         obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
         obs_list = obs * number_of_qnodes
 
-        a_params = np.linspace(0, 1.5, number_of_qnodes)
-        b_params = np.linspace(-1.5, 0, number_of_qnodes)
+        dev = qml.device("forest.qvm", device=device, timeout=100)
+        params = qml.init.strong_ent_layers_normal(n_layers=4, n_wires=dev.num_wires)
 
-        params = list(zip(a_params, b_params))
+        qnodes = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev)
 
-        dev = qml.device("forest.qvm", device=device)        
-        qnodes = qml.map(circuit, obs_list, dev)
+        results = qnodes(params)
 
-        results = []
-        for idx, qnode in enumerate(qnodes):
-            results.append(qnode(*params[idx]))
-        
-        dev2 = qml.device("default.qubit")
-        qnodes2 = qml.map(circuit, obs_list, dev2)
+        dev2 = qml.device("default.qubit", wires=dev.num_wires)
+        qnodes2 = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev2)
 
-        results2 = []
-        for idx, qnode in enumerate(qnodes2):
-            results2.append(qnode(*params[idx]))
+        results2 = qnodes2(params)
 
-        assert np.allclose(results, results2, atol=tol, rtol=0)
+        assert np.allclose(results, results2, atol=1e-02, rtol=0)
         assert dev.circuit_hash in dev._lookup_table
         assert len(dev._lookup_table.items()) == 1
 
