@@ -47,7 +47,7 @@ class TestPyQVMBasic(BaseTest):
                                        {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -74,7 +74,7 @@ class TestPyQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -103,7 +103,7 @@ class TestPyQVMBasic(BaseTest):
                                     {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -131,7 +131,7 @@ class TestPyQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -160,7 +160,7 @@ class TestPyQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -190,7 +190,7 @@ class TestPyQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -232,7 +232,7 @@ class TestPyQVMBasic(BaseTest):
                                         {}
                                     )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -267,7 +267,7 @@ class TestPyQVMBasic(BaseTest):
                                     )
 
         # test correct variance for <Z> of a rotated state
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -296,7 +296,7 @@ class TestPyQVMBasic(BaseTest):
                                     )
 
         # test correct variance for <A> of a rotated state
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -372,7 +372,7 @@ class TestPyQVMBasic(BaseTest):
                                                 {}
                                             )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 

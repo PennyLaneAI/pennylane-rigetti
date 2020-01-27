@@ -54,7 +54,7 @@ class TestWavefunctionBasic(BaseTest):
         circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
         # test correct variance for <Z> of a rotated state
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         var = dev.var(qml.PauliZ(0))
         expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
@@ -81,7 +81,7 @@ class TestWavefunctionBasic(BaseTest):
         observables = [O]
         circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
         
         var = dev.var(qml.Hermitian(H, wires=[0]))
         expected = 0.5 * (
@@ -155,7 +155,7 @@ class TestWavefunctionBasic(BaseTest):
                                                 {}
                                             )
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         res = dev.expval(obs)
 
@@ -178,7 +178,7 @@ class TestWavefunctionBasic(BaseTest):
         observables = [O]
         circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
         dev.generate_samples()
         s1 = dev.sample(O)
 
@@ -203,7 +203,7 @@ class TestWavefunctionBasic(BaseTest):
         observables = [O]
         circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 
@@ -246,7 +246,7 @@ class TestWavefunctionBasic(BaseTest):
         observables = [O]
         circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
-        dev.apply(circuit_graph.operations, circuit_graph.diagonalizing_gates)
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev.generate_samples()
 

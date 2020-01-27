@@ -48,10 +48,10 @@ class NumpyWavefunctionDevice(ForestDevice):
         self.qc = PyQVM(n_qubits=wires, quantum_simulator_type=NumpyWavefunctionSimulator)
         self._state = None
 
-    def apply(self, operations, rotations=None):
+    def apply(self, operations, **kwargs):
         self.reset()
         self.qc.wf_simulator.reset()
-        super().apply(operations, rotations)
+        super().apply(operations, **kwargs)
 
         # TODO: currently, the PyQVM considers qubit 0 as the leftmost bit and therefore
         # returns amplitudes in the opposite of the Rigetti Lisp QVM (which considers qubit

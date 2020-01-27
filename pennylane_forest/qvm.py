@@ -118,12 +118,11 @@ class QVMDevice(ForestDevice):
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
 
-    def apply(self, operations, rotations=None, **kwargs):
+    def apply(self, operations, **kwargs):
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
-        super().apply(operations, rotations)
+        super().apply(operations, **kwargs)
 
-        self._circuit_hash = kwargs.pop("hash", None)
         prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
 
         if self.active_reset:
