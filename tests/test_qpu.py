@@ -7,6 +7,7 @@ import pytest
 import pyquil
 import pennylane as qml
 from pennylane import numpy as np
+import pennylane_forest as plf
 from conftest import BaseTest, QVM_SHOTS
 
 from flaky import flaky
@@ -193,3 +194,23 @@ class TestQPUBasic(BaseTest):
             return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
 
         assert np.allclose(circuit(), 1.0, atol=2e-2)
+
+    def test_timeout_set_correctly(self, shots):
+        """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
+        is set correctly when passing a value as keyword argument"""
+        device = np.random.choice(VALID_QPU_LATTICES)
+        dev = plf.QVMDevice(device=device, shots=shots, timeout=100)
+        assert dev.qc.compiler.client.timeout == 100
+
+    def test_timeout_default(self, shots):
+        """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
+        is set correctly when passing a value as keyword argument"""
+        device = np.random.choice(VALID_QPU_LATTICES)
+        dev = plf.QVMDevice(device=device, shots=shots)
+        qc = pyquil.get_qc(device, as_qvm=True)
+
+        # Check that the timeouts are equal (it has not been changed as a side effect of
+        # instantiation
+        assert dev.qc.compiler.client.timeout == qc.compiler.client.timeout
+
+
