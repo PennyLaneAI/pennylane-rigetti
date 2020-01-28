@@ -127,7 +127,7 @@ class QVMDevice(ForestDevice):
         # pylint: disable=attribute-defined-outside-init
         super().apply(operations, **kwargs)
 
-        prag = Program(Pragma("INITIAL_REWIRING", ['"NAIVE"']))
+        prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
 
         if self.active_reset:
             prag += RESET()
