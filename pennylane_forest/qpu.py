@@ -111,7 +111,10 @@ class QPUDevice(QVMDevice):
         # Single-qubit observable
         if len(wires) == 1:
             # identify Experiment Settings for each of the possible single-qubit observables
-            wire = wires[0][0]
+            if isinstance(wires[0], int):
+                wire = wires[0]
+            else:
+                wire = wires[0][0]
             
             qubit = self.wiring[wire]
             d_expt_settings = {
