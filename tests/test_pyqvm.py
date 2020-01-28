@@ -416,12 +416,8 @@ class TestQVMIntegration(BaseTest):
         )
 
     @pytest.mark.parametrize("device", ["2q-pyqvm"])
-    @flaky(max_runs=10, min_passes=1)
-    def test_one_qubit_wavefunction_circuit(self, device):
-        """Test that the wavefunction plugin provides correct result for simple circuit.
-
-        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
-"""
+    def test_one_qubit_wavefunction_circuit(self, device, shots):
+        """Test that the wavefunction plugin provides correct result for simple circuit."""
         shots = 100000
         dev = qml.device("forest.qvm", device=device, shots=shots)
 

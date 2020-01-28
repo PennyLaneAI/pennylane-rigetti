@@ -44,8 +44,7 @@ from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT
 # following gates are not supported by PennyLane
 from pyquil.gates import S, T, CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, CSWAP, ISWAP, PSWAP
 
-from pennylane import QubitDevice
-from pennylane.variable import Variable
+from pennylane import QubitDevice, DeviceError
 
 from ._version import __version__
 
@@ -217,8 +216,6 @@ class ForestDevice(QubitDevice):
 
         # if 'qpu_url' in kwargs:
         #     os.environ['QPU_URL'] = kwargs['qpu_url']
-        self._parameter_map = {}
-        self._parameter_reference_map = {}
 
         self.reset()
 
@@ -254,28 +251,15 @@ class ForestDevice(QubitDevice):
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
                 raise DeviceError("Operation {} cannot be used after other Operations have already been applied "
                                   "on a {} device.".format(operation.name, self.short_name))
-
-            # Prepare for parametric compilation
-            if self.short_name in {"forest.qvm", "forest.qpu"}:
-                par = []
-                for param in operation.params:
-                    if isinstance(param, Variable):
-                        # Using the idx for each Variable instance
-                        parameter_string = "theta" + str(param.idx)
-                        if parameter_string not in self._parameter_map:
-                            current_ref = self.prog.declare(parameter_string, "REAL")
-                            self._parameter_reference_map[parameter_string] = current_ref
-
-                        self._parameter_map[parameter_string] = [param.val]
-
-                        # Appending the parameter reference
-                        par.append(self._parameter_reference_map[parameter_string])
-                    else:
-                        par.append(param)
-
             self.prog += self._operation_map[operation.name](*par, *wires)
 
-        # Apply the circuit rotations
+        self.apply_rotations(rotations)
+
+    def apply_rotations(self, rotations):
+        """Apply the circuit rotations.
+
+        This method serves as an auxiliary method to :meth:`~.ForestDevice.apply`.
+        """
         for operation in rotations:
             wires = self.remap_wires(operation.wires)
             par = operation.parameters

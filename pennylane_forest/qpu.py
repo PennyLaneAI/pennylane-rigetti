@@ -81,8 +81,13 @@ class QPUDevice(QVMDevice):
 
         self.readout_error = readout_error
 
-        self._lookup_table = {}
         self._eigs = {}
+        self.parametric_compilation = kwargs.get("parametric_compilation", True)
+
+        if self.parametric_compilation:
+            self._lookup_table = {}
+            self._parameter_map = {}
+            self._parameter_reference_map = {}
 
         timeout = kwargs.pop("timeout", None)
 

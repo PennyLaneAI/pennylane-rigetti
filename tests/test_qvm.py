@@ -2,6 +2,7 @@
 Unit tests for the QVM simulator device.
 """
 import logging
+import re
 
 import networkx as nx
 import pytest
@@ -26,7 +27,9 @@ from flaky import flaky
 
 log = logging.getLogger(__name__)
 
-VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc]
+# Creating pattern for devices that have at most 5 qubits
+pattern = 'Aspen-.-[1-5]Q-.'
+VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)]
 
 
 class TestQVMBasic(BaseTest):
@@ -498,12 +501,29 @@ class TestQVMBasic(BaseTest):
             + 5*np.cos(theta) - 6*np.cos(2*theta) + 27*np.cos(3*theta) + 6)/32
         assert np.allclose(np.mean(s1), expected, atol=0.1, rtol=0)
 
+    @pytest.mark.parametrize("shots", list(range(0,-10, -1)))
+    def test_raise_error_if_shots_is_not_positive(self, shots):
+        """Test that instantiating a QVMDevice if the number of shots is not a postivie
+        integer raises an error"""
+        with pytest.raises(
+            ValueError, match="Number of shots must be a positive integer."
+        ):
+            dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+
     def test_raise_error_if_analytic_true(self, shots):
         """Test that instantiating a QVMDevice in analytic=True mode raises an error"""
         with pytest.raises(
             ValueError, match="QVM device cannot be run in analytic=True mode."
         ):
             dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
+
+    def test_raise_error_if_qubits_not_indicated(self, shots):
+        """Test that instantiating a QVMDevice if the number of qubits were not indicated
+        in the name raises an error"""
+        with pytest.raises(
+            ValueError, match="QVM device string does not indicate the number of qubits!"
+        ):
+            dev = plf.QVMDevice(device="-qvm", shots=shots)
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_timeout_set_correctly(self, shots, device):
@@ -658,6 +678,27 @@ class TestParametricCompilation(BaseTest):
         assert len(dev._lookup_table.items()) == 1 
         assert len(call_history) == 1
 
+    def test_apply_basis_state_raises_an_error_if_not_first(self):
+        """Test that there is an error raised when the BasisState is not
+        applied as the first operation."""
+        dev = qml.device("forest.qvm", device="3q-qvm", parametric_compilation=True)
+
+
+        operation = qml.BasisState(np.array([1,0,0]), wires=list(range(3)))
+        queue = [qml.PauliX(0), operation]
+        with pytest.raises(qml.DeviceError, match="Operation {} cannot be used after other Operations have already been applied".format(operation.name)):
+            dev.apply(queue)
+
+    def test_apply_qubitstatesvector_raises_an_error_if_not_first(self):
+        """Test that there is an error raised when the QubitStateVector is not
+        applied as the first operation."""
+        dev = qml.device("forest.qvm", device="2q-qvm", parametric_compilation=True)
+
+        operation = qml.QubitStateVector(np.array([1,0]), wires=list(range(2)))
+        queue = [qml.PauliX(0), operation]
+        with pytest.raises(qml.DeviceError, match="Operation {} cannot be used after other Operations have already been applied".format(operation.name)):
+            dev.apply(queue)
+
 class TestQVMIntegration(BaseTest):
     """Test the QVM simulator works correctly from the PennyLane frontend."""
 
@@ -750,6 +791,23 @@ class TestQVMIntegration(BaseTest):
             return qml.expval(qml.PauliZ(0))
 
         self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=3 / np.sqrt(shots))
+
+    @flaky(max_runs=10, min_passes=1)
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_2q_gate(self, device, qvm, compiler):
+        """Test that the two qubit gate with the PauliZ observable works correctly.
+
+        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        """
+        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
+
+        @qml.qnode(dev)
+        def circuit():
+            qml.RY(np.pi/2, wires=[0])
+            qml.CNOT(wires=[0, 1])
+            return qml.expval(qml.PauliZ(0) @ qml.Identity(1))
+
+        assert np.allclose(circuit(), 0.0, atol=2e-2)
 
     @flaky(max_runs=10, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
@@ -921,3 +979,21 @@ class TestQVMIntegration(BaseTest):
         assert dev.circuit_hash in dev._lookup_table
         assert len(dev._lookup_table.items()) == 1
 
+    @flaky(max_runs=10, min_passes=1)
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, device, qvm, compiler):
+        """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
+        was turned off.
+
+        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        """
+
+        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS, parametric_compilation=False)
+
+        @qml.qnode(dev)
+        def circuit():
+            qml.Hadamard(0)
+            qml.CNOT(wires=[0, 1])
+            return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
+
+        assert np.allclose(circuit(), 1.0, atol=2e-2)

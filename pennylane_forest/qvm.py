@@ -24,6 +24,8 @@ import re
 
 import numpy as np
 
+from pennylane.variable import Variable
+from pennylane import DeviceError
 import networkx as nx
 from pyquil import get_qc
 from pyquil.api._quantum_computer import _get_qvm_with_topology
@@ -71,7 +73,6 @@ class QVMDevice(ForestDevice):
     observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
     def __init__(self, device, *, shots=1024, noisy=False, **kwargs):
-        self._lookup_table = {}
 
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
@@ -79,8 +80,14 @@ class QVMDevice(ForestDevice):
         # ignore any 'wires' keyword argument passed to the device
         kwargs.pop("wires", None)
         analytic = kwargs.get("analytic", False)
-
         timeout = kwargs.pop("timeout", None)
+
+        self.parametric_compilation = kwargs.get("parametric_compilation", True)
+
+        if self.parametric_compilation:
+            self._lookup_table = {}
+            self._parameter_map = {}
+            self._parameter_reference_map = {}
 
         if analytic:
             raise ValueError("QVM device cannot be run in analytic=True mode.")
@@ -125,7 +132,10 @@ class QVMDevice(ForestDevice):
     def apply(self, operations, **kwargs):
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
-        super().apply(operations, **kwargs)
+        if self.parametric_compilation and "pyqvm" not in self.qc.name:
+            self.apply_parametric_program(operations, **kwargs)
+        else:
+            super().apply(operations, **kwargs)
 
         prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
 
@@ -141,12 +151,50 @@ class QVMDevice(ForestDevice):
 
         self.prog.wrap_in_numshots_loop(self.shots)
 
+    def apply_parametric_program(self, operations, **kwargs):
+        # pylint: disable=attribute-defined-outside-init
+        rotations = kwargs.get("rotations", [])
+
+        # Storing the active wires
+        self._active_wires = ForestDevice.active_wires(operations + rotations)
+
+        # Apply the circuit operations
+        for i, operation in enumerate(operations):
+            # number of wires on device
+            wires = self.remap_wires(operation.wires)
+
+            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
+                raise DeviceError("Operation {} cannot be used after other Operations have already been applied "
+                                  "on a {} device.".format(operation.name, self.short_name))
+
+            # Prepare for parametric compilation
+            par = []
+            for param in operation.params:
+                if isinstance(param, Variable):
+                    # Using the idx for each Variable instance
+                    parameter_string = "theta" + str(param.idx)
+                    if parameter_string not in self._parameter_map:
+                        current_ref = self.prog.declare(parameter_string, "REAL")
+                        self._parameter_reference_map[parameter_string] = current_ref
+
+                    self._parameter_map[parameter_string] = [param.val]
+
+                    # Appending the parameter reference
+                    par.append(self._parameter_reference_map[parameter_string])
+                else:
+                    par.append(param)
+
+            self.prog += self._operation_map[operation.name](*par, *wires)
+
+        self.apply_rotations(rotations)
+
     def generate_samples(self):
         if "pyqvm" in self.qc.name:
-            self._samples = self.qc.run(self.prog)
+            self._samples = self.qc.run(self.prog, memory_map=self._parameter_map)
         else:
-            # No hash provided, compile the program
-            if self.circuit_hash is None:
+            # No hash provided or parametric compilation was set to False
+            # Will compile the program
+            if self.circuit_hash is None or not self.parametric_compilation:
                 compiled_program = self.qc.compile(self.prog)
 
             # Store the compiled program with the corresponding hash

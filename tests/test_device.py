@@ -109,3 +109,25 @@ class TestMatVecProduct:
         expected = np.kron(U2, I)[:, perm][perm] @ vec
 
         assert np.allclose(res, expected, atol=tol, rtol=0)
+
+    def test_apply_basis_state_raises_an_error_if_not_first(self):
+        """Test that there is an error raised when the BasisState is not
+        applied as the first operation."""
+        wires = 3
+        dev = ForestDevice(wires=wires, shots=1)
+
+        operation = qml.BasisState(np.array([1,0,0]), wires=list(range(wires)))
+        queue = [qml.PauliX(0), operation]
+        with pytest.raises(qml.DeviceError, match="Operation {} cannot be used after other Operations have already been applied".format(operation.name)):
+            dev.apply(queue)
+
+    def test_apply_qubitstatesvector_raises_an_error_if_not_first(self):
+        """Test that there is an error raised when the QubitStateVector is not
+        applied as the first operation."""
+        wires = 1
+        dev = ForestDevice(wires=wires, shots=1)
+
+        operation = qml.QubitStateVector(np.array([1,0]), wires=list(range(wires)))
+        queue = [qml.PauliX(0), operation]
+        with pytest.raises(qml.DeviceError, match="Operation {} cannot be used after other Operations have already been applied".format(operation.name)):
+            dev.apply(queue)
