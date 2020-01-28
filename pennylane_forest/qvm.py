@@ -73,7 +73,6 @@ class QVMDevice(ForestDevice):
     observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
     def __init__(self, device, *, shots=1024, noisy=False, **kwargs):
-        self._eigs = {}
 
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
