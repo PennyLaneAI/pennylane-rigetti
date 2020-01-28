@@ -619,11 +619,11 @@ class TestParametricCompilation(BaseTest):
                             qml.RX(variable1, wires=[0]),
                             qml.RX(variable2, wires=[1])
                             ],
-                         [],
+                         []),
                         ]
 
     @pytest.mark.parametrize("queue, observable_queue", multiple_symbolic_queue)
-    def test_parametric_compilation_with_numeric_and_symbolic_queue(self, queue, observable_queue, expected_string, monkeypatch):
+    def test_parametric_compilation_with_numeric_and_symbolic_queue(self, queue, observable_queue, monkeypatch):
         """Tests that a program containing numeric and symbolic variables as well is only compiled once."""
 
         dev = qml.device("forest.qvm", device="2q-qvm", timeout=100)

@@ -15,6 +15,7 @@ from conftest import I, Z, H, U, U2, test_operation_map
 
 import pennylane_forest as plf
 
+from flaky import flaky
 
 log = logging.getLogger(__name__)
 
@@ -414,8 +415,8 @@ class TestQVMIntegration(BaseTest):
             circuit2(), np.vdot(out_state, obs @ out_state), delta=3 / np.sqrt(shots)
         )
 
-    @flaky(max_runs=10, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-pyqvm"])
+    @flaky(max_runs=10, min_passes=1)
     def test_one_qubit_wavefunction_circuit(self, device):
         """Test that the wavefunction plugin provides correct result for simple circuit.
 
