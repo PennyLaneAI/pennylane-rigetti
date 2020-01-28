@@ -81,6 +81,7 @@ class QPUDevice(QVMDevice):
 
         self.readout_error = readout_error
 
+        self._lookup_table = {}
         self._eigs = {}
 
         timeout = kwargs.pop("timeout", None)
