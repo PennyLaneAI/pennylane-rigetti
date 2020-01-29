@@ -632,7 +632,6 @@ class TestParametricCompilation(BaseTest):
 
     variable1 = Variable(1)
     variable2 = Variable(2)
-    Variable.free_param_values = {}
 
     multiple_symbolic_queue = [
                         ([
@@ -646,6 +645,7 @@ class TestParametricCompilation(BaseTest):
     def test_parametric_compilation_with_numeric_and_symbolic_queue(self, queue, observable_queue, monkeypatch):
         """Tests that a program containing numeric and symbolic variables as well is only compiled once."""
 
+        Variable.free_param_values = {}
         dev = qml.device("forest.qvm", device="2q-qvm", timeout=100)
 
         dev._circuit_hash = None
