@@ -152,7 +152,7 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(results[:3], 1.0, atol=2e-2)
         assert np.allclose(results[3:], -1.0, atol=2e-2)
 
-    @flaky(max_runs=10, min_passes=1)
+    @flaky(max_runs=5, min_passes=3)
     def test_2q_gate(self):
         device = np.random.choice(VALID_QPU_LATTICES)
         dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
@@ -166,7 +166,7 @@ class TestQPUBasic(BaseTest):
 
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
-    @flaky(max_runs=10, min_passes=1)
+    @flaky(max_runs=5, min_passes=3)
     def test_2q_gate_pauliz_identity_tensor(self):
         device = np.random.choice(VALID_QPU_LATTICES)
         dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
@@ -180,7 +180,7 @@ class TestQPUBasic(BaseTest):
 
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
-    @flaky(max_runs=10, min_passes=1)
+    @flaky(max_runs=5, min_passes=3)
     @pytest.mark.parametrize("a", np.linspace(-0.5, 2, 6))
     def test_2q_gate_pauliz_pauliz_tensor(self, a):
         device = np.random.choice(VALID_QPU_LATTICES)
