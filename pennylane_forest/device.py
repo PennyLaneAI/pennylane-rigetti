@@ -253,17 +253,23 @@ class ForestDevice(QubitDevice):
                                   "on a {} device.".format(operation.name, self.short_name))
             self.prog += self._operation_map[operation.name](*par, *wires)
 
-        self.apply_rotations(rotations)
+        self.prog += self.apply_rotations(rotations)
 
     def apply_rotations(self, rotations):
         """Apply the circuit rotations.
 
         This method serves as an auxiliary method to :meth:`~.ForestDevice.apply`.
+
+        Args:
+            rotations (pennylane.Operation):
         """
+        rotation_operations = Program()
         for operation in rotations:
             wires = self.remap_wires(operation.wires)
             par = operation.parameters
-            self.prog += self._operation_map[operation.name](*par, *wires)
+            rotation_operations += self._operation_map[operation.name](*par, *wires)
+
+        return rotation_operations
 
     def reset(self):
         self.prog = Program()

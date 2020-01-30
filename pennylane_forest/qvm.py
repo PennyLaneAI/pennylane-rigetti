@@ -186,7 +186,7 @@ class QVMDevice(ForestDevice):
 
             self.prog += self._operation_map[operation.name](*par, *wires)
 
-        self.apply_rotations(rotations)
+        self.prog += self.apply_rotations(rotations)
 
     def generate_samples(self):
         if "pyqvm" in self.qc.name:
