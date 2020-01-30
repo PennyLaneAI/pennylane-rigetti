@@ -59,7 +59,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
 
@@ -87,7 +87,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
 
@@ -117,7 +117,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
         # below are the analytic expectation values for this circuit
@@ -145,7 +145,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
 
@@ -174,7 +174,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
 
@@ -204,7 +204,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
 
@@ -247,7 +247,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1)])
         # below is the analytic expectation value for this circuit with arbitrary
@@ -282,7 +282,7 @@ class TestQVMBasic(BaseTest):
         # test correct variance for <Z> of a rotated state
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         var = np.array([dev.var(O1)])
         expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
@@ -311,7 +311,7 @@ class TestQVMBasic(BaseTest):
         # test correct variance for <A> of a rotated state
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         var = np.array([dev.var(O1)])
         expected = 0.5 * (
@@ -387,7 +387,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         res = dev.expval(obs)
         expected = np.vdot(state, np.kron(np.kron(Z, I), I) @ state)
@@ -414,7 +414,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         s1 = dev.sample(O1)
 
@@ -443,7 +443,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         s1 = dev.sample(O1)
 
@@ -487,7 +487,7 @@ class TestQVMBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         s1 = dev.sample(O1)
 

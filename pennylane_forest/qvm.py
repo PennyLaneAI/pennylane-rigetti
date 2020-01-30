@@ -190,7 +190,7 @@ class QVMDevice(ForestDevice):
 
     def generate_samples(self):
         if "pyqvm" in self.qc.name:
-            self._samples = self.qc.run(self.prog, memory_map=self._parameter_map)
+            return self.qc.run(self.prog, memory_map=self._parameter_map)
         else:
             # No hash provided or parametric compilation was set to False
             # Will compile the program
@@ -206,4 +206,4 @@ class QVMDevice(ForestDevice):
             else:
                 compiled_program = self._lookup_table[self.circuit_hash]
 
-            self._samples = self.qc.run(executable=compiled_program, memory_map=self._parameter_map)
+            return self.qc.run(executable=compiled_program, memory_map=self._parameter_map)
