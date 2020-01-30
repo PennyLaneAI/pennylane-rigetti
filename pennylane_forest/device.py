@@ -244,7 +244,7 @@ class ForestDevice(QubitDevice):
 
         # Apply the circuit operations
         for i, operation in enumerate(operations):
-            # number of wires on device
+            # map the operation wires to the physical device qubits
             wires = self.remap_wires(operation.wires)
             par = operation.parameters
 
