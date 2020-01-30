@@ -574,7 +574,7 @@ class TestQVMIntegration(BaseTest):
             circuit2(), np.vdot(out_state, obs @ out_state), delta=3 / np.sqrt(shots)
         )
 
-    @flaky(max_runs=5, min_passes=3)
+    @flaky(max_runs=5, min_passes=2)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
         """Test that the wavefunction plugin provides correct result for simple circuit"""
