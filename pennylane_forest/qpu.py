@@ -104,14 +104,8 @@ class QPUDevice(QVMDevice):
         self.calibrate_readout = calibrate_readout
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
 
-    def pre_rotations(self, observable, wires):
-        """
-        This is used in `QVM.pre_measure`. Since the pre-rotations are handled
-        by `measure_observables` (see `expval`), we simply don't do anything here
-        """
-        pass
-
-    def expval(self, observable, wires, par):
+    def expval(self, observable):
+        wires = observable.wires
         # Single-qubit observable
         if len(wires) == 1:
             # identify Experiment Settings for each of the possible single-qubit observables
@@ -126,7 +120,7 @@ class QPUDevice(QVMDevice):
                              ExperimentSetting(TensorProductState(), float(np.sqrt(1/2)) * sZ(qubit))]
             }
             # expectation values for single-qubit observables
-            if observable in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
+            if observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
                 prep_prog = Program()
                 for instr in self.program.instructions:
                     if isinstance(instr, Gate):
@@ -142,7 +136,9 @@ class QPUDevice(QVMDevice):
                 if self.readout_error is not None:
                     prep_prog.define_noisy_readout(qubit, p00=self.readout_error[0],
                                                           p11=self.readout_error[1])
-                tomo_expt = Experiment(settings=d_expt_settings[observable], program=prep_prog)
+
+                # All observables are rotated and can be measured in the PauliZ basis
+                tomo_expt = Experiment(settings=d_expt_settings["PauliZ"], program=prep_prog)
                 grouped_tomo_expt = group_experiments(tomo_expt)
                 meas_obs = list(measure_observables(self.qc, grouped_tomo_expt,
                                                     active_reset=self.active_reset,
@@ -150,24 +146,10 @@ class QPUDevice(QVMDevice):
                                                     calibrate_readout=self.calibrate_readout))
                 return np.sum([expt_result.expectation for expt_result in meas_obs])
 
-            elif observable == 'Hermitian':
+            elif observable.name == 'Hermitian':
                 # <H> = \sum_i w_i p_i
                 Hkey = tuple(par[0].flatten().tolist())
                 w = self._eigs[Hkey]['eigval']
                 return w[0]*p0 + w[1]*p1
 
-        # Multi-qubit observable
-        # ----------------------
-        # Currently, we only support qml.expval.Hermitian(A, wires),
-        # where A is a 2^N x 2^N matrix acting on N wires.
-        #
-        # Eventually, we will also support tensor products of Pauli
-        # matrices in the PennyLane UI.
-
-        probs = self.probabilities(wires)
-
-        if observable == 'Hermitian':
-            Hkey = tuple(par[0].flatten().tolist())
-            w = self._eigs[Hkey]['eigval']
-            # <A> = \sum_i w_i p_i
-            return w @ probs
+        return super().expval(observable)

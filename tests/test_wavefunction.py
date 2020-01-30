@@ -9,23 +9,12 @@ import pennylane as qml
 from pennylane import numpy as np
 
 from conftest import BaseTest
-from conftest import I, U, U2, SWAP, CNOT, U_toffoli, H, test_operation_map
+from conftest import I, Z, H, U, U2, SWAP, CNOT, U_toffoli, H, test_operation_map
 
 import pennylane_forest as plf
 
 
 log = logging.getLogger(__name__)
-
-
-class TestAuxillaryFunctions(BaseTest):
-    """Test auxillary functions."""
-
-    def test_spectral_decomposition(self, tol):
-        """Test that the correct spectral decomposition is returned."""
-        a, P = plf.WavefunctionDevice.spectral_decomposition(H)
-
-        # verify that H = \sum_k a_k P_k
-        self.assertAllAlmostEqual(H, np.einsum("i,ijk->jk", a, P), delta=tol)
 
 
 class TestWavefunctionBasic(BaseTest):
@@ -36,56 +25,38 @@ class TestWavefunctionBasic(BaseTest):
         dev = plf.WavefunctionDevice(wires=3)
 
         # expand a two qubit state to the 3 qubit device
-        dev.state = np.array([0, 1, 1, 0]) / np.sqrt(2)
-        dev.active_wires = {0, 2}
+        dev._state = np.array([0, 1, 1, 0]) / np.sqrt(2)
+        dev._active_wires = {0, 2}
         dev.expand_state()
-        self.assertAllEqual(dev.state, np.array([0, 1, 0, 0, 1, 0, 0, 0]) / np.sqrt(2))
+        self.assertAllEqual(dev._state, np.array([0, 1, 0, 0, 1, 0, 0, 0]) / np.sqrt(2))
 
         # expand a three qubit state to the 3 qubit device
-        dev.state = np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2
-        dev.active_wires = {0, 1, 2}
+        dev._state = np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2
+        dev._active_wires = {0, 1, 2}
         dev.expand_state()
-        self.assertAllEqual(dev.state, np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2)
-
-    @pytest.mark.parametrize("ev", plf.WavefunctionDevice.observables)
-    def test_ev(self, ev, tol):
-        """Test that expectation values are calculated correctly"""
-        dev = plf.WavefunctionDevice(wires=2)
-
-        # start in the following initial state
-        dev.state = np.array([1, 0, 1, 1]) / np.sqrt(3)
-        dev.active_wires = {0, 1}
-
-        # get the equivalent pennylane operation class
-        op = getattr(qml.ops, ev)
-
-        O = test_operation_map[ev]
-
-        # calculate the expected output
-        if op.num_wires == 1 or op.num_wires <= 0:
-            expected_out = dev.state.conj() @ np.kron(O, I) @ dev.state
-        elif op.num_wires == 2:
-            expected_out = dev.state.conj() @ O @ dev.state
-
-        res = dev.ev(O, wires=[0])
-
-        # verify the device is now in the expected state
-        self.assertAllAlmostEqual(res, expected_out, delta=tol)
+        self.assertAllEqual(dev._state, np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2)
 
     def test_var(self, tol, qvm):
         """Tests for variance calculation"""
         dev = plf.WavefunctionDevice(wires=2)
-        dev.active_wires = {0}
 
         phi = 0.543
         theta = 0.6543
 
-        # test correct variance for <Z> of a rotated state
-        dev.apply("RX", wires=[0], par=[phi])
-        dev.apply("RY", wires=[0], par=[theta])
-        dev.pre_measure()
+        circuit_operations = [
+                    qml.RX(phi, wires=[0]),
+                    qml.RY(theta, wires=[0])
+                    ]
 
-        var = dev.var("PauliZ", [0], [])
+        O = qml.var(qml.PauliZ(wires=[0]))
+
+        observables = [O]
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+
+        # test correct variance for <Z> of a rotated state
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+
+        var = dev.var(qml.PauliZ(0))
         expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
 
         self.assertAlmostEqual(var, expected, delta=tol)
@@ -93,18 +64,26 @@ class TestWavefunctionBasic(BaseTest):
     def test_var_hermitian(self, tol, qvm):
         """Tests for variance calculation using an arbitrary Hermitian observable"""
         dev = plf.WavefunctionDevice(wires=2)
-        dev.active_wires = {0}
 
         phi = 0.543
         theta = 0.6543
 
         # test correct variance for <H> of a rotated state
         H = np.array([[4, -1 + 6j], [-1 - 6j, 2]])
-        dev.apply("RX", wires=[0], par=[phi])
-        dev.apply("RY", wires=[0], par=[theta])
-        dev.pre_measure()
 
-        var = dev.var("Hermitian", [0], [H])
+        circuit_operations = [
+                    qml.RX(phi, wires=[0]),
+                    qml.RY(theta, wires=[0])
+                    ]
+
+        O = qml.var(qml.Hermitian(H, wires=[0]))
+
+        observables = [O]
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+        
+        var = dev.var(qml.Hermitian(H, wires=[0]))
         expected = 0.5 * (
             2 * np.sin(2 * theta) * np.cos(phi) ** 2
             + 24 * np.sin(phi) * np.cos(phi) * (np.sin(theta) - np.cos(theta))
@@ -131,19 +110,26 @@ class TestWavefunctionBasic(BaseTest):
         # the list of wires to apply the operation to
         w = list(range(op.num_wires))
 
+        obs = qml.expval(qml.PauliZ(0))
         if op.par_domain == "A":
             # the parameter is an array
             if gate == "QubitUnitary":
-                p = [U]
+                p = np.array(U)
                 w = [0]
-                expected_out = apply_unitary(U, 3)
+                state = apply_unitary(U, 3)
             elif gate == "BasisState":
-                p = [np.array([1, 1, 1])]
-                expected_out = np.array([0, 0, 0, 0, 0, 0, 0, 1])
+                p = np.array([1, 1, 1])
+                state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
+                w = list(range(dev.num_wires))
+
+            circuit_graph = qml.CircuitGraph([
+                                           op(p, wires=w)
+                                           ] + [obs],
+                                            {}
+                                        )
         else:
             p = [0.432423, 2, 0.324][: op.num_params]
             fn = test_operation_map[gate]
-
             if callable(fn):
                 # if the default.qubit is an operation accepting parameters,
                 # initialise it using the parameters generated above.
@@ -153,24 +139,48 @@ class TestWavefunctionBasic(BaseTest):
                 O = fn
 
             # calculate the expected output
-            expected_out = apply_unitary(O, 3)
+            state = apply_unitary(O, 3)
+            # Creating the circuit graph using a parametrized operation
+            if p:
+                circuit_graph = qml.CircuitGraph([
+                                               op(*p, wires=w)
+                                               ] + [obs],
+                                                {}
+                                            )
+            # Creating the circuit graph using an operation that take no parameters
+            else:
+                circuit_graph = qml.CircuitGraph([
+                                               op(wires=w)
+                                               ] + [obs],
+                                                {}
+                                            )
 
-        dev.apply(gate, wires=w, par=p)
-        dev.pre_measure()
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+
+        res = dev.expval(obs)
 
         # verify the device is now in the expected state
-        self.assertAllAlmostEqual(dev.state, expected_out, delta=tol)
+        self.assertAllAlmostEqual(dev._state, state, delta=tol)
 
     def test_sample_values(self, tol):
         """Tests if the samples returned by sample have
         the correct values
         """
         dev = plf.WavefunctionDevice(wires=1, shots=10)
+        theta = 1.5708
 
-        dev.apply('RX', wires=[0], par=[1.5708])
-        dev.pre_measure()
+        circuit_operations = [
+                    qml.RX(theta, wires=[0])
+                    ]
 
-        s1 = dev.sample('PauliZ', [0], [])
+        O = qml.sample(qml.PauliZ(0))
+
+        observables = [O]
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+        dev._samples = dev.generate_samples()
+        s1 = dev.sample(O)
 
         # s1 should only contain 1 and -1
         self.assertAllAlmostEqual(s1**2, 1, delta=tol)
@@ -182,12 +192,22 @@ class TestWavefunctionBasic(BaseTest):
         dev = plf.WavefunctionDevice(wires=1, shots=1000_000)
         theta = 0.543
 
-        dev.apply('RX', wires=[0], par=[theta])
-        dev.pre_measure()
-
         A = np.array([[1, 2j], [-2j, 0]])
 
-        s1 = dev.sample('Hermitian', [0], [A])
+        circuit_operations = [
+                    qml.RX(theta, wires=[0])
+                    ]
+
+        O = qml.sample(qml.Hermitian(A, wires=[0]))
+
+        observables = [O]
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+
+        dev._samples = dev.generate_samples()
+
+        s1 = dev.sample(O)
 
         # s1 should only contain the eigenvalues of
         # the hermitian matrix
@@ -204,13 +224,9 @@ class TestWavefunctionBasic(BaseTest):
         """Tests if the samples of a multi-qubit Hermitian observable returned by sample have
         the correct values
         """
-        dev = plf.WavefunctionDevice(wires=2, shots=1000_000)
+        shots = 1000_000
+        dev = plf.WavefunctionDevice(wires=2, shots=shots)
         theta = 0.543
-
-        dev.apply('RX', wires=[0], par=[theta])
-        dev.apply('RY', wires=[1], par=[2*theta])
-        dev.apply('CNOT', wires=[0, 1], par=[])
-        dev.pre_measure()
 
         A = np.array([
             [1,     2j,   1-2j, 0.5j  ],
@@ -219,7 +235,22 @@ class TestWavefunctionBasic(BaseTest):
             [-0.5j, 1,    1.5+2j, -1  ]
         ])
 
-        s1 = dev.sample('Hermitian', [0, 1], [A])
+        circuit_operations = [
+                    qml.RX(theta, wires=[0]),
+                    qml.RY(2*theta, wires=[1]),
+                    qml.CNOT(wires=[0,1])
+                    ]
+
+        O = qml.sample(qml.Hermitian(A, wires=[0, 1]))
+
+        observables = [O]
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+
+        dev._samples = dev.generate_samples()
+
+        s1 = dev.sample(O)
 
         # s1 should only contain the eigenvalues of
         # the hermitian matrix
@@ -259,8 +290,10 @@ class TestWavefunctionIntegration(BaseTest):
 
         # construct and run the program
         circuit()
-        self.assertEqual(len(dev.program), 2)
-        self.assertEqual(str(dev.program), "H 0\nY 0\n")
+
+        # Consider the gates used for diagonalization as well
+        self.assertEqual(len(dev.program), 2 + 1)
+        self.assertEqual(str(dev.program), "H 0\nY 0\nH 0\n")
 
     def test_wavefunction_args(self):
         """Test that the wavefunction plugin requires correct arguments"""

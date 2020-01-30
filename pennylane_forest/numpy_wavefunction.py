@@ -26,11 +26,11 @@ import numpy as np
 from pyquil.pyqvm import PyQVM
 from pyquil.simulation import NumpyWavefunctionSimulator
 
-from .wavefunction import WavefunctionDevice
+from .device import ForestDevice
 from ._version import __version__
 
 
-class NumpyWavefunctionDevice(WavefunctionDevice):
+class NumpyWavefunctionDevice(ForestDevice):
     r"""NumpyWavefunction simulator device for PennyLane.
 
     Args:
@@ -44,18 +44,18 @@ class NumpyWavefunctionDevice(WavefunctionDevice):
     observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
 
     def __init__(self, wires, *, shots=1000, analytic=True, **kwargs):
-        super(WavefunctionDevice, self).__init__(wires, shots, analytic, **kwargs)
+        super().__init__(wires, shots, analytic, **kwargs)
         self.qc = PyQVM(n_qubits=wires, quantum_simulator_type=NumpyWavefunctionSimulator)
-        self.state = None
+        self._state = None
 
-    def pre_apply(self):
+    def apply(self, operations, **kwargs):
         self.reset()
         self.qc.wf_simulator.reset()
+        super().apply(operations, **kwargs)
 
-    def pre_measure(self):
         # TODO: currently, the PyQVM considers qubit 0 as the leftmost bit and therefore
         # returns amplitudes in the opposite of the Rigetti Lisp QVM (which considers qubit
         # 0 as the rightmost bit). This may change in the future, so in the future this
         # might need to get udpated to be similar to the pre_measure function of
         # pennylane_forest/wavefunction.py
-        self.state = self.qc.execute(self.prog).wf_simulator.wf.flatten()
+        self._state = self.qc.execute(self.prog).wf_simulator.wf.flatten()

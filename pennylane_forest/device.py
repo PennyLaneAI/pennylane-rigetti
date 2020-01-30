@@ -44,7 +44,7 @@ from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT
 # following gates are not supported by PennyLane
 from pyquil.gates import S, T, CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, CSWAP, ISWAP, PSWAP
 
-from pennylane import Device
+from pennylane import QubitDevice
 
 from ._version import __version__
 
@@ -64,7 +64,7 @@ def basis_state(par, *wires):
         list: list of PauliX matrix operators acting on each wire
     """
     # pylint: disable=unused-argument
-    return [X(w) for w, p in enumerate(par) if p == 1]
+    return [X(w) for w, p in zip(wires, par) if p == 1]
 
 
 def qubit_unitary(par, *wires):
@@ -151,7 +151,7 @@ pyquil_operation_map = {
     # the following gates are provided by the PL-Forest plugin
     "S": S,
     "T": T,
-    "CCNOT": CCNOT,
+    "Toffoli": CCNOT,
     "CPHASE": controlled_phase,
     "CSWAP": CSWAP,
     "ISWAP": ISWAP,
@@ -159,7 +159,7 @@ pyquil_operation_map = {
 }
 
 
-class ForestDevice(Device):
+class ForestDevice(QubitDevice):
     r"""Abstract Forest device for PennyLane.
 
     Args:
@@ -184,10 +184,10 @@ class ForestDevice(Device):
     author = "Josh Izaac"
 
     _operation_map = pyquil_operation_map
-    _capabilities = {"model": "qubit"}
+    _capabilities = {"model": "qubit", "tensor_observables": True}
 
     def __init__(self, wires, shots=1000, analytic=False,  **kwargs):
-        super().__init__(wires, shots)
+        super().__init__(wires, shots, analytic=analytic)
         self.analytic = analytic
         self.forest_url = kwargs.get("forest_url", pyquil_config.forest_url)
         self.qvm_url = kwargs.get("qvm_url", pyquil_config.qvm_url)
@@ -224,31 +224,46 @@ class ForestDevice(Device):
         """View the last evaluated Quil program"""
         return self.prog
 
-    def apply(self, operation, wires, par):
-        # pylint: disable=attribute-defined-outside-init
+    def remap_wires(self, wires):
+        """Use the wiring specified for the device if applicable.
+
+        Returns:
+            list: wires as integers corresponding to the wiring if applicable
+        """
         if hasattr(self, "wiring"):
-            qubits = [int(self.wiring[i]) for i in wires]
-        else:
-            qubits = [int(w) for w in wires]
+            return [int(self.wiring[i]) for i in wires]
 
-        self.prog += self._operation_map[operation](*par, *qubits)
+        return [int(w) for w in wires]
 
-        # keep track of the active wires. This is required, as the
-        # pyQuil wavefunction simulator creates qubits dynamically.
-        if wires:
-            self.active_wires = self.active_wires.union(set(wires))
-        else:
-            self.active_wires = set(range(self.num_wires))
+    def apply(self, operations, **kwargs):
+        # pylint: disable=attribute-defined-outside-init
+        rotations = kwargs.get("rotations", [])
 
-    @abc.abstractmethod
-    def pre_measure(self):  # pragma no cover
-        """Run the QVM or QPU"""
-        raise NotImplementedError
+        # Storing the active wires
+        self._active_wires = ForestDevice.active_wires(operations + rotations)
+
+        # Apply the circuit operations
+        for i, operation in enumerate(operations):
+            # number of wires on device
+            wires = self.remap_wires(operation.wires)
+            par = operation.parameters
+
+            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
+                raise DeviceError("Operation {} cannot be used after other Operations have already been applied "
+                                  "on a {} device.".format(operation.name, self.short_name))
+
+            self.prog += self._operation_map[operation.name](*par, *wires)
+
+        # Apply the circuit rotations
+        for operation in rotations:
+            wires = self.remap_wires(operation.wires)
+            par = operation.parameters
+            self.prog += self._operation_map[operation.name](*par, *wires)
 
     def reset(self):
         self.prog = Program()
-        self.active_wires = set()
-        self.state = None
+        self._active_wires = set()
+        self._state = None
 
     @property
     def operations(self):
@@ -327,3 +342,29 @@ class ForestDevice(Device):
         state_multi_index = np.transpose(tdot, inv_perm)
 
         return np.reshape(state_multi_index, 2 ** self.num_wires)
+
+    def probability(self, wires=None):
+        """Return the (marginal) probability of each computational basis
+        state from the last run of the device.
+
+        If no wires are specified, then all the basis states representable by
+        the device are considered and no marginalization takes place.
+
+        .. warning:: This method will have to be redefined for hardware devices, since it uses
+            the ``device._state`` attribute. This attribute might not be available for such devices.
+
+        Args:
+            wires (Sequence[int]): Sequence of wires to return
+                marginal probabilities for. Wires not provided
+                are traced out of the system.
+
+        Returns:
+            List[float]: list of the probabilities
+        """
+        if self._state is None:
+            return None
+
+        wires = wires or range(self.num_wires)
+        wires = self.remap_wires(wires)
+        prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
+        return prob
