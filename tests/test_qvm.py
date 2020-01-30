@@ -5,6 +5,7 @@ import logging
 
 import networkx as nx
 import pytest
+import re
 
 import pennylane as qml
 from pennylane import numpy as np
@@ -22,7 +23,9 @@ from flaky import flaky
 
 log = logging.getLogger(__name__)
 
-VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc]
+pattern = 'Aspen-.-[1-5]Q-.'
+
+VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)]
 
 
 class TestQVMBasic(BaseTest):

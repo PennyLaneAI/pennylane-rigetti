@@ -2,6 +2,7 @@
 Unit tests for the QPU device.
 """
 import logging
+import re
 
 import pytest
 import pyquil
@@ -13,7 +14,9 @@ from flaky import flaky
 
 log = logging.getLogger(__name__)
 
-VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc]
+pattern = 'Aspen-.-[1-5]Q-.'
+
+VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)]
 
 
 class TestQPUIntegration(BaseTest):
