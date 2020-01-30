@@ -181,15 +181,17 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
     @flaky(max_runs=10, min_passes=1)
-    def test_2q_gate_pauliz_pauliz_tensor(self):
+    @pytest.mark.parametrize("a", np.linspace(-0.5, 2, 6))
+    def test_2q_gate_pauliz_pauliz_tensor(self, a):
         device = np.random.choice(VALID_QPU_LATTICES)
         dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
                             symmetrize_readout="exhaustive", calibrate_readout="plus-eig", shots=QVM_SHOTS)
 
         @qml.qnode(dev_qpu)
-        def circuit():
-            qml.Hadamard(0)
+        def circuit(x):
+            qml.RY(x, wires=[0])
+            qml.Hadamard(wires=1)
             qml.CNOT(wires=[0, 1])
-            return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
+            return qml.expval(qml.PauliZ(0) @ qml.Identity(1))
 
-        assert np.allclose(circuit(), 1.0, atol=2e-2)
+        assert np.allclose(circuit(a), np.cos(a), atol=2e-2)
