@@ -136,6 +136,6 @@ class QVMDevice(ForestDevice):
     def generate_samples(self):
         if "pyqvm" in self.qc.name:
             return self.qc.run(self.prog)
-        else:
-            self.compiled = self.qc.compile(self.prog)
-            return self.qc.run(executable=self.compiled)
+
+        self.compiled = self.qc.compile(self.prog)
+        return self.qc.run(executable=self.compiled)
