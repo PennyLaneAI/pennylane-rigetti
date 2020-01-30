@@ -19,21 +19,19 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-import itertools
 import re
 
-import numpy as np
-
-from pennylane.variable import Variable
-from pennylane import DeviceError
 import networkx as nx
+
+from pennylane import DeviceError
+from pennylane.variable import Variable
 from pyquil import get_qc
 from pyquil.api._quantum_computer import _get_qvm_with_topology
 from pyquil.gates import MEASURE, RESET
 from pyquil.quil import Pragma, Program
 
-from .device import ForestDevice
 from ._version import __version__
+from .device import ForestDevice
 
 
 class QVMDevice(ForestDevice):
@@ -164,6 +162,9 @@ class QVMDevice(ForestDevice):
         self.prog.wrap_in_numshots_loop(self.shots)
 
     def apply_parametric_program(self, operations, **kwargs):
+        """Applies a parametric program by applying parametric
+        operation with symbolic parameters.
+        """
         # pylint: disable=attribute-defined-outside-init
         rotations = kwargs.get("rotations", [])
 
@@ -209,19 +210,19 @@ class QVMDevice(ForestDevice):
     def generate_samples(self):
         if "pyqvm" in self.qc.name:
             return self.qc.run(self.prog, memory_map=self._parameter_map)
+
+        if self.circuit_hash is None or not self.parametric_compilation:
+            # No hash provided or parametric compilation was set to False
+            # Will compile the program
+            compiled_program = self.qc.compile(self.prog)
+
+        elif self.circuit_hash not in self._compiled_program_dict:
+            # Store the compiled program with the corresponding hash
+            compiled_program = self.qc.compile(self.prog)
+            self._compiled_program_dict[self.circuit_hash] = compiled_program
+
         else:
-            if self.circuit_hash is None or not self.parametric_compilation:
-                # No hash provided or parametric compilation was set to False
-                # Will compile the program
-                compiled_program = self.qc.compile(self.prog)
+            # The program has been compiled already
+            compiled_program = self._compiled_program_dict[self.circuit_hash]
 
-            elif self.circuit_hash not in self._compiled_program_dict:
-                # Store the compiled program with the corresponding hash
-                compiled_program = self.qc.compile(self.prog)
-                self._compiled_program_dict[self.circuit_hash] = compiled_program
-
-            else:
-                # The program has been compiled already
-                compiled_program = self._compiled_program_dict[self.circuit_hash]
-
-            return self.qc.run(executable=compiled_program, memory_map=self._parameter_map)
+        return self.qc.run(executable=compiled_program, memory_map=self._parameter_map)
