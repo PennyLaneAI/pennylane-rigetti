@@ -6,6 +6,7 @@ import re
 
 import networkx as nx
 import pytest
+import re
 
 import pennylane as qml
 from pennylane import numpy as np
@@ -61,6 +62,7 @@ class TestQVMBasic(BaseTest):
 
         dev._samples = dev.generate_samples()
 
+
         res = np.array([dev.expval(O1), dev.expval(O2)])
 
         # below are the analytic expectation values for this circuit (trace should always be 1)
@@ -75,6 +77,19 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.expval(qml.PauliZ(wires=[0]))
         O2 = qml.expval(qml.PauliZ(wires=[1]))
+
+        circuit_graph = CircuitGraph([
+                                       qml.RX(theta, wires=[0]),
+                                       qml.RX(phi, wires=[1]),
+                                       qml.CNOT(wires=[0, 1])
+                                       ] +
+                                         [O1, O2],
+                                        {}
+                                    )
+
+        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+
+        dev._samples = dev.generate_samples()
 
         circuit_graph = CircuitGraph([
                                        qml.RX(theta, wires=[0]),
@@ -768,7 +783,7 @@ class TestQVMIntegration(BaseTest):
             circuit2(), np.vdot(out_state, obs @ out_state), delta=3 / np.sqrt(shots)
         )
 
-    @flaky(max_runs=5, min_passes=3)
+    @flaky(max_runs=5, min_passes=2)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
         """Test that the wavefunction plugin provides correct result for simple circuit.
@@ -833,7 +848,6 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
         """
-
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
 
         @qml.qnode(dev)

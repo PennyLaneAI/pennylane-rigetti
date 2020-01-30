@@ -181,7 +181,6 @@ class TestQPUBasic(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of  3 out of 5 runs was added.
         """
-
         device = np.random.choice(VALID_QPU_LATTICES)
         dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
                             symmetrize_readout="exhaustive", calibrate_readout="plus-eig", shots=QVM_SHOTS)
