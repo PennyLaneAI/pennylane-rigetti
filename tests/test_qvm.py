@@ -895,6 +895,8 @@ class TestQVMIntegration(BaseTest):
 
         # Using that True evaluates to 1
         number_of_true = sum(statements)
+        # Checks if all elements in the list were either ``True`` or ``False``
+        # In such a case we have compiled only one program
         length = 1 if (number_of_true == 6 or number_of_true == 0) else 2
         assert len(dev._compiled_program_dict.items()) == length
 
