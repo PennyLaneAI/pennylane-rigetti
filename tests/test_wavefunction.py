@@ -179,7 +179,7 @@ class TestWavefunctionBasic(BaseTest):
         circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
         s1 = dev.sample(O)
 
         # s1 should only contain 1 and -1
@@ -205,7 +205,7 @@ class TestWavefunctionBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         s1 = dev.sample(O)
 
@@ -248,7 +248,7 @@ class TestWavefunctionBasic(BaseTest):
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
-        dev.generate_samples()
+        dev._samples = dev.generate_samples()
 
         s1 = dev.sample(O)
 
