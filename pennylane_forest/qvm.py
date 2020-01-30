@@ -19,10 +19,7 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-import itertools
 import re
-
-import numpy as np
 
 import networkx as nx
 from pyquil import get_qc
