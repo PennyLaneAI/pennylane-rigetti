@@ -86,8 +86,16 @@ class QVMDevice(ForestDevice):
 
         if self.parametric_compilation:
             self._lookup_table = {}
+            """dict: stores circuit hashes associated with the corresponding compiled
+                programs."""
+
             self._parameter_map = {}
+            """dict: stores the string of symbolic parameters associated with
+                their numeric values."""
+
             self._parameter_reference_map = {}
+            """dict: stores the string of symbolic parameters associated with
+                their PyQuil memory references."""
 
         if analytic:
             raise ValueError("QVM device cannot be run in analytic=True mode.")

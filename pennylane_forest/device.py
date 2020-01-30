@@ -261,7 +261,11 @@ class ForestDevice(QubitDevice):
         This method serves as an auxiliary method to :meth:`~.ForestDevice.apply`.
 
         Args:
-            rotations (pennylane.Operation):
+            rotations (List[pennylane.Operation]): operations that rotate into the
+                measurement basis
+
+        Returns:
+            list: wires as integers corresponding to the wiring if applicable
         """
         rotation_operations = Program()
         for operation in rotations:
