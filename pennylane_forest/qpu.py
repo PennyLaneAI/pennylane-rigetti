@@ -69,6 +69,8 @@ class QPUDevice(QVMDevice):
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
         timeout (int): Number of seconds to wait for a response from the client.
+        parametric_compilation (bool): a boolean value of whether or not use parametric
+            compilation. It is True by default.
     """
     name = "Forest QPU Device"
     short_name = "forest.qpu"
@@ -86,9 +88,9 @@ class QPUDevice(QVMDevice):
         self.parametric_compilation = kwargs.get("parametric_compilation", True)
 
         if self.parametric_compilation:
-            self._lookup_table = {}
-            """dict: stores circuit hashes associated with the corresponding compiled
-                programs."""
+            self._compiled_program_dict = {}
+            """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
+                with the corresponding compiled programs."""
 
             self._parameter_map = {}
             """dict: stores the string of symbolic parameters associated with

@@ -68,6 +68,8 @@ class QVMDevice(ForestDevice):
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
         timeout (int): Number of seconds to wait for a response from the client.
+        parametric_compilation (bool): a boolean value of whether or not use parametric
+            compilation. It is True by default.
     """
     name = "Forest QVM Device"
     short_name = "forest.qvm"
@@ -86,7 +88,7 @@ class QVMDevice(ForestDevice):
         self.parametric_compilation = kwargs.get("parametric_compilation", True)
 
         if self.parametric_compilation:
-            self._lookup_table = {}
+            self._compiled_program_dict = {}
             """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
                 with the corresponding compiled programs."""
 
@@ -185,9 +187,9 @@ class QVMDevice(ForestDevice):
                     # corresponding symbolic parameter
                     parameter_string = "theta" + str(param.idx)
 
-                    # Create a new PyQuil memory reference and store it in the
-                    # parameter reference map if it was not done so already
                     if parameter_string not in self._parameter_map:
+                        # Create a new PyQuil memory reference and store it in the
+                        # parameter reference map if it was not done so already
                         current_ref = self.prog.declare(parameter_string, "REAL")
                         self._parameter_reference_map[parameter_string] = current_ref
 
@@ -208,18 +210,18 @@ class QVMDevice(ForestDevice):
         if "pyqvm" in self.qc.name:
             return self.qc.run(self.prog, memory_map=self._parameter_map)
         else:
-            # No hash provided or parametric compilation was set to False
-            # Will compile the program
             if self.circuit_hash is None or not self.parametric_compilation:
+                # No hash provided or parametric compilation was set to False
+                # Will compile the program
                 compiled_program = self.qc.compile(self.prog)
 
-            # Store the compiled program with the corresponding hash
-            elif self.circuit_hash not in self._lookup_table:
+            elif self.circuit_hash not in self._compiled_program_dict:
+                # Store the compiled program with the corresponding hash
                 compiled_program = self.qc.compile(self.prog)
-                self._lookup_table[self.circuit_hash] = compiled_program
+                self._compiled_program_dict[self.circuit_hash] = compiled_program
 
-            # The program has been compiled already
             else:
-                compiled_program = self._lookup_table[self.circuit_hash]
+                # The program has been compiled already
+                compiled_program = self._compiled_program_dict[self.circuit_hash]
 
             return self.qc.run(executable=compiled_program, memory_map=self._parameter_map)

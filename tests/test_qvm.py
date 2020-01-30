@@ -578,8 +578,8 @@ class TestParametricCompilation(BaseTest):
             m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
             dev.generate_samples()
 
-        assert dev.circuit_hash in dev._lookup_table
-        assert len(dev._lookup_table.items()) == 1
+        assert dev.circuit_hash in dev._compiled_program_dict
+        assert len(dev._compiled_program_dict.items()) == 1
         assert len(call_history) == 1
 
         # Testing that the compile() method was not called
@@ -590,8 +590,8 @@ class TestParametricCompilation(BaseTest):
                 m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
                 dev.generate_samples()
 
-            assert dev.circuit_hash in dev._lookup_table
-            assert len(dev._lookup_table.items()) == 1
+            assert dev.circuit_hash in dev._compiled_program_dict
+            assert len(dev._compiled_program_dict.items()) == 1
             assert len(call_history) == 1
 
     def test_circuit_hash_none_no_compiled_program_was_stored(self, qvm, monkeypatch):
@@ -627,7 +627,7 @@ class TestParametricCompilation(BaseTest):
             dev.generate_samples()
 
         assert dev.circuit_hash is None
-        assert len(dev._lookup_table.items()) == 0
+        assert len(dev._compiled_program_dict.items()) == 0
         assert len(call_history) == 1
 
     variable1 = Variable(1)
@@ -675,7 +675,7 @@ class TestParametricCompilation(BaseTest):
                 m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
                 dev.generate_samples()
 
-        assert len(dev._lookup_table.items()) == 1 
+        assert len(dev._compiled_program_dict.items()) == 1 
         assert len(call_history) == 1
 
     def test_apply_basis_state_raises_an_error_if_not_first(self):
@@ -849,7 +849,7 @@ class TestQVMIntegration(BaseTest):
         """Test that QVM device stores the compiled program correctly"""
         dev = qml.device("forest.qvm", device=device, timeout=100)
 
-        assert len(dev._lookup_table.items()) == 0
+        assert len(dev._compiled_program_dict.items()) == 0
 
         def circuit(params, wires):
             qml.Hadamard(0)
@@ -861,8 +861,8 @@ class TestQVMIntegration(BaseTest):
         qnodes = qml.map(circuit, obs_list, dev)
 
         qnodes([])
-        assert dev.circuit_hash in dev._lookup_table
-        assert len(dev._lookup_table.items()) == 1
+        assert dev.circuit_hash in dev._compiled_program_dict
+        assert len(dev._compiled_program_dict.items()) == 1
 
     @pytest.mark.parametrize("statements", [
                                             [True, True, True, True, True, True],
@@ -877,7 +877,7 @@ class TestQVMIntegration(BaseTest):
         """Test that QVM device stores the compiled program when the QNode is mutated correctly"""
         dev = qml.device("forest.qvm", device=device, timeout=100)
 
-        assert len(dev._lookup_table.items()) == 0
+        assert len(dev._compiled_program_dict.items()) == 0
 
         def circuit(params, wires, statement=None):
             if statement:
@@ -891,19 +891,19 @@ class TestQVMIntegration(BaseTest):
 
         for idx, stmt in enumerate(statements):
             qnodes[idx]([], statement=stmt)
-            assert dev.circuit_hash in dev._lookup_table
+            assert dev.circuit_hash in dev._compiled_program_dict
 
         # Using that True evaluates to 1
         number_of_true = sum(statements)
         length = 1 if (number_of_true == 6 or number_of_true == 0) else 2
-        assert len(dev._lookup_table.items()) == length
+        assert len(dev._compiled_program_dict.items()) == length
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_compiled_program_was_stored_mutable_qnode_with_loop(self, qvm, device):
         """Test that QVM device stores the compiled program when the QNode is mutated correctly"""
         dev = qml.device("forest.qvm", device=device, timeout=100)
 
-        assert len(dev._lookup_table.items()) == 0
+        assert len(dev._compiled_program_dict.items()) == 0
 
         def circuit(params, wires, rounds=1):
             for i in range(rounds):
@@ -917,9 +917,9 @@ class TestQVMIntegration(BaseTest):
 
         for idx, qnode in enumerate(qnodes):
             qnode([], rounds=idx)
-            assert dev.circuit_hash in dev._lookup_table
+            assert dev.circuit_hash in dev._compiled_program_dict
 
-        assert len(dev._lookup_table.items()) == len(qnodes)
+        assert len(dev._compiled_program_dict.items()) == len(qnodes)
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_compiled_program_was_used(self, qvm, device, monkeypatch):
@@ -949,8 +949,8 @@ class TestQVMIntegration(BaseTest):
         results = qnodes(params)
 
         assert len(call_history) == 0
-        assert dev.circuit_hash in dev._lookup_table
-        assert len(dev._lookup_table.items()) == 1
+        assert dev.circuit_hash in dev._compiled_program_dict
+        assert len(dev._compiled_program_dict.items()) == 1
 
     @flaky(max_runs=5, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
@@ -976,8 +976,8 @@ class TestQVMIntegration(BaseTest):
         results2 = qnodes2(params)
 
         assert np.allclose(results, results2, atol=1e-02, rtol=0)
-        assert dev.circuit_hash in dev._lookup_table
-        assert len(dev._lookup_table.items()) == 1
+        assert dev.circuit_hash in dev._compiled_program_dict
+        assert len(dev._compiled_program_dict.items()) == 1
 
     @flaky(max_runs=10, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
