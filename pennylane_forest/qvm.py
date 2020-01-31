@@ -66,7 +66,7 @@ class QVMDevice(ForestDevice):
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
         timeout (int): Number of seconds to wait for a response from the client.
-        parametric_compilation (bool): a boolean value of whether or not use parametric
+        parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation. It is True by default.
     """
     name = "Forest QVM Device"
@@ -82,6 +82,10 @@ class QVMDevice(ForestDevice):
         kwargs.pop("wires", None)
         analytic = kwargs.get("analytic", False)
         timeout = kwargs.pop("timeout", None)
+
+        self._compiled_program = None
+        """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
+        compilation is turned on, this will be a parametric program."""
 
         self.parametric_compilation = kwargs.get("parametric_compilation", True)
 
@@ -188,7 +192,7 @@ class QVMDevice(ForestDevice):
                     # corresponding symbolic parameter
                     parameter_string = "theta" + str(param.idx)
 
-                    if parameter_string not in self._parameter_map:
+                    if parameter_string not in self._parameter_reference_map:
                         # Create a new PyQuil memory reference and store it in the
                         # parameter reference map if it was not done so already
                         current_ref = self.prog.declare(parameter_string, "REAL")
@@ -213,16 +217,43 @@ class QVMDevice(ForestDevice):
 
         if self.circuit_hash is None or not self.parametric_compilation:
             # No hash provided or parametric compilation was set to False
-            # Will compile the program
-            compiled_program = self.qc.compile(self.prog)
+            # Compile the program
+            self._compiled_program = self.qc.compile(self.prog)
+            return self.qc.run(executable=self._compiled_program)
 
-        elif self.circuit_hash not in self._compiled_program_dict:
+        if self.circuit_hash not in self._compiled_program_dict:
+            # Compiling this specific program for the first time
             # Store the compiled program with the corresponding hash
-            compiled_program = self.qc.compile(self.prog)
-            self._compiled_program_dict[self.circuit_hash] = compiled_program
+            self._compiled_program_dict[self.circuit_hash] = self.qc.compile(self.prog)
 
-        else:
-            # The program has been compiled already
-            compiled_program = self._compiled_program_dict[self.circuit_hash]
+        # The program has been compiled, store as the latest compiled program
+        self._compiled_program = self._compiled_program_dict[self.circuit_hash]
+        samples = self.qc.run(executable=self._compiled_program, memory_map=self._parameter_map)
+        return samples
 
-        return self.qc.run(executable=compiled_program, memory_map=self._parameter_map)
+    @property
+    def compiled_program(self):
+        """Returns the latest program that was compiled for running.
+
+        If parametric compilation is turned on, this will be a parametric program.
+
+        The pyquil.ExecutableDesignator.program attribute stores the pyquil.Program
+        instance. If no program was compiled yet, this property returns None.
+
+        Returns:
+            Union[None, pyquil.ExecutableDesignator]: the latest compiled program
+        """
+        return self._compiled_program
+
+    def reset(self):
+        """Resets the device after the previous run.
+
+        Note:
+            The ``_compiled_program`` and the ``_compiled_program_dict`` attributes are
+            not reset such that these can be used upon multiple device execution.
+        """
+        super().reset()
+
+        if self.parametric_compilation:
+            self._parameter_map = {}
+            self._parameter_reference_map = {}

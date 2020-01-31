@@ -216,8 +216,9 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(circuit(a), np.cos(a), atol=2e-2)
 
     @flaky(max_runs=10, min_passes=1)
-    @pytest.mark.parametrize("a", np.linspace(-0.5, 2, 6))
-    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, a):
+    @pytest.mark.parametrize("a", np.linspace(-np.pi/2, 0, 3))
+    @pytest.mark.parametrize("b", np.linspace(0, np.pi/2, 3))
+    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, a, b):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         is turned off.
 
@@ -230,15 +231,20 @@ class TestQPUBasic(BaseTest):
                             parametric_compilation=False)
 
         @qml.qnode(dev_qpu)
-        def circuit(x):
+        def circuit(x, y):
             qml.RY(x, wires=[0])
-            qml.Hadamard(0)
-            qml.CNOT(wires=[0, 1])
+            qml.RY(y, wires=[1])
+            qml.CNOT(wires=[0,1])
             return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
 
-        assert np.allclose(circuit(a), np.cos(a), atol=2e-2)
+        analytic_value = np.cos(a/2)**2 * np.cos(b/2) ** 2\
+                        + np.cos(b/2) ** 2 * np.sin(a/2) ** 2\
+                        - np.cos(a/2) ** 2 * np.sin(b/2) ** 2\
+                        - np.sin(a/2) ** 2 * np.sin(b/2) ** 2
+
+        assert np.allclose(circuit(a, b), analytic_value, atol=2e-2)
         # Check that repeated calling of the QNode works correctly
-        assert np.allclose(circuit(a), np.cos(a), atol=2e-2)
+        assert np.allclose(circuit(a, b), analytic_value, atol=2e-2)
 
     def test_timeout_set_correctly(self, shots):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice

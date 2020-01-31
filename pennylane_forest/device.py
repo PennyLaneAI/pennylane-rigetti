@@ -278,8 +278,6 @@ class ForestDevice(QubitDevice):
         self.prog = Program()
         self._active_wires = set()
         self._state = None
-        self._parameter_map = {}
-        self._parameter_reference_map = {}
 
     @property
     def operations(self):
