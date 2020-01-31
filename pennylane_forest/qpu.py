@@ -97,7 +97,7 @@ class QPUDevice(QVMDevice):
                 with the corresponding compiled programs."""
 
             self._parameter_map = {}
-            """dict: stores the string of symbolic parameters associated with
+            """dict[str, float]: stores the string of symbolic parameters associated with
                 their numeric values. This map will be used to bind parameters in a parametric
                 program using PyQuil."""
 
