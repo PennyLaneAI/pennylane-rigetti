@@ -69,7 +69,7 @@ class QPUDevice(QVMDevice):
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
         timeout (int): Number of seconds to wait for a response from the client.
-        parametric_compilation (bool): a boolean value of whether or not to use parametric
+        parametric_compilation (bool): whether or not to use parametric compilation.
             compilation. It is True by default.
     """
     name = "Forest QPU Device"
