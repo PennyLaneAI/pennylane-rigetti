@@ -215,7 +215,7 @@ class TestQPUBasic(BaseTest):
         # Check that repeated calling of the QNode works correctly
         assert np.allclose(circuit(a), np.cos(a), atol=2e-2)
 
-    @flaky(max_runs=10, min_passes=1)
+    @flaky(max_runs=5, min_passes=3)
     @pytest.mark.parametrize("a", np.linspace(-np.pi/2, 0, 3))
     @pytest.mark.parametrize("b", np.linspace(0, np.pi/2, 3))
     def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, a, b):

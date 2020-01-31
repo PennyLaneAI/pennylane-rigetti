@@ -68,9 +68,9 @@ class QPUDevice(QVMDevice):
         compiler_url (str): the compiler server URL. Can also be set by the environment
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
-        timeout (int): Number of seconds to wait for a response from the client.
+        timeout (int): number of seconds to wait for a response from the client.
         parametric_compilation (bool): a boolean value of whether or not to use parametric
-            compilation. It is True by default.
+            compilation.
     """
     name = "Forest QPU Device"
     short_name = "forest.qpu"
@@ -98,12 +98,12 @@ class QPUDevice(QVMDevice):
                 with the corresponding compiled programs."""
 
             self._parameter_map = {}
-            """dict[string, float]: stores the string of symbolic parameters associated with
+            """dict[str, float]: stores the string of symbolic parameters associated with
                 their numeric values. This map will be used to bind parameters in a parametric
                 program using PyQuil."""
 
             self._parameter_reference_map = {}
-            """dict[string, pyquil.quilatom.MemoryReference]: stores the string of symbolic
+            """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
                 parameters associated with their PyQuil memory references."""
 
         timeout = kwargs.pop("timeout", None)
