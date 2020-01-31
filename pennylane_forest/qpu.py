@@ -98,13 +98,13 @@ class QPUDevice(QVMDevice):
                 with the corresponding compiled programs."""
 
             self._parameter_map = {}
-            """dict: stores the string of symbolic parameters associated with
+            """dict[string, float]: stores the string of symbolic parameters associated with
                 their numeric values. This map will be used to bind parameters in a parametric
                 program using PyQuil."""
 
             self._parameter_reference_map = {}
-            """dict: stores the string of symbolic parameters associated with
-                their PyQuil memory references."""
+            """dict[string, pyquil.quilatom.MemoryReference]: stores the string of symbolic
+                parameters associated with their PyQuil memory references."""
 
         timeout = kwargs.pop("timeout", None)
 

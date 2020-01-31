@@ -264,7 +264,7 @@ class ForestDevice(QubitDevice):
                 measurement basis
 
         Returns:
-            list: wires as integers corresponding to the wiring if applicable
+            pyquil.Program: the pyquil Program that specifies the corresponding rotations
         """
         rotation_operations = Program()
         for operation in rotations:
