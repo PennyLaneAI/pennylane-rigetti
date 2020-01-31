@@ -116,9 +116,14 @@ class TestMatVecProduct:
         wires = 3
         dev = ForestDevice(wires=wires, shots=1)
 
-        operation = qml.BasisState(np.array([1,0,0]), wires=list(range(wires)))
+        operation = qml.BasisState(np.array([1, 0, 0]), wires=list(range(wires)))
         queue = [qml.PauliX(0), operation]
-        with pytest.raises(qml.DeviceError, match="Operation {} cannot be used after other Operations have already been applied".format(operation.name)):
+        with pytest.raises(
+            qml.DeviceError,
+            match="Operation {} cannot be used after other Operations have already been applied".format(
+                operation.name
+            ),
+        ):
             dev.apply(queue)
 
     def test_apply_qubitstatesvector_raises_an_error_if_not_first(self):
@@ -127,7 +132,12 @@ class TestMatVecProduct:
         wires = 1
         dev = ForestDevice(wires=wires, shots=1)
 
-        operation = qml.QubitStateVector(np.array([1,0]), wires=list(range(wires)))
+        operation = qml.QubitStateVector(np.array([1, 0]), wires=list(range(wires)))
         queue = [qml.PauliX(0), operation]
-        with pytest.raises(qml.DeviceError, match="Operation {} cannot be used after other Operations have already been applied".format(operation.name)):
+        with pytest.raises(
+            qml.DeviceError,
+            match="Operation {} cannot be used after other Operations have already been applied".format(
+                operation.name
+            ),
+        ):
             dev.apply(queue)

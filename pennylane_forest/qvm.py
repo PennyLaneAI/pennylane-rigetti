@@ -181,8 +181,10 @@ class QVMDevice(ForestDevice):
             wires = self.remap_wires(operation.wires)
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
-                raise DeviceError("Operation {} cannot be used after other Operations have already been applied "
-                                  "on a {} device.".format(operation.name, self.short_name))
+                raise DeviceError(
+                    "Operation {} cannot be used after other Operations have already been applied "
+                    "on a {} device.".format(operation.name, self.short_name)
+                )
 
             # Prepare for parametric compilation
             par = []

@@ -15,8 +15,11 @@ from flaky import flaky
 
 log = logging.getLogger(__name__)
 
-pattern = 'Aspen-.-[1-5]Q-.'
-VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)]
+pattern = "Aspen-.-[1-5]Q-."
+VALID_QPU_LATTICES = [
+    qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)
+]
+
 
 class TestQPUIntegration(BaseTest):
     """Test the wavefunction simulator works correctly from the PennyLane frontend."""
@@ -25,7 +28,7 @@ class TestQPUIntegration(BaseTest):
 
     def test_load_qpu_device(self):
         """Test that the QPU device loads correctly"""
-        device = [qpu for qpu in VALID_QPU_LATTICES if '-2Q' in qpu][0]
+        device = [qpu for qpu in VALID_QPU_LATTICES if "-2Q" in qpu][0]
         dev = qml.device("forest.qpu", device=device, load_qc=False)
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 1024)
@@ -61,28 +64,34 @@ class TestQPUBasic(BaseTest):
     def test_no_readout_correction(self):
         """Test the QPU plugin with no readout correction"""
         device = np.random.choice(VALID_QPU_LATTICES)
-        dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                            symmetrize_readout=None, calibrate_readout=None)
-        qubit = 0   # just run program on the first qubit
+        dev_qpu = qml.device(
+            "forest.qpu",
+            device=device,
+            load_qc=False,
+            readout_error=[0.9, 0.75],
+            symmetrize_readout=None,
+            calibrate_readout=None,
+        )
+        qubit = 0  # just run program on the first qubit
 
         @qml.qnode(dev_qpu)
         def circuit_Xpl():
-            qml.RY(np.pi/2, wires=qubit)
+            qml.RY(np.pi / 2, wires=qubit)
             return qml.expval(qml.PauliX(qubit))
 
         @qml.qnode(dev_qpu)
         def circuit_Xmi():
-            qml.RY(-np.pi/2, wires=qubit)
+            qml.RY(-np.pi / 2, wires=qubit)
             return qml.expval(qml.PauliX(qubit))
 
         @qml.qnode(dev_qpu)
         def circuit_Ypl():
-            qml.RX(-np.pi/2, wires=qubit)
+            qml.RX(-np.pi / 2, wires=qubit)
             return qml.expval(qml.PauliY(qubit))
 
         @qml.qnode(dev_qpu)
         def circuit_Ymi():
-            qml.RX(np.pi/2, wires=qubit)
+            qml.RX(np.pi / 2, wires=qubit)
             return qml.expval(qml.PauliY(qubit))
 
         @qml.qnode(dev_qpu)
@@ -99,8 +108,14 @@ class TestQPUBasic(BaseTest):
         results_unavged = np.zeros((num_expts, 6))
 
         for i in range(num_expts):
-            results_unavged[i, :] = [circuit_Xpl(), circuit_Ypl(), circuit_Zpl(),
-                                     circuit_Xmi(), circuit_Ymi(), circuit_Zmi()]
+            results_unavged[i, :] = [
+                circuit_Xpl(),
+                circuit_Ypl(),
+                circuit_Zpl(),
+                circuit_Xmi(),
+                circuit_Ymi(),
+                circuit_Zmi(),
+            ]
 
         results = np.mean(results_unavged, axis=0)
 
@@ -110,28 +125,35 @@ class TestQPUBasic(BaseTest):
     def test_readout_correction(self):
         """Test the QPU plugin with readout correction"""
         device = np.random.choice(VALID_QPU_LATTICES)
-        dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig", timeout=100)
-        qubit = 0   # just run program on the first qubit
+        dev_qpu = qml.device(
+            "forest.qpu",
+            device=device,
+            load_qc=False,
+            readout_error=[0.9, 0.75],
+            symmetrize_readout="exhaustive",
+            calibrate_readout="plus-eig",
+            timeout=100,
+        )
+        qubit = 0  # just run program on the first qubit
 
         @qml.qnode(dev_qpu)
         def circuit_Xpl():
-            qml.RY(np.pi/2, wires=qubit)
+            qml.RY(np.pi / 2, wires=qubit)
             return qml.expval(qml.PauliX(qubit))
 
         @qml.qnode(dev_qpu)
         def circuit_Xmi():
-            qml.RY(-np.pi/2, wires=qubit)
+            qml.RY(-np.pi / 2, wires=qubit)
             return qml.expval(qml.PauliX(qubit))
 
         @qml.qnode(dev_qpu)
         def circuit_Ypl():
-            qml.RX(-np.pi/2, wires=qubit)
+            qml.RX(-np.pi / 2, wires=qubit)
             return qml.expval(qml.PauliY(qubit))
 
         @qml.qnode(dev_qpu)
         def circuit_Ymi():
-            qml.RX(np.pi/2, wires=qubit)
+            qml.RX(np.pi / 2, wires=qubit)
             return qml.expval(qml.PauliY(qubit))
 
         @qml.qnode(dev_qpu)
@@ -148,8 +170,14 @@ class TestQPUBasic(BaseTest):
         results_unavged = np.zeros((num_expts, 6))
 
         for i in range(num_expts):
-            results_unavged[i, :] = [circuit_Xpl(), circuit_Ypl(), circuit_Zpl(),
-                                     circuit_Xmi(), circuit_Ymi(), circuit_Zmi()]
+            results_unavged[i, :] = [
+                circuit_Xpl(),
+                circuit_Ypl(),
+                circuit_Zpl(),
+                circuit_Xmi(),
+                circuit_Ymi(),
+                circuit_Zmi(),
+            ]
 
         results = np.mean(results_unavged, axis=0)
 
@@ -164,12 +192,19 @@ class TestQPUBasic(BaseTest):
         """
 
         device = np.random.choice(VALID_QPU_LATTICES)
-        dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig", shots=QVM_SHOTS)
+        dev_qpu = qml.device(
+            "forest.qpu",
+            device=device,
+            load_qc=False,
+            readout_error=[0.9, 0.75],
+            symmetrize_readout="exhaustive",
+            calibrate_readout="plus-eig",
+            shots=QVM_SHOTS,
+        )
 
         @qml.qnode(dev_qpu)
         def circuit():
-            qml.RY(np.pi/2, wires=[0])
+            qml.RY(np.pi / 2, wires=[0])
             qml.CNOT(wires=[0, 1])
             return qml.expval(qml.PauliZ(0))
 
@@ -182,12 +217,19 @@ class TestQPUBasic(BaseTest):
         As the results coming from the qvm are stochastic, a constraint of  3 out of 5 runs was added.
         """
         device = np.random.choice(VALID_QPU_LATTICES)
-        dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig", shots=QVM_SHOTS)
+        dev_qpu = qml.device(
+            "forest.qpu",
+            device=device,
+            load_qc=False,
+            readout_error=[0.9, 0.75],
+            symmetrize_readout="exhaustive",
+            calibrate_readout="plus-eig",
+            shots=QVM_SHOTS,
+        )
 
         @qml.qnode(dev_qpu)
         def circuit():
-            qml.RY(np.pi/2, wires=[0])
+            qml.RY(np.pi / 2, wires=[0])
             qml.CNOT(wires=[0, 1])
             return qml.expval(qml.PauliZ(0) @ qml.Identity(1))
 
@@ -201,8 +243,15 @@ class TestQPUBasic(BaseTest):
         As the results coming from the qvm are stochastic, a constraint of  3 out of 5 runs was added.
         """
         device = np.random.choice(VALID_QPU_LATTICES)
-        dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig", shots=QVM_SHOTS)
+        dev_qpu = qml.device(
+            "forest.qpu",
+            device=device,
+            load_qc=False,
+            readout_error=[0.9, 0.75],
+            symmetrize_readout="exhaustive",
+            calibrate_readout="plus-eig",
+            shots=QVM_SHOTS,
+        )
 
         @qml.qnode(dev_qpu)
         def circuit(x):
@@ -216,8 +265,8 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(circuit(a), np.cos(a), atol=2e-2)
 
     @flaky(max_runs=5, min_passes=3)
-    @pytest.mark.parametrize("a", np.linspace(-np.pi/2, 0, 3))
-    @pytest.mark.parametrize("b", np.linspace(0, np.pi/2, 3))
+    @pytest.mark.parametrize("a", np.linspace(-np.pi / 2, 0, 3))
+    @pytest.mark.parametrize("b", np.linspace(0, np.pi / 2, 3))
     def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, a, b):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         is turned off.
@@ -226,21 +275,30 @@ class TestQPUBasic(BaseTest):
         """
 
         device = np.random.choice(VALID_QPU_LATTICES)
-        dev_qpu = qml.device('forest.qpu', device=device, load_qc=False, readout_error=[0.9, 0.75],
-                            symmetrize_readout="exhaustive", calibrate_readout="plus-eig", shots=QVM_SHOTS,
-                            parametric_compilation=False)
+        dev_qpu = qml.device(
+            "forest.qpu",
+            device=device,
+            load_qc=False,
+            readout_error=[0.9, 0.75],
+            symmetrize_readout="exhaustive",
+            calibrate_readout="plus-eig",
+            shots=QVM_SHOTS,
+            parametric_compilation=False,
+        )
 
         @qml.qnode(dev_qpu)
         def circuit(x, y):
             qml.RY(x, wires=[0])
             qml.RY(y, wires=[1])
-            qml.CNOT(wires=[0,1])
+            qml.CNOT(wires=[0, 1])
             return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
 
-        analytic_value = np.cos(a/2)**2 * np.cos(b/2) ** 2\
-                        + np.cos(b/2) ** 2 * np.sin(a/2) ** 2\
-                        - np.cos(a/2) ** 2 * np.sin(b/2) ** 2\
-                        - np.sin(a/2) ** 2 * np.sin(b/2) ** 2
+        analytic_value = (
+            np.cos(a / 2) ** 2 * np.cos(b / 2) ** 2
+            + np.cos(b / 2) ** 2 * np.sin(a / 2) ** 2
+            - np.cos(a / 2) ** 2 * np.sin(b / 2) ** 2
+            - np.sin(a / 2) ** 2 * np.sin(b / 2) ** 2
+        )
 
         assert np.allclose(circuit(a, b), analytic_value, atol=2e-2)
         # Check that repeated calling of the QNode works correctly

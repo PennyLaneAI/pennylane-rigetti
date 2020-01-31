@@ -198,11 +198,7 @@ class TestProgramConverter:
 
         a, b, c = 0.1, 0.2, 0.3
 
-        parameter_map = {
-            "alpha": a,
-            "beta": b,
-            "gamma": c,
-        }
+        parameter_map = {"alpha": a, "beta": b, "gamma": c}
 
         with OperationRecorder() as rec:
             load_program(program)(wires=range(2), parameter_map=parameter_map)
@@ -265,12 +261,7 @@ class TestProgramConverter:
 
         a, b, c, d = 0.1, 0.2, 0.3, 0.4
 
-        parameter_map = {
-            "alpha": a,
-            beta: b,
-            gamma: c,
-            "delta": d,
-        }
+        parameter_map = {"alpha": a, beta: b, gamma: c, "delta": d}
 
         with OperationRecorder() as rec:
             load_program(program)(wires=range(2), parameter_map=parameter_map)
@@ -714,10 +705,7 @@ class TestQuilConverter:
         with OperationRecorder() as rec:
             load_quil(quil_str)(wires=[0], parameter_map={"flag_register": flag})
 
-        expected_queue = [
-            qml.PauliX(0),
-            qml.Hadamard(0),
-        ]
+        expected_queue = [qml.PauliX(0), qml.Hadamard(0)]
 
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
@@ -830,11 +818,7 @@ class TestQuilConverter:
 
         a, b, c = 0.1, 0.2, 0.3
 
-        parameter_map = {
-            "alpha": a,
-            "beta": b,
-            "gamma": c,
-        }
+        parameter_map = {"alpha": a, "beta": b, "gamma": c}
 
         with OperationRecorder() as rec:
             load_quil(quil_str)(wires=range(2), parameter_map=parameter_map)
@@ -878,11 +862,7 @@ class TestQuilConverter:
 
         a, b, c = 0.1, 0.2, 0.3
 
-        parameter_map = {
-            "alpha": a,
-            "beta": b,
-            "gamma": c,
-        }
+        parameter_map = {"alpha": a, "beta": b, "gamma": c}
 
         with OperationRecorder() as rec:
             load_quil(quil_str)(wires=range(2), parameter_map=parameter_map)

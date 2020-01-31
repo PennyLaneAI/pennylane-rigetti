@@ -29,22 +29,26 @@ from flaky import flaky
 log = logging.getLogger(__name__)
 
 # Creating pattern for devices that have at most 5 qubits
-pattern = 'Aspen-.-[1-5]Q-.'
-VALID_QPU_LATTICES = [qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)]
+pattern = "Aspen-.-[1-5]Q-."
+VALID_QPU_LATTICES = [
+    qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)
+]
 
 
-compiled_program = 'DECLARE ro BIT[2]\n'\
-                    'PRAGMA INITIAL_REWIRING "PARTIAL"\n'\
-                    'CZ 1 0\n'\
-                    'RZ(0.432) 1\n'\
-                    'MEASURE 1 ro[0]\n'\
-                    'MEASURE 0 ro[1]\n'\
-                    'HALT\n'
-
+compiled_program = (
+    "DECLARE ro BIT[2]\n"
+    'PRAGMA INITIAL_REWIRING "PARTIAL"\n'
+    "CZ 1 0\n"
+    "RZ(0.432) 1\n"
+    "MEASURE 1 ro[0]\n"
+    "MEASURE 0 ro[1]\n"
+    "HALT\n"
+)
 
 
 class TestQVMBasic(BaseTest):
     """Unit tests for the QVM simulator."""
+
     # pylint: disable=protected-access
 
     def test_identity_expectation(self, shots, qvm, compiler):
@@ -57,21 +61,13 @@ class TestQVMBasic(BaseTest):
         O1 = qml.expval(qml.Identity(wires=[0]))
         O2 = qml.expval(qml.Identity(wires=[1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(theta, wires=[0]),
-                                       qml.RX(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ],
-                                         [
-                                        O1,
-                                        O2
-                                        ]
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2]
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
         dev._samples = dev.generate_samples()
-
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
 
@@ -88,14 +84,10 @@ class TestQVMBasic(BaseTest):
         O1 = qml.expval(qml.PauliZ(wires=[0]))
         O2 = qml.expval(qml.PauliZ(wires=[1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(theta, wires=[0]),
-                                       qml.RX(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ] +
-                                         [O1, O2],
-                                        {}
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
+            {},
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -117,15 +109,10 @@ class TestQVMBasic(BaseTest):
         O1 = qml.expval(qml.PauliX(wires=[0]))
         O2 = qml.expval(qml.PauliX(wires=[1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RY(theta, wires=[0]),
-                                       qml.RY(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ]
-                                     +
-                                     [O1, O2],
-                                    {}
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
+            {},
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -146,14 +133,10 @@ class TestQVMBasic(BaseTest):
         O1 = qml.expval(qml.PauliY(wires=[0]))
         O2 = qml.expval(qml.PauliY(wires=[1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(theta, wires=[0]),
-                                       qml.RX(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ] +
-                                         [O1, O2],
-                                        {}
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
+            {},
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -175,14 +158,10 @@ class TestQVMBasic(BaseTest):
         O1 = qml.expval(qml.Hadamard(wires=[0]))
         O2 = qml.expval(qml.Hadamard(wires=[1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RY(theta, wires=[0]),
-                                       qml.RY(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ] +
-                                         [O1, O2],
-                                        {}
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
+            {},
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -205,14 +184,10 @@ class TestQVMBasic(BaseTest):
         O1 = qml.expval(qml.Hermitian(H, wires=[0]))
         O2 = qml.expval(qml.Hermitian(H, wires=[1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RY(theta, wires=[0]),
-                                       qml.RY(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ] +
-                                         [O1, O2],
-                                        {}
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
+            {},
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -248,14 +223,9 @@ class TestQVMBasic(BaseTest):
         dev = plf.QVMDevice(device="2q-qvm", shots=10 * shots)
         O1 = qml.expval(qml.Hermitian(A, wires=[0, 1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RY(theta, wires=[0]),
-                                       qml.RY(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ] +
-                                         [O1],
-                                        {}
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1], {}
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -283,13 +253,7 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.var(qml.PauliZ(wires=[0]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(phi, wires=[0]),
-                                       qml.RY(theta, wires=[0]),
-                                       ] +
-                                         [O1],
-                                        {}
-                                    )
+        circuit_graph = CircuitGraph([qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])] + [O1], {})
 
         # test correct variance for <Z> of a rotated state
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -312,13 +276,7 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.var(qml.Hermitian(A, wires=[0]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(phi, wires=[0]),
-                                       qml.RY(theta, wires=[0]),
-                                       ] +
-                                         [O1],
-                                        {}
-                                    )
+        circuit_graph = CircuitGraph([qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])] + [O1], {})
 
         # test correct variance for <A> of a rotated state
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -364,13 +322,9 @@ class TestQVMBasic(BaseTest):
                 state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
                 w = list(range(dev.num_wires))
 
-            circuit_graph = CircuitGraph([
-                                           op(p, wires=w)
-                                           ] + [obs],
-                                            {}
-                                        )
+            circuit_graph = CircuitGraph([op(p, wires=w)] + [obs], {})
         else:
-            p = [0.432423, 2, 0.324][: op.num_params]
+            p = [0.432_423, 2, 0.324][: op.num_params]
             fn = test_operation_map[gate]
             if callable(fn):
                 # if the default.qubit is an operation accepting parameters,
@@ -384,18 +338,10 @@ class TestQVMBasic(BaseTest):
             state = apply_unitary(O, 3)
             # Creating the circuit graph using a parametrized operation
             if p:
-                circuit_graph = CircuitGraph([
-                                               op(*p, wires=w)
-                                               ] + [obs],
-                                                {}
-                                            )
+                circuit_graph = CircuitGraph([op(*p, wires=w)] + [obs], {})
             # Creating the circuit graph using an operation that take no parameters
             else:
-                circuit_graph = CircuitGraph([
-                                               op(wires=w)
-                                               ] + [obs],
-                                                {}
-                                            )
+                circuit_graph = CircuitGraph([op(wires=w)] + [obs], {})
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -417,12 +363,7 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.expval(qml.PauliZ(wires=[0]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(1.5708, wires=[0]),
-                                       ] +
-                                         [O1],
-                                        {}
-                                    )
+        circuit_graph = CircuitGraph([qml.RX(1.5708, wires=[0])] + [O1], {})
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -431,27 +372,22 @@ class TestQVMBasic(BaseTest):
         s1 = dev.sample(O1)
 
         # s1 should only contain 1 and -1
-        self.assertAllAlmostEqual(s1**2, 1, delta=tol)
-        self.assertAllAlmostEqual(s1, 1-2*dev._samples[:,0], delta=tol)
+        self.assertAllAlmostEqual(s1 ** 2, 1, delta=tol)
+        self.assertAllAlmostEqual(s1, 1 - 2 * dev._samples[:, 0], delta=tol)
 
     def test_sample_values_hermitian(self, qvm, tol):
         """Tests if the samples of a Hermitian observable returned by sample have
         the correct values
         """
         theta = 0.543
-        shots = 1000_000
+        shots = 1_000_000
         A = np.array([[1, 2j], [-2j, 0]])
 
         dev = plf.QVMDevice(device="1q-qvm", shots=shots)
 
         O1 = qml.sample(qml.Hermitian(A, wires=[0]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(theta, wires=[0]),
-                                       ] +
-                                         [O1],
-                                     {}
-                                    )
+        circuit_graph = CircuitGraph([qml.RX(theta, wires=[0])] + [O1], {})
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -465,37 +401,39 @@ class TestQVMBasic(BaseTest):
         assert np.allclose(sorted(list(set(s1))), sorted(eigvals), atol=tol, rtol=0)
 
         # the analytic mean is 2*sin(theta)+0.5*cos(theta)+0.5
-        assert np.allclose(np.mean(s1), 2*np.sin(theta)+0.5*np.cos(theta)+0.5, atol=0.1, rtol=0)
+        assert np.allclose(
+            np.mean(s1), 2 * np.sin(theta) + 0.5 * np.cos(theta) + 0.5, atol=0.1, rtol=0
+        )
 
         # the analytic variance is 0.25*(sin(theta)-4*cos(theta))^2
-        assert np.allclose(np.var(s1), 0.25*(np.sin(theta)-4*np.cos(theta))**2, atol=0.1, rtol=0)
+        assert np.allclose(
+            np.var(s1), 0.25 * (np.sin(theta) - 4 * np.cos(theta)) ** 2, atol=0.1, rtol=0
+        )
 
     def test_sample_values_hermitian_multi_qubit(self, qvm, tol):
         """Tests if the samples of a multi-qubit Hermitian observable returned by sample have
         the correct values
         """
         theta = 0.543
-        shots = 100000
+        shots = 100_000
 
-        A = np.array([
-            [1,     2j,   1-2j, 0.5j  ],
-            [-2j,   0,    3+4j, 1     ],
-            [1+2j,  3-4j, 0.75, 1.5-2j],
-            [-0.5j, 1,    1.5+2j, -1  ]
-        ])
+        A = np.array(
+            [
+                [1, 2j, 1 - 2j, 0.5j],
+                [-2j, 0, 3 + 4j, 1],
+                [1 + 2j, 3 - 4j, 0.75, 1.5 - 2j],
+                [-0.5j, 1, 1.5 + 2j, -1],
+            ]
+        )
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
         O1 = qml.sample(qml.Hermitian(A, wires=[0, 1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(theta, wires=[0]),
-                                       qml.RY(2*theta, wires=[1]),
-                                       qml.CNOT(wires=[0, 1]),
-                                       ] +
-                                         [O1],
-                                     {}
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RX(theta, wires=[0]), qml.RY(2 * theta, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1],
+            {},
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -509,24 +447,27 @@ class TestQVMBasic(BaseTest):
         assert np.allclose(sorted(list(set(s1))), sorted(eigvals), atol=tol, rtol=0)
 
         # make sure the mean matches the analytic mean
-        expected = (88*np.sin(theta) + 24*np.sin(2*theta) - 40*np.sin(3*theta)
-            + 5*np.cos(theta) - 6*np.cos(2*theta) + 27*np.cos(3*theta) + 6)/32
+        expected = (
+            88 * np.sin(theta)
+            + 24 * np.sin(2 * theta)
+            - 40 * np.sin(3 * theta)
+            + 5 * np.cos(theta)
+            - 6 * np.cos(2 * theta)
+            + 27 * np.cos(3 * theta)
+            + 6
+        ) / 32
         assert np.allclose(np.mean(s1), expected, atol=0.1, rtol=0)
 
-    @pytest.mark.parametrize("shots", list(range(0,-10, -1)))
+    @pytest.mark.parametrize("shots", list(range(0, -10, -1)))
     def test_raise_error_if_shots_is_not_positive(self, shots):
         """Test that instantiating a QVMDevice if the number of shots is not a postivie
         integer raises an error"""
-        with pytest.raises(
-            ValueError, match="Number of shots must be a positive integer."
-        ):
+        with pytest.raises(ValueError, match="Number of shots must be a positive integer."):
             dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
     def test_raise_error_if_analytic_true(self, shots):
         """Test that instantiating a QVMDevice in analytic=True mode raises an error"""
-        with pytest.raises(
-            ValueError, match="QVM device cannot be run in analytic=True mode."
-        ):
+        with pytest.raises(ValueError, match="QVM device cannot be run in analytic=True mode."):
             dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
 
     def test_raise_error_if_qubits_not_indicated(self, shots):
@@ -567,16 +508,9 @@ class TestQVMBasic(BaseTest):
         O1 = qml.expval(qml.Identity(wires=[0]))
         O2 = qml.expval(qml.Identity(wires=[1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(theta, wires=[0]),
-                                       qml.RX(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ],
-                                         [
-                                        O1,
-                                        O2
-                                        ]
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2]
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
         dev.generate_samples()
@@ -593,17 +527,13 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.expval(qml.PauliZ(wires=[0]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RZ(theta, wires=[0]),
-                                       qml.CZ(wires=[0, 1])
-                                       ],
-                                         [O1]
-                                    )
+        circuit_graph = CircuitGraph([qml.RZ(theta, wires=[0]), qml.CZ(wires=[0, 1])], [O1])
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
         dev.generate_samples()
 
         dev.compiled_program.program == compiled_program
+
 
 class TestParametricCompilation(BaseTest):
     """Test that parametric compilation works fine and the same program only compiles once."""
@@ -617,13 +547,9 @@ class TestParametricCompilation(BaseTest):
         O1 = qml.expval(qml.Identity(wires=[0]))
         O2 = qml.expval(qml.Identity(wires=[1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(theta, wires=[0]),
-                                       qml.RX(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ],
-                                         [O1,O2]
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2]
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -662,16 +588,9 @@ class TestParametricCompilation(BaseTest):
         O1 = qml.expval(qml.Identity(wires=[0]))
         O2 = qml.expval(qml.Identity(wires=[1]))
 
-        circuit_graph = CircuitGraph([
-                                       qml.RX(theta, wires=[0]),
-                                       qml.RX(phi, wires=[1]),
-                                       qml.CNOT(wires=[0, 1])
-                                       ],
-                                         [
-                                        O1,
-                                        O2
-                                        ]
-                                    )
+        circuit_graph = CircuitGraph(
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2]
+        )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -691,16 +610,12 @@ class TestParametricCompilation(BaseTest):
     variable1 = Variable(1)
     variable2 = Variable(2)
 
-    multiple_symbolic_queue = [
-                        ([
-                            qml.RX(variable1, wires=[0]),
-                            qml.RX(variable2, wires=[1])
-                            ],
-                         []),
-                        ]
+    multiple_symbolic_queue = [([qml.RX(variable1, wires=[0]), qml.RX(variable2, wires=[1])], [])]
 
     @pytest.mark.parametrize("queue, observable_queue", multiple_symbolic_queue)
-    def test_parametric_compilation_with_numeric_and_symbolic_queue(self, queue, observable_queue, monkeypatch):
+    def test_parametric_compilation_with_numeric_and_symbolic_queue(
+        self, queue, observable_queue, monkeypatch
+    ):
         """Tests that a program containing numeric and symbolic variables as well is only compiled once."""
 
         Variable.free_param_values = {}
@@ -708,15 +623,15 @@ class TestParametricCompilation(BaseTest):
 
         dev._circuit_hash = None
 
-        number_of_runs = 10 
+        number_of_runs = 10
 
         first = True
 
         call_history = []
         for run_idx in range(number_of_runs):
-            Variable.free_param_values[1] = 0.232 *run_idx
-            Variable.free_param_values[2] = 0.8764 *run_idx 
-            circuit_graph = CircuitGraph(queue,observable_queue)
+            Variable.free_param_values[1] = 0.232 * run_idx
+            Variable.free_param_values[2] = 0.8764 * run_idx
+            circuit_graph = CircuitGraph(queue, observable_queue)
 
             dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -727,13 +642,12 @@ class TestParametricCompilation(BaseTest):
                 # Check that we are still producing the same circuit hash
                 assert dev._circuit_hash == circuit_graph.hash
 
-
             with monkeypatch.context() as m:
                 m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
                 m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
                 dev.generate_samples()
 
-        assert len(dev._compiled_program_dict.items()) == 1 
+        assert len(dev._compiled_program_dict.items()) == 1
         assert len(call_history) == 1
 
     def test_apply_basis_state_raises_an_error_if_not_first(self):
@@ -741,10 +655,14 @@ class TestParametricCompilation(BaseTest):
         applied as the first operation."""
         dev = qml.device("forest.qvm", device="3q-qvm", parametric_compilation=True)
 
-
-        operation = qml.BasisState(np.array([1,0,0]), wires=list(range(3)))
+        operation = qml.BasisState(np.array([1, 0, 0]), wires=list(range(3)))
         queue = [qml.PauliX(0), operation]
-        with pytest.raises(qml.DeviceError, match="Operation {} cannot be used after other Operations have already been applied".format(operation.name)):
+        with pytest.raises(
+            qml.DeviceError,
+            match="Operation {} cannot be used after other Operations have already been applied".format(
+                operation.name
+            ),
+        ):
             dev.apply(queue)
 
     def test_apply_qubitstatesvector_raises_an_error_if_not_first(self):
@@ -752,10 +670,16 @@ class TestParametricCompilation(BaseTest):
         applied as the first operation."""
         dev = qml.device("forest.qvm", device="2q-qvm", parametric_compilation=True)
 
-        operation = qml.QubitStateVector(np.array([1,0]), wires=list(range(2)))
+        operation = qml.QubitStateVector(np.array([1, 0]), wires=list(range(2)))
         queue = [qml.PauliX(0), operation]
-        with pytest.raises(qml.DeviceError, match="Operation {} cannot be used after other Operations have already been applied".format(operation.name)):
+        with pytest.raises(
+            qml.DeviceError,
+            match="Operation {} cannot be used after other Operations have already been applied".format(
+                operation.name
+            ),
+        ):
             dev.apply(queue)
+
 
 class TestQVMIntegration(BaseTest):
     """Test the QVM simulator works correctly from the PennyLane frontend."""
@@ -833,7 +757,7 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
         """
-        shots = 100000
+        shots = 100_000
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
 
         a = 0.543
@@ -861,7 +785,7 @@ class TestQVMIntegration(BaseTest):
 
         @qml.qnode(dev)
         def circuit():
-            qml.RY(np.pi/2, wires=[0])
+            qml.RY(np.pi / 2, wires=[0])
             qml.CNOT(wires=[0, 1])
             return qml.expval(qml.PauliZ(0) @ qml.Identity(1))
 
@@ -878,7 +802,7 @@ class TestQVMIntegration(BaseTest):
 
         @qml.qnode(dev)
         def circuit():
-            qml.RY(np.pi/2, wires=[0])
+            qml.RY(np.pi / 2, wires=[0])
             qml.CNOT(wires=[0, 1])
             return qml.expval(qml.PauliZ(0) @ qml.Identity(1))
 
@@ -921,16 +845,21 @@ class TestQVMIntegration(BaseTest):
         assert dev.circuit_hash in dev._compiled_program_dict
         assert len(dev._compiled_program_dict.items()) == 1
 
-    @pytest.mark.parametrize("statements", [
-                                            [True, True, True, True, True, True],
-                                            [True, False, True, False, True, False],
-                                            [True, False, False, False, True, False],
-                                            [False, False, False, False, False, True],
-                                            [True, False, False, False, False, False],
-                                            [False, False, False, False, False, False],
-                                            ])
+    @pytest.mark.parametrize(
+        "statements",
+        [
+            [True, True, True, True, True, True],
+            [True, False, True, False, True, False],
+            [True, False, False, False, True, False],
+            [False, False, False, False, False, True],
+            [True, False, False, False, False, False],
+            [False, False, False, False, False, False],
+        ],
+    )
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
-    def test_compiled_program_was_stored_mutable_qnode_with_if_statement(self, qvm, device, statements):
+    def test_compiled_program_was_stored_mutable_qnode_with_if_statement(
+        self, qvm, device, statements
+    ):
         """Test that QVM device stores the compiled program when the QNode is mutated correctly"""
         dev = qml.device("forest.qvm", device=device, timeout=100)
 
@@ -997,12 +926,11 @@ class TestQVMIntegration(BaseTest):
         # For the first evaluation, use the real compile method
         qnodes[0](params)
 
-
         call_history = []
         with monkeypatch.context() as m:
             m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
 
-            for i in range(1,number_of_qnodes):
+            for i in range(1, number_of_qnodes):
                 qnodes[i](params)
 
         # Then use the mocked one to see if it was called

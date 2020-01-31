@@ -248,8 +248,10 @@ class ForestDevice(QubitDevice):
             par = operation.parameters
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
-                raise DeviceError("Operation {} cannot be used after other Operations have already "
-                                  "been applied on a {} device.".format(operation.name, self.short_name))
+                raise DeviceError(
+                    "Operation {} cannot be used after other Operations have already "
+                    "been applied on a {} device.".format(operation.name, self.short_name)
+                )
             self.prog += self._operation_map[operation.name](*par, *wires)
 
         self.prog += self.apply_rotations(rotations)
