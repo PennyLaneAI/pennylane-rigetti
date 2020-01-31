@@ -70,7 +70,6 @@ class QPUDevice(QVMDevice):
             Default value is ``"http://127.0.0.1:6000"``.
         timeout (int): Number of seconds to wait for a response from the client.
         parametric_compilation (bool): whether or not to use parametric compilation.
-            compilation. It is True by default.
     """
     name = "Forest QPU Device"
     short_name = "forest.qpu"
