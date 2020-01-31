@@ -1,4 +1,4 @@
 pyquil>=2.16
-git+https://github.com/XanaduAI/pennylane.git#egg=pennylane
+pennylane>=0.6
 networkx
 flaky
