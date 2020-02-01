@@ -30,7 +30,6 @@ Code details
 ~~~~~~~~~~~~
 """
 import uuid
-import abc
 
 import numpy as np
 
@@ -44,7 +43,7 @@ from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT
 # following gates are not supported by PennyLane
 from pyquil.gates import S, T, CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, CSWAP, ISWAP, PSWAP
 
-from pennylane import QubitDevice
+from pennylane import QubitDevice, DeviceError
 
 from ._version import __version__
 
@@ -186,7 +185,7 @@ class ForestDevice(QubitDevice):
     _operation_map = pyquil_operation_map
     _capabilities = {"model": "qubit", "tensor_observables": True}
 
-    def __init__(self, wires, shots=1000, analytic=False,  **kwargs):
+    def __init__(self, wires, shots=1000, analytic=False, **kwargs):
         super().__init__(wires, shots, analytic=analytic)
         self.analytic = analytic
         self.forest_url = kwargs.get("forest_url", pyquil_config.forest_url)
@@ -244,21 +243,38 @@ class ForestDevice(QubitDevice):
 
         # Apply the circuit operations
         for i, operation in enumerate(operations):
-            # number of wires on device
+            # map the operation wires to the physical device qubits
             wires = self.remap_wires(operation.wires)
             par = operation.parameters
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
-                raise DeviceError("Operation {} cannot be used after other Operations have already been applied "
-                                  "on a {} device.".format(operation.name, self.short_name))
-
+                raise DeviceError(
+                    "Operation {} cannot be used after other Operations have already "
+                    "been applied on a {} device.".format(operation.name, self.short_name)
+                )
             self.prog += self._operation_map[operation.name](*par, *wires)
 
-        # Apply the circuit rotations
+        self.prog += self.apply_rotations(rotations)
+
+    def apply_rotations(self, rotations):
+        """Apply the circuit rotations.
+
+        This method serves as an auxiliary method to :meth:`~.ForestDevice.apply`.
+
+        Args:
+            rotations (List[pennylane.Operation]): operations that rotate into the
+                measurement basis
+
+        Returns:
+            pyquil.Program: the pyquil Program that specifies the corresponding rotations
+        """
+        rotation_operations = Program()
         for operation in rotations:
             wires = self.remap_wires(operation.wires)
             par = operation.parameters
-            self.prog += self._operation_map[operation.name](*par, *wires)
+            rotation_operations += self._operation_map[operation.name](*par, *wires)
+
+        return rotation_operations
 
     def reset(self):
         self.prog = Program()

@@ -22,13 +22,16 @@ Code details
 import re
 
 import networkx as nx
+
+from pennylane import DeviceError
+from pennylane.variable import Variable
 from pyquil import get_qc
 from pyquil.api._quantum_computer import _get_qvm_with_topology
 from pyquil.gates import MEASURE, RESET
 from pyquil.quil import Pragma, Program
 
-from .device import ForestDevice
 from ._version import __version__
+from .device import ForestDevice
 
 
 class QVMDevice(ForestDevice):
@@ -62,6 +65,9 @@ class QVMDevice(ForestDevice):
         compiler_url (str): the compiler server URL. Can also be set by the environment
             variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
+        timeout (int): number of seconds to wait for a response from the client.
+        parametric_compilation (bool): a boolean value of whether or not to use parametric
+            compilation.
     """
     name = "Forest QVM Device"
     short_name = "forest.qvm"
@@ -75,6 +81,27 @@ class QVMDevice(ForestDevice):
         # ignore any 'wires' keyword argument passed to the device
         kwargs.pop("wires", None)
         analytic = kwargs.get("analytic", False)
+        timeout = kwargs.pop("timeout", None)
+
+        self._compiled_program = None
+        """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
+        compilation is turned on, this will be a parametric program."""
+
+        self.parametric_compilation = kwargs.get("parametric_compilation", True)
+
+        if self.parametric_compilation:
+            self._compiled_program_dict = {}
+            """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
+                with the corresponding compiled programs."""
+
+            self._parameter_map = {}
+            """dict[str, float]: stores the string of symbolic parameters associated with
+                their numeric values. This map will be used to bind parameters in a parametric
+                program using PyQuil."""
+
+            self._parameter_reference_map = {}
+            """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
+                parameters associated with their PyQuil memory references."""
 
         if analytic:
             raise ValueError("QVM device cannot be run in analytic=True mode.")
@@ -110,14 +137,19 @@ class QVMDevice(ForestDevice):
         elif isinstance(device, str):
             self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
 
+        if timeout is not None:
+            self.qc.compiler.client.timeout = timeout
+
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
-        self.compiled = None
 
     def apply(self, operations, **kwargs):
         """Run the QVM"""
         # pylint: disable=attribute-defined-outside-init
-        super().apply(operations, **kwargs)
+        if self.parametric_compilation and "pyqvm" not in self.qc.name:
+            self.apply_parametric_program(operations, **kwargs)
+        else:
+            super().apply(operations, **kwargs)
 
         prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
 
@@ -133,9 +165,97 @@ class QVMDevice(ForestDevice):
 
         self.prog.wrap_in_numshots_loop(self.shots)
 
+    def apply_parametric_program(self, operations, **kwargs):
+        """Applies a parametric program by applying parametric
+        operation with symbolic parameters.
+        """
+        # pylint: disable=attribute-defined-outside-init
+        rotations = kwargs.get("rotations", [])
+
+        # Storing the active wires
+        self._active_wires = ForestDevice.active_wires(operations + rotations)
+
+        # Apply the circuit operations
+        for i, operation in enumerate(operations):
+            # map the operation wires to the physical device qubits
+            wires = self.remap_wires(operation.wires)
+
+            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
+                raise DeviceError(
+                    "Operation {} cannot be used after other Operations have already been applied "
+                    "on a {} device.".format(operation.name, self.short_name)
+                )
+
+            # Prepare for parametric compilation
+            par = []
+            for param in operation.params:
+                if isinstance(param, Variable):
+                    # Using the idx for each Variable instance to specify the
+                    # corresponding symbolic parameter
+                    parameter_string = "theta" + str(param.idx)
+
+                    if parameter_string not in self._parameter_reference_map:
+                        # Create a new PyQuil memory reference and store it in the
+                        # parameter reference map if it was not done so already
+                        current_ref = self.prog.declare(parameter_string, "REAL")
+                        self._parameter_reference_map[parameter_string] = current_ref
+
+                    # Store the numeric value bound to the symbolic parameter
+                    self._parameter_map[parameter_string] = [param.val]
+
+                    # Appending the parameter reference to the parameters
+                    # of the corresponding operation
+                    par.append(self._parameter_reference_map[parameter_string])
+                else:
+                    par.append(param)
+
+            self.prog += self._operation_map[operation.name](*par, *wires)
+
+        self.prog += self.apply_rotations(rotations)
+
     def generate_samples(self):
         if "pyqvm" in self.qc.name:
-            return self.qc.run(self.prog)
+            return self.qc.run(self.prog, memory_map=self._parameter_map)
 
-        self.compiled = self.qc.compile(self.prog)
-        return self.qc.run(executable=self.compiled)
+        if self.circuit_hash is None or not self.parametric_compilation:
+            # No hash provided or parametric compilation was set to False
+            # Compile the program
+            self._compiled_program = self.qc.compile(self.prog)
+            return self.qc.run(executable=self._compiled_program)
+
+        if self.circuit_hash not in self._compiled_program_dict:
+            # Compiling this specific program for the first time
+            # Store the compiled program with the corresponding hash
+            self._compiled_program_dict[self.circuit_hash] = self.qc.compile(self.prog)
+
+        # The program has been compiled, store as the latest compiled program
+        self._compiled_program = self._compiled_program_dict[self.circuit_hash]
+        samples = self.qc.run(executable=self._compiled_program, memory_map=self._parameter_map)
+        return samples
+
+    @property
+    def compiled_program(self):
+        """Returns the latest program that was compiled for running.
+
+        If parametric compilation is turned on, this will be a parametric program.
+
+        The pyquil.ExecutableDesignator.program attribute stores the pyquil.Program
+        instance. If no program was compiled yet, this property returns None.
+
+        Returns:
+            Union[None, pyquil.ExecutableDesignator]: the latest compiled program
+        """
+        return self._compiled_program
+
+    def reset(self):
+        """Resets the device after the previous run.
+
+        Note:
+            The ``_compiled_program`` and the ``_compiled_program_dict`` attributes are
+            not reset such that these can be used upon multiple device execution.
+        """
+        super().reset()
+
+        if self.parametric_compilation:
+            self._parameter_map = {}
+            self._parameter_reference_map = {}
