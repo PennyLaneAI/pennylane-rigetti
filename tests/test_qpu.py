@@ -88,7 +88,6 @@ class TestQPUIntegration(BaseTest):
         res = circuit_tensor(p)
         exp = circuit_obs(p)
 
-        print(dev.compiled_program)
         assert np.allclose(res, exp, atol=2e-2)
 
 class TestQPUBasic(BaseTest):
