@@ -21,6 +21,8 @@ Code details
 """
 import re
 
+from pennylane.operation import Tensor
+
 from pyquil import get_qc
 
 from .qvm import QVMDevice
@@ -153,6 +155,15 @@ class QPUDevice(QVMDevice):
         wires = observable.wires
         # Single-qubit observable
         if len(wires) == 1:
+
+            # In case the observable is a Tensor, then
+            # it is made up of exactly one observable
+            # so we can extract that to perform operator
+            # estimation
+            if isinstance(observable, Tensor):
+                observable = observable.obs[0]
+                wires = observable.wires
+
             # identify Experiment Settings for each of the possible single-qubit observables
             wire = wires[0]
             qubit = self.wiring[wire]
