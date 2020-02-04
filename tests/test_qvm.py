@@ -755,7 +755,7 @@ class TestQVMIntegration(BaseTest):
     def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
         """Test that the wavefunction plugin provides correct result for simple circuit.
 
-        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 2 out of 5 runs was added.
         """
         shots = 100_000
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
@@ -779,7 +779,7 @@ class TestQVMIntegration(BaseTest):
     def test_2q_gate(self, device, qvm, compiler):
         """Test that the two qubit gate with the PauliZ observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
 
@@ -791,12 +791,12 @@ class TestQVMIntegration(BaseTest):
 
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
-    @flaky(max_runs=10, min_passes=1)
+    @flaky(max_runs=5, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_2q_gate_pauliz_identity_tensor(self, device, qvm, compiler):
         """Test that the PauliZ tensor Identity observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
 
@@ -813,7 +813,7 @@ class TestQVMIntegration(BaseTest):
     def test_2q_gate_pauliz_pauliz_tensor(self, device, qvm, compiler):
         """Test that the PauliZ tensor PauliZ observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
 
@@ -964,17 +964,17 @@ class TestQVMIntegration(BaseTest):
 
         results2 = qnodes2(params)
 
-        assert np.allclose(results, results2, atol=1e-02, rtol=0)
+        assert np.allclose(results, results2, atol=2e-02, rtol=0)
         assert dev.circuit_hash in dev._compiled_program_dict
         assert len(dev._compiled_program_dict.items()) == 1
 
-    @flaky(max_runs=10, min_passes=1)
+    @flaky(max_runs=5, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, device, qvm, compiler):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         was turned off.
 
-        As the results coming from the qvm are stochastic, a constraint of 1 out of 10 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
 
         dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS, parametric_compilation=False)
