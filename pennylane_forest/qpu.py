@@ -158,7 +158,7 @@ class QPUDevice(QVMDevice):
 
             # In case the observable is a Tensor, then
             # it is made up of exactly one observable
-            # so we can extract that to perform operator
+            # so we can extract it to perform operator
             # estimation
             if isinstance(observable, Tensor):
                 observable = observable.obs[0]
