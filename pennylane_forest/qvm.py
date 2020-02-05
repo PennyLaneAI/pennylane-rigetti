@@ -220,7 +220,6 @@ class QVMDevice(ForestDevice):
         if self.circuit_hash is None or not self.parametric_compilation:
             # No hash provided or parametric compilation was set to False
             # Compile the program
-            print(self.prog, self.qc.qubits())
             self._compiled_program = self.qc.compile(self.prog)
             return self.qc.run(executable=self._compiled_program)
 
