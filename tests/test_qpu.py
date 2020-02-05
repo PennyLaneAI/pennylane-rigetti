@@ -56,7 +56,6 @@ class TestQPUIntegration(BaseTest):
         with pytest.raises(ValueError, match="Readout error cannot be set on the physical QPU"):
             qml.device("forest.qpu", device=device, load_qc=True, readout_error=[0.9, 0.75])
 
-    @flaky(max_runs=5, min_passes=3)
     @pytest.mark.parametrize("obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)])
     def test_tensor_wires_expval(self, obs):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
@@ -72,8 +71,6 @@ class TestQPUIntegration(BaseTest):
             qml.BasisState(np.array([0, 0, 1, 1]), wires=list(range(4)))
             qml.RY(param, wires=[2])
             qml.CNOT(wires=[2, 3])
-            qml.CNOT(wires=[2, 0])
-            qml.CNOT(wires=[3, 1])
 
         @qml.qnode(dev)
         def circuit_tensor(param):
