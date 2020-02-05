@@ -175,11 +175,11 @@ class TestQVMBasic(BaseTest):
         ) / np.sqrt(2)
         self.assertAllAlmostEqual(res, expected, delta=3 / np.sqrt(shots))
 
-    @flaky(max_runs=5, min_passes=2)
+    @flaky(max_runs=5, min_passes=3)
     def test_hermitian_expectation(self, shots, qvm, compiler):
         """Test that arbitrary Hermitian expectation values are correct.
 
-        As the results coming from the qvm are stochastic, a constraint of 2 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
 
         theta = 0.432
