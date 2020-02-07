@@ -57,7 +57,7 @@ class TestQPUIntegration(BaseTest):
         with pytest.raises(ValueError, match="Readout error cannot be set on the physical QPU"):
             qml.device("forest.qpu", device=device, load_qc=True, readout_error=[0.9, 0.75])
 
-    @flaky(max_runs=3, min_passes=2)
+    @flaky(max_runs=5, min_passes=3)
     @pytest.mark.parametrize(
         "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
     )
@@ -65,7 +65,7 @@ class TestQPUIntegration(BaseTest):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
         turned on.
 
-        As the results coming from the qvm are stochastic, a constraint of 2 out of 3 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
         p = np.pi / 8
         dev = qml.device(
