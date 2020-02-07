@@ -103,7 +103,7 @@ class QPUDevice(QVMDevice):
             # Raise a warning if parametric compilation was explicitly turned on by the user
             # about turning the operator estimation off
 
-            # TODO: Remove the warning and togglig once a migration to the new operator estimation
+            # TODO: Remove the warning and toggling once a migration to the new operator estimation
             # API has been executed. This new API provides compatibility between parametric
             # compilation and operator estimation.
             warnings.warn("Parametric compilation is currently not supported with operator"
