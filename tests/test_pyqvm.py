@@ -365,7 +365,7 @@ class TestQVMIntegration(BaseTest):
     @pytest.mark.parametrize("device", ["2q-pyqvm"])
     def test_one_qubit_wavefunction_circuit(self, device, shots):
         """Test that the wavefunction plugin provides correct result for simple circuit."""
-        shots = 100000
+        shots = 10000
         dev = qml.device("forest.qvm", device=device, shots=shots)
 
         a = 0.543
@@ -380,4 +380,4 @@ class TestQVMIntegration(BaseTest):
             qml.Rot(x, y, z, wires=0)
             return qml.expval(qml.PauliZ(0))
 
-        self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=3 / np.sqrt(shots))
+        self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=5 / np.sqrt(shots))
