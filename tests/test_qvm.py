@@ -247,7 +247,7 @@ class TestQVMBasic(BaseTest):
             - 6
         )
 
-        self.assertAllAlmostEqual(res, expected, delta=4 / np.sqrt(shots))
+        self.assertAllAlmostEqual(res, expected, delta=5 / np.sqrt(shots))
 
     def test_var(self, shots, qvm, compiler):
         """Tests for variance calculation"""
