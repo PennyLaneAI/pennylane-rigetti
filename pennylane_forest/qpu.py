@@ -44,6 +44,7 @@ from pyquil.operator_estimation import (
 )
 from pyquil.quilbase import Gate
 
+import warnings
 
 class QPUDevice(QVMDevice):
     r"""Forest QPU device for PennyLane.
@@ -108,6 +109,17 @@ class QPUDevice(QVMDevice):
         """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
         compilation is turned on, this will be a parametric program."""
 
+
+        if "parametric_compilation" in kwargs and kwargs["parametric_compilation"]:
+            # Raise a warning if parametric compilation was explicitly turned on by the user
+            # about turning the operator estimation off
+
+            # TODO: Remove the warning and togglig once a migration to the new operator estimation API
+            # has been executed. This new API provides compatibility between parametric compilation
+            # and operator estimation.
+            warnings.warn("Parametric compilation is currently not supported with operator estimation."\
+                            " Operator estimation is being turned off.")
+
         self.parametric_compilation = kwargs.get("parametric_compilation", True)
 
         if self.parametric_compilation:
@@ -155,8 +167,7 @@ class QPUDevice(QVMDevice):
         wires = observable.wires
 
         # Single-qubit observable
-        if len(wires) == 1:
-
+        if len(wires) == 1 and not self.parametric_compilation:
             # identify Experiment Settings for each of the possible single-qubit observables
             wire = wires[0]
             qubit = self.wiring[wire]
@@ -208,5 +219,4 @@ class QPUDevice(QVMDevice):
                 Hkey = tuple(par[0].flatten().tolist())
                 w = self._eigs[Hkey]["eigval"]
                 return w[0] * p0 + w[1] * p1
-
         return super().expval(observable)
