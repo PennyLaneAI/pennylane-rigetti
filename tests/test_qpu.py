@@ -58,16 +58,30 @@ class TestQPUIntegration(BaseTest):
             qml.device("forest.qpu", device=device, load_qc=True, readout_error=[0.9, 0.75])
 
     @flaky(max_runs=3, min_passes=2)
-    @pytest.mark.parametrize("obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)])
+    @pytest.mark.parametrize(
+        "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
+    )
     def test_tensor_wires_expval_parametric_compilation(self, obs):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
         turned on.
 
         As the results coming from the qvm are stochastic, a constraint of 2 out of 3 runs was added.
         """
-        p = np.pi/8
-        dev = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=10000, load_qc=False, parametric_compilation=True)
-        dev_1 = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=10000, load_qc=False, parametric_compilation=True)
+        p = np.pi / 8
+        dev = qml.device(
+            "forest.qpu",
+            device="Aspen-4-4Q-E",
+            shots=10000,
+            load_qc=False,
+            parametric_compilation=True,
+        )
+        dev_1 = qml.device(
+            "forest.qpu",
+            device="Aspen-4-4Q-E",
+            shots=10000,
+            load_qc=False,
+            parametric_compilation=True,
+        )
 
         def template(param):
             qml.BasisState(np.array([0, 0, 1, 1]), wires=list(range(4)))
@@ -90,16 +104,30 @@ class TestQPUIntegration(BaseTest):
         assert np.allclose(res, exp, atol=2e-2)
 
     @flaky(max_runs=5, min_passes=3)
-    @pytest.mark.parametrize("obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)])
+    @pytest.mark.parametrize(
+        "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
+    )
     def test_tensor_wires_expval_operator_estimation(self, obs):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
         turned off allowing operator estimation.
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        p = np.pi/7
-        dev = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=1000, load_qc=False, parametric_compilation=False)
-        dev_1 = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=1000, load_qc=False, parametric_compilation=False)
+        p = np.pi / 7
+        dev = qml.device(
+            "forest.qpu",
+            device="Aspen-4-4Q-E",
+            shots=1000,
+            load_qc=False,
+            parametric_compilation=False,
+        )
+        dev_1 = qml.device(
+            "forest.qpu",
+            device="Aspen-4-4Q-E",
+            shots=1000,
+            load_qc=False,
+            parametric_compilation=False,
+        )
 
         def template(param):
             qml.BasisState(np.array([0, 0, 1, 1]), wires=list(range(4)))
@@ -121,6 +149,7 @@ class TestQPUIntegration(BaseTest):
 
         assert np.allclose(res, exp, atol=2e-2)
 
+
 class TestQPUBasic(BaseTest):
     """Unit tests for the QPU (as a QVM)."""
 
@@ -129,8 +158,14 @@ class TestQPUBasic(BaseTest):
     def test_warnings_raised_parametric_compilation_and_operator_estimation(self):
         """Test that a warning is raised if parameter compilation and operator estimation are both turned on."""
         device = np.random.choice(VALID_QPU_LATTICES)
-        with pytest.warns(Warning, match='Operator estimation is being turned off.'):
-            dev = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=1000, load_qc=False, parametric_compilation=True)
+        with pytest.warns(Warning, match="Operator estimation is being turned off."):
+            dev = qml.device(
+                "forest.qpu",
+                device="Aspen-4-4Q-E",
+                shots=1000,
+                load_qc=False,
+                parametric_compilation=True,
+            )
 
     def test_no_readout_correction(self):
         """Test the QPU plugin with no readout correction"""
@@ -142,7 +177,7 @@ class TestQPUBasic(BaseTest):
             readout_error=[0.9, 0.75],
             symmetrize_readout=None,
             calibrate_readout=None,
-            parametric_compilation=False
+            parametric_compilation=False,
         )
         qubit = 0  # just run program on the first qubit
 

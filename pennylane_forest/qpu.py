@@ -24,9 +24,13 @@ import warnings
 
 import numpy as np
 from pyquil import get_qc
-from pyquil.operator_estimation import (Experiment, ExperimentSetting,
-                                        TensorProductState, group_experiments,
-                                        measure_observables)
+from pyquil.operator_estimation import (
+    Experiment,
+    ExperimentSetting,
+    TensorProductState,
+    group_experiments,
+    measure_observables,
+)
 from pyquil.paulis import sI, sX, sY, sZ
 from pyquil.quil import Program
 from pyquil.quilbase import Gate
@@ -98,7 +102,6 @@ class QPUDevice(QVMDevice):
         """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
         compilation is turned on, this will be a parametric program."""
 
-
         if kwargs.get("parametric_compilation", False):
             # Raise a warning if parametric compilation was explicitly turned on by the user
             # about turning the operator estimation off
@@ -106,8 +109,10 @@ class QPUDevice(QVMDevice):
             # TODO: Remove the warning and toggling once a migration to the new operator estimation
             # API has been executed. This new API provides compatibility between parametric
             # compilation and operator estimation.
-            warnings.warn("Parametric compilation is currently not supported with operator"
-                          "estimation. Operator estimation is being turned off.")
+            warnings.warn(
+                "Parametric compilation is currently not supported with operator"
+                "estimation. Operator estimation is being turned off."
+            )
 
         self.parametric_compilation = kwargs.get("parametric_compilation", True)
 

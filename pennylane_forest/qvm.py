@@ -22,13 +22,13 @@ Code details
 import re
 
 import networkx as nx
-
-from pennylane import DeviceError
-from pennylane.variable import Variable
 from pyquil import get_qc
 from pyquil.api._quantum_computer import _get_qvm_with_topology
 from pyquil.gates import MEASURE, RESET
 from pyquil.quil import Pragma, Program
+
+from pennylane import DeviceError
+from pennylane.variable import Variable
 
 from ._version import __version__
 from .device import ForestDevice
