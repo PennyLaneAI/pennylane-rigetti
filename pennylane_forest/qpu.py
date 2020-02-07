@@ -20,31 +20,20 @@ Code details
 ~~~~~~~~~~~~
 """
 import re
-
-from pennylane.operation import Tensor
-
-from pyquil import get_qc
-
-from .qvm import QVMDevice
-from ._version import __version__
+import warnings
 
 import numpy as np
-
 from pyquil import get_qc
-from pyquil.api._quantum_computer import _get_qvm_with_topology
-from pyquil.gates import MEASURE, RESET
-from pyquil.quil import Pragma, Program
+from pyquil.operator_estimation import (Experiment, ExperimentSetting,
+                                        TensorProductState, group_experiments,
+                                        measure_observables)
 from pyquil.paulis import sI, sX, sY, sZ
-from pyquil.operator_estimation import (
-    ExperimentSetting,
-    TensorProductState,
-    Experiment,
-    measure_observables,
-    group_experiments,
-)
+from pyquil.quil import Program
 from pyquil.quilbase import Gate
 
-import warnings
+from ._version import __version__
+from .qvm import QVMDevice
+
 
 class QPUDevice(QVMDevice):
     r"""Forest QPU device for PennyLane.
@@ -64,8 +53,8 @@ class QPUDevice(QVMDevice):
             readout errors need to be simulated; can only be set for the QPU-as-a-QVM
         symmetrize_readout (str): method to perform readout symmetrization, using exhaustive
             symmetrization by default
-        calibrate_readout (str): method to perform calibration for readout error mitigation, normalizing
-            by the expectation value in the +1-eigenstate of the observable by default
+        calibrate_readout (str): method to perform calibration for readout error mitigation,
+            normalizing by the expectation value in the +1-eigenstate of the observable by default
 
     Keyword args:
         forest_url (str): the Forest URL server. Can also be set by
@@ -114,11 +103,11 @@ class QPUDevice(QVMDevice):
             # Raise a warning if parametric compilation was explicitly turned on by the user
             # about turning the operator estimation off
 
-            # TODO: Remove the warning and togglig once a migration to the new operator estimation API
-            # has been executed. This new API provides compatibility between parametric compilation
-            # and operator estimation.
-            warnings.warn("Parametric compilation is currently not supported with operator estimation."\
-                            " Operator estimation is being turned off.")
+            # TODO: Remove the warning and togglig once a migration to the new operator estimation
+            # API has been executed. This new API provides compatibility between parametric
+            # compilation and operator estimation.
+            warnings.warn("Parametric compilation is currently not supported with operator"
+                          "estimation. Operator estimation is being turned off.")
 
         self.parametric_compilation = kwargs.get("parametric_compilation", True)
 
