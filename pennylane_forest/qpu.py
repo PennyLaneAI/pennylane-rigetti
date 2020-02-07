@@ -99,7 +99,7 @@ class QPUDevice(QVMDevice):
         compilation is turned on, this will be a parametric program."""
 
 
-        if "parametric_compilation" in kwargs and kwargs["parametric_compilation"]:
+        if kwargs.get("parametric_compilation", False):
             # Raise a warning if parametric compilation was explicitly turned on by the user
             # about turning the operator estimation off
 
