@@ -65,7 +65,7 @@ class TestQPUIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 2 out of 3 runs was added.
         """
-        p = np.pi/7
+        p = np.pi/8
         dev = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=10000, load_qc=False, parametric_compilation=True)
         dev_1 = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=10000, load_qc=False, parametric_compilation=True)
 
