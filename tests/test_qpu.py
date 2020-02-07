@@ -266,7 +266,6 @@ class TestQPUBasic(BaseTest):
             symmetrize_readout=None,
             calibrate_readout=None,
         )
-        # qubit = 0  # just run program on the first qubit
 
         @qml.qnode(dev_qpu)
         def circuit():

@@ -31,6 +31,8 @@ from pyquil.paulis import sI, sX, sY, sZ
 from pyquil.quil import Program
 from pyquil.quilbase import Gate
 
+from pennylane.operation import Tensor
+
 from ._version import __version__
 from .qvm import QVMDevice
 
