@@ -208,12 +208,6 @@ class QPUDevice(QVMDevice):
                 )
                 return np.sum([expt_result.expectation for expt_result in meas_obs])
 
-            elif observable.name == "Hermitian":
-                # <H> = \sum_i w_i p_i
-                Hkey = tuple(par[0].flatten().tolist())
-                w = self._eigs[Hkey]["eigval"]
-                return w[0] * p0 + w[1] * p1
-
         # Multi-qubit observable
         elif len(wires) > 1 and isinstance(observable, Tensor) and not self.parametric_compilation:
 
@@ -257,5 +251,11 @@ class QPUDevice(QVMDevice):
                 )
             )
             return np.sum([expt_result.expectation for expt_result in meas_obs])
+
+        elif observable.name == "Hermitian":
+            # <H> = \sum_i w_i p_i
+            Hkey = tuple(par[0].flatten().tolist())
+            w = self._eigs[Hkey]["eigval"]
+            return w[0] * p0 + w[1] * p1
 
         return super().expval(observable)
