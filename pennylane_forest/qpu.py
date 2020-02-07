@@ -20,27 +20,23 @@ Code details
 ~~~~~~~~~~~~
 """
 import re
-
-from pyquil import get_qc
-
-from .qvm import QVMDevice
-from ._version import __version__
+import warnings
 
 import numpy as np
-
 from pyquil import get_qc
-from pyquil.api._quantum_computer import _get_qvm_with_topology
-from pyquil.gates import MEASURE, RESET
-from pyquil.quil import Pragma, Program
-from pyquil.paulis import sI, sX, sY, sZ
 from pyquil.operator_estimation import (
+    Experiment,
     ExperimentSetting,
     TensorProductState,
-    Experiment,
-    measure_observables,
     group_experiments,
+    measure_observables,
 )
+from pyquil.paulis import sI, sX, sY, sZ
+from pyquil.quil import Program
 from pyquil.quilbase import Gate
+
+from ._version import __version__
+from .qvm import QVMDevice
 
 
 class QPUDevice(QVMDevice):
@@ -61,8 +57,8 @@ class QPUDevice(QVMDevice):
             readout errors need to be simulated; can only be set for the QPU-as-a-QVM
         symmetrize_readout (str): method to perform readout symmetrization, using exhaustive
             symmetrization by default
-        calibrate_readout (str): method to perform calibration for readout error mitigation, normalizing
-            by the expectation value in the +1-eigenstate of the observable by default
+        calibrate_readout (str): method to perform calibration for readout error mitigation,
+            normalizing by the expectation value in the +1-eigenstate of the observable by default
 
     Keyword args:
         forest_url (str): the Forest URL server. Can also be set by
@@ -105,6 +101,18 @@ class QPUDevice(QVMDevice):
         self._compiled_program = None
         """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
         compilation is turned on, this will be a parametric program."""
+
+        if kwargs.get("parametric_compilation", False):
+            # Raise a warning if parametric compilation was explicitly turned on by the user
+            # about turning the operator estimation off
+
+            # TODO: Remove the warning and toggling once a migration to the new operator estimation
+            # API has been executed. This new API provides compatibility between parametric
+            # compilation and operator estimation.
+            warnings.warn(
+                "Parametric compilation is currently not supported with operator"
+                "estimation. Operator estimation is being turned off."
+            )
 
         self.parametric_compilation = kwargs.get("parametric_compilation", True)
 
@@ -151,8 +159,10 @@ class QPUDevice(QVMDevice):
 
     def expval(self, observable):
         wires = observable.wires
-        # Single-qubit observable
-        if len(wires) == 1:
+
+        if len(wires) == 1 and not self.parametric_compilation:
+            # Single-qubit observable when parametric compilation is turned off
+
             # identify Experiment Settings for each of the possible single-qubit observables
             wire = wires[0]
             qubit = self.wiring[wire]
@@ -166,8 +176,10 @@ class QPUDevice(QVMDevice):
                     ExperimentSetting(TensorProductState(), float(np.sqrt(1 / 2)) * sZ(qubit)),
                 ],
             }
-            # expectation values for single-qubit observables
+
             if observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
+                # expectation values for single-qubit observables
+
                 prep_prog = Program()
                 for instr in self.program.instructions:
                     if isinstance(instr, Gate):
@@ -204,5 +216,4 @@ class QPUDevice(QVMDevice):
                 Hkey = tuple(par[0].flatten().tolist())
                 w = self._eigs[Hkey]["eigval"]
                 return w[0] * p0 + w[1] * p1
-
         return super().expval(observable)
