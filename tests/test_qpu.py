@@ -67,7 +67,7 @@ class TestQPUIntegration(BaseTest):
         """
         p = np.pi/7
         dev = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=10000, load_qc=False, parametric_compilation=True)
-        dev_1 = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=10000, load_qc=False,  parametric_compilation=True)
+        dev_1 = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=10000, load_qc=False, parametric_compilation=True)
 
         def template(param):
             qml.BasisState(np.array([0, 0, 1, 1]), wires=list(range(4)))
@@ -99,7 +99,7 @@ class TestQPUIntegration(BaseTest):
         """
         p = np.pi/7
         dev = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=1000, load_qc=False, parametric_compilation=False)
-        dev_1 = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=1000, load_qc=False,  parametric_compilation=False)
+        dev_1 = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=1000, load_qc=False, parametric_compilation=False)
 
         def template(param):
             qml.BasisState(np.array([0, 0, 1, 1]), wires=list(range(4)))
