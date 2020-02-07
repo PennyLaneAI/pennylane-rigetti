@@ -216,4 +216,51 @@ class QPUDevice(QVMDevice):
                 w = self._eigs[Hkey]["eigval"]
                 return w[0] * p0 + w[1] * p1
 
+        # Multi-qubit observable
+        if len(wires) > 1:
+            # In this case, the observable must be a Tensor product
+            assert isinstance(observable, Tensor), "Multi-qubit observable is not in Tensor format"
+
+            # All observables are rotated to be measured in the Z-basis, so we just need to
+            # check which wires exist in the observable, map them to physical qubits, and measure
+            # the product of PauliZ operators on those qubits
+            pauli_obs = sI()
+            for wire in observable.wires:
+                qubit = wire[0]
+                pauli_obs *= sZ(qubit)
+
+            # Preparation Program
+            prep_prog = Program()
+            for instr in self.program.instructions:
+                if isinstance(instr, Gate):
+                    # split gate and wires -- assumes 1q and 2q gates
+                    tup_gate_wires = instr.out().split(" ")
+                    gate = tup_gate_wires[0]
+                    str_instr = str(gate)
+                    # map wires to qubits
+                    for w in tup_gate_wires[1:]:
+                        str_instr += f" {int(w)}"
+                    prep_prog += Program(str_instr)
+
+            if self.readout_error is not None:
+                prep_prog.define_noisy_readout(
+                    qubit, p00=self.readout_error[0], p11=self.readout_error[1]
+                )
+
+            # Measure out multi-qubit observable
+            tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), pauli_obs)],
+                                   program=prep_prog)
+            grouped_tomo_expt = group_experiments(tomo_expt)
+            meas_obs = list(
+                measure_observables(
+                    self.qc,
+                    grouped_tomo_expt,
+                    active_reset=self.active_reset,
+                    symmetrize_readout=self.symmetrize_readout,
+                    calibrate_readout=self.calibrate_readout,
+                )
+            )
+            return np.sum([expt_result.expectation for expt_result in meas_obs])
+
+
         return super().expval(observable)
