@@ -385,7 +385,7 @@ class TestQPUBasic(BaseTest):
 
     def test_timeout_default(self, shots):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
-        is set correctly when passing a value as keyword argument"""
+        is set to default when no specific value is being passed."""
         device = np.random.choice(VALID_QPU_LATTICES)
         dev = plf.QVMDevice(device=device, shots=shots)
         qc = pyquil.get_qc(device, as_qvm=True)
