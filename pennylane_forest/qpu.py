@@ -166,8 +166,9 @@ class QPUDevice(QVMDevice):
     def expval(self, observable):
         wires = observable.wires
 
-        # Single-qubit observable
         if len(wires) == 1 and not self.parametric_compilation:
+            # Single-qubit observable when parametric compilation is turned off
+
             # identify Experiment Settings for each of the possible single-qubit observables
             wire = wires[0]
             qubit = self.wiring[wire]
@@ -181,8 +182,10 @@ class QPUDevice(QVMDevice):
                     ExperimentSetting(TensorProductState(), float(np.sqrt(1 / 2)) * sZ(qubit)),
                 ],
             }
-            # expectation values for single-qubit observables
+
             if observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
+                # expectation values for single-qubit observables
+
                 prep_prog = Program()
                 for instr in self.program.instructions:
                     if isinstance(instr, Gate):
