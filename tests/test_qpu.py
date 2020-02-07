@@ -2,12 +2,14 @@
 Unit tests for the QPU device.
 """
 import logging
+import warnings
 import re
 
 import pytest
 import pyquil
 import pennylane as qml
 from pennylane import numpy as np
+from pennylane.operation import Tensor
 import pennylane_forest as plf
 from conftest import BaseTest, QVM_SHOTS
 
@@ -55,11 +57,48 @@ class TestQPUIntegration(BaseTest):
         with pytest.raises(ValueError, match="Readout error cannot be set on the physical QPU"):
             qml.device("forest.qpu", device=device, load_qc=True, readout_error=[0.9, 0.75])
 
+    @flaky(max_runs=5, min_passes=3)
+    @pytest.mark.parametrize("obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)])
+    def test_tensor_wires_expval(self, obs):
+        """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
+        turned off.
+
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        """
+        p = np.pi/7
+        dev = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=10000, load_qc=False, parametric_compilation=True)
+        dev_1 = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=10000, load_qc=False,  parametric_compilation=True)
+
+        def template(param):
+            qml.BasisState(np.array([0, 0, 1, 1]), wires=list(range(4)))
+            qml.RY(param, wires=[2])
+            qml.CNOT(wires=[2, 3])
+
+        @qml.qnode(dev)
+        def circuit_tensor(param):
+            template(param)
+            return qml.expval(Tensor(obs))
+
+        @qml.qnode(dev_1)
+        def circuit_obs(param):
+            template(param)
+            return qml.expval(obs)
+
+        res = circuit_tensor(p)
+        exp = circuit_obs(p)
+
+        assert np.allclose(res, exp, atol=2e-2)
 
 class TestQPUBasic(BaseTest):
     """Unit tests for the QPU (as a QVM)."""
 
     # pylint: disable=protected-access
+
+    def test_warnings_raised_parametric_compilation_and_operator_estimation(self):
+        """Test that a warning is raised if parameter compilation and operator estimation are both turned on."""
+        device = np.random.choice(VALID_QPU_LATTICES)
+        with pytest.warns(Warning, match='Operator estimation is being turned off.'):
+            dev = qml.device('forest.qpu', device='Aspen-4-4Q-E', shots=1000, load_qc=False, parametric_compilation=True)
 
     def test_no_readout_correction(self):
         """Test the QPU plugin with no readout correction"""
@@ -71,6 +110,7 @@ class TestQPUBasic(BaseTest):
             readout_error=[0.9, 0.75],
             symmetrize_readout=None,
             calibrate_readout=None,
+            parametric_compilation=False
         )
         qubit = 0  # just run program on the first qubit
 
@@ -188,7 +228,7 @@ class TestQPUBasic(BaseTest):
     def test_2q_gate(self):
         """Test that the two qubit gate with the PauliZ observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of  3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
 
         device = np.random.choice(VALID_QPU_LATTICES)
@@ -214,7 +254,7 @@ class TestQPUBasic(BaseTest):
     def test_2q_gate_pauliz_identity_tensor(self):
         """Test that the PauliZ tensor Identity observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of  3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
         device = np.random.choice(VALID_QPU_LATTICES)
         dev_qpu = qml.device(
@@ -240,7 +280,7 @@ class TestQPUBasic(BaseTest):
     def test_2q_gate_pauliz_pauliz_tensor(self, a):
         """Test that the PauliZ tensor PauliZ observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of  3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
         device = np.random.choice(VALID_QPU_LATTICES)
         dev_qpu = qml.device(
@@ -271,7 +311,7 @@ class TestQPUBasic(BaseTest):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         is turned off.
 
-        As the results coming from the qvm are stochastic, a constraint of  3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
 
         device = np.random.choice(VALID_QPU_LATTICES)
