@@ -213,9 +213,7 @@ class QPUDevice(QVMDevice):
                 return w[0] * p0 + w[1] * p1
 
         # Multi-qubit observable
-        if len(wires) > 1:
-            # In this case, the observable must be a Tensor product
-            assert isinstance(observable, Tensor), "Multi-qubit observable is not in Tensor format"
+        elif len(wires) > 1 and isinstance(observable, Tensor) and not self.parametric_compilation:
 
             # All observables are rotated to be measured in the Z-basis, so we just need to
             # check which wires exist in the observable, map them to physical qubits, and measure
