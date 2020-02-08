@@ -33,6 +33,8 @@ from pyquil.quilbase import Gate
 
 from pennylane.operation import Tensor
 
+from typing import List
+
 from ._version import __version__
 from .qvm import QVMDevice
 
@@ -157,6 +159,29 @@ class QPUDevice(QVMDevice):
     def expval(self, observable):
         wires = observable.wires
 
+        # Program preparing the state in which to measure observable
+        prep_prog = Program()
+        for instr in self.program.instructions:
+            if isinstance(instr, Gate):
+                # split gate and wires -- assumes 1q and 2q gates
+                tup_gate_wires = instr.out().split(" ")
+                gate = tup_gate_wires[0]
+                str_instr = str(gate)
+                # map wires to qubits
+                for w in tup_gate_wires[1:]:
+                    str_instr += f" {int(w)}"
+                prep_prog += Program(str_instr)
+
+        if self.readout_error is not None:
+            for wire in observable.wires:
+                if isinstance(wire, int):
+                    qubit = wire
+                elif isinstance(wire, List):
+                    qubit = wire[0]
+                prep_prog.define_noisy_readout(
+                    self.wiring[qubit], p00=self.readout_error[0], p11=self.readout_error[1]
+                )
+
         # Single-qubit observable when parametric compilation is turned off
         if len(wires) == 1 and not self.parametric_compilation:            
             # Identify qubit
@@ -165,24 +190,6 @@ class QPUDevice(QVMDevice):
 
             # Ensure sensible observable
             assert observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"], "Unknown observable"
-
-            # Program preparing the state in which to measure observable
-            prep_prog = Program()
-            for instr in self.program.instructions:
-                if isinstance(instr, Gate):
-                    # split gate and wires -- assumes 1q and 2q gates
-                    tup_gate_wires = instr.out().split(" ")
-                    gate = tup_gate_wires[0]
-                    str_instr = str(gate)
-                    # map wires to qubits
-                    for w in tup_gate_wires[1:]:
-                        str_instr += f" {int(w)}"
-                    prep_prog += Program(str_instr)
-
-            if self.readout_error is not None:
-                prep_prog.define_noisy_readout(
-                    qubit, p00=self.readout_error[0], p11=self.readout_error[1]
-                )
 
             # All observables are rotated and measured in the PauliZ basis
             tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), sZ(qubit))],
@@ -210,25 +217,6 @@ class QPUDevice(QVMDevice):
                 qubit = wire[0]
                 pauli_obs *= sZ(self.wiring[qubit])
 
-            # Preparation Program
-            prep_prog = Program()
-            for instr in self.program.instructions:
-                if isinstance(instr, Gate):
-                    # split gate and wires -- assumes 1q and 2q gates
-                    tup_gate_wires = instr.out().split(" ")
-                    gate = tup_gate_wires[0]
-                    str_instr = str(gate)
-                    # map wires to qubits
-                    for w in tup_gate_wires[1:]:
-                        str_instr += f" {int(w)}"
-                    prep_prog += Program(str_instr)
-
-            if self.readout_error is not None:
-                for wire in observable.wires:
-                    qubit = wire[0]
-                    prep_prog.define_noisy_readout(
-                        self.wiring[qubit], p00=self.readout_error[0], p11=self.readout_error[1]
-                    )
             # Measure out multi-qubit observable
             tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), pauli_obs)],
                                    program=prep_prog)
