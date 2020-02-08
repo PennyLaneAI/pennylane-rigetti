@@ -217,7 +217,7 @@ class QPUDevice(QVMDevice):
             pauli_obs = sI()
             for wire in observable.wires:
                 qubit = wire[0]
-                pauli_obs *= sZ(qubit)
+                pauli_obs *= sZ(self.wiring[qubit])
 
             # Preparation Program
             prep_prog = Program()
@@ -233,10 +233,11 @@ class QPUDevice(QVMDevice):
                     prep_prog += Program(str_instr)
 
             if self.readout_error is not None:
-                prep_prog.define_noisy_readout(
-                    qubit, p00=self.readout_error[0], p11=self.readout_error[1]
-                )
-
+                for wire in observable.wires:
+                    qubit = wire[0]
+                    prep_prog.define_noisy_readout(
+                        self.wiring[qubit], p00=self.readout_error[0], p11=self.readout_error[1]
+                    )
             # Measure out multi-qubit observable
             tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), pauli_obs)],
                                    program=prep_prog)
