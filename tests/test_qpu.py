@@ -306,6 +306,31 @@ class TestQPUBasic(BaseTest):
         assert np.isclose(result, 0.38, atol=2e-2)
 
     @flaky(max_runs=5, min_passes=3)
+    def test_multi_qub_readout_correction(self):
+        """Test the QPU plugin with readout errors and correction"""
+        device = np.random.choice(VALID_QPU_LATTICES)
+        dev_qpu = qml.device(
+            "forest.qpu",
+            device=device,
+            load_qc=False,
+            shots=10_000,
+            readout_error=[0.9, 0.75],
+            symmetrize_readout='exhaustive',
+            calibrate_readout='plus-eig',
+            parametric_compilation=False
+        )
+
+        @qml.qnode(dev_qpu)
+        def circuit():
+            qml.RY(np.pi / 2, wires=0)
+            qml.RY(np.pi / 3, wires=1)
+            return qml.expval(qml.PauliX(0) @ qml.PauliZ(1))
+
+        result = circuit()
+
+        assert np.isclose(result, 0.5, atol=2e-2)
+
+    @flaky(max_runs=5, min_passes=3)
     def test_2q_gate(self):
         """Test that the two qubit gate with the PauliZ observable works correctly.
 
