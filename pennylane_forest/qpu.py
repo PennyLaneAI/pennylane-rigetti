@@ -157,47 +157,47 @@ class QPUDevice(QVMDevice):
     def expval(self, observable):
         wires = observable.wires
 
-        if len(wires) == 1 and not self.parametric_compilation:
-            # Single-qubit observable when parametric compilation is turned off
-
-            # identify Experiment Settings for each of the possible single-qubit observables
+        # Single-qubit observable when parametric compilation is turned off
+        if len(wires) == 1 and not self.parametric_compilation:            
+            # Identify qubit
             wire = wires[0]
             qubit = self.wiring[wire]
 
-            if observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
-                # expectation values for single-qubit observables
+            # Ensure sensible observable
+            assert observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"], "Unknown observable"
 
-                prep_prog = Program()
-                for instr in self.program.instructions:
-                    if isinstance(instr, Gate):
-                        # split gate and wires -- assumes 1q and 2q gates
-                        tup_gate_wires = instr.out().split(" ")
-                        gate = tup_gate_wires[0]
-                        str_instr = str(gate)
-                        # map wires to qubits
-                        for w in tup_gate_wires[1:]:
-                            str_instr += f" {int(w)}"
-                        prep_prog += Program(str_instr)
+            # Program preparing the state in which to measure observable
+            prep_prog = Program()
+            for instr in self.program.instructions:
+                if isinstance(instr, Gate):
+                    # split gate and wires -- assumes 1q and 2q gates
+                    tup_gate_wires = instr.out().split(" ")
+                    gate = tup_gate_wires[0]
+                    str_instr = str(gate)
+                    # map wires to qubits
+                    for w in tup_gate_wires[1:]:
+                        str_instr += f" {int(w)}"
+                    prep_prog += Program(str_instr)
 
-                if self.readout_error is not None:
-                    prep_prog.define_noisy_readout(
-                        qubit, p00=self.readout_error[0], p11=self.readout_error[1]
-                    )
-
-                # All observables are rotated and can be measured in the PauliZ basis
-                tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), sZ(qubit))],
-                                       program=prep_prog)
-                grouped_tomo_expt = group_experiments(tomo_expt)
-                meas_obs = list(
-                    measure_observables(
-                        self.qc,
-                        grouped_tomo_expt,
-                        active_reset=self.active_reset,
-                        symmetrize_readout=self.symmetrize_readout,
-                        calibrate_readout=self.calibrate_readout,
-                    )
+            if self.readout_error is not None:
+                prep_prog.define_noisy_readout(
+                    qubit, p00=self.readout_error[0], p11=self.readout_error[1]
                 )
-                return np.sum([expt_result.expectation for expt_result in meas_obs])
+
+            # All observables are rotated and measured in the PauliZ basis
+            tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), sZ(qubit))],
+                                   program=prep_prog)
+            grouped_tomo_expt = group_experiments(tomo_expt)
+            meas_obs = list(
+                measure_observables(
+                    self.qc,
+                    grouped_tomo_expt,
+                    active_reset=self.active_reset,
+                    symmetrize_readout=self.symmetrize_readout,
+                    calibrate_readout=self.calibrate_readout,
+                )
+            )
+            return np.sum([expt_result.expectation for expt_result in meas_obs])
 
         # Multi-qubit observable
         elif len(wires) > 1 and isinstance(observable, Tensor) and not self.parametric_compilation:
