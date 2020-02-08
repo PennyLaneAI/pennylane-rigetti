@@ -163,16 +163,6 @@ class QPUDevice(QVMDevice):
             # identify Experiment Settings for each of the possible single-qubit observables
             wire = wires[0]
             qubit = self.wiring[wire]
-            d_expt_settings = {
-                "Identity": [ExperimentSetting(TensorProductState(), sI(qubit))],
-                "PauliX": [ExperimentSetting(TensorProductState(), sX(qubit))],
-                "PauliY": [ExperimentSetting(TensorProductState(), sY(qubit))],
-                "PauliZ": [ExperimentSetting(TensorProductState(), sZ(qubit))],
-                "Hadamard": [
-                    ExperimentSetting(TensorProductState(), float(np.sqrt(1 / 2)) * sX(qubit)),
-                    ExperimentSetting(TensorProductState(), float(np.sqrt(1 / 2)) * sZ(qubit)),
-                ],
-            }
 
             if observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"]:
                 # expectation values for single-qubit observables
@@ -195,7 +185,8 @@ class QPUDevice(QVMDevice):
                     )
 
                 # All observables are rotated and can be measured in the PauliZ basis
-                tomo_expt = Experiment(settings=d_expt_settings["PauliZ"], program=prep_prog)
+                tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), sZ(qubit))],
+                                       program=prep_prog)
                 grouped_tomo_expt = group_experiments(tomo_expt)
                 meas_obs = list(
                     measure_observables(
