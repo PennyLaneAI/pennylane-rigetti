@@ -159,63 +159,60 @@ class QPUDevice(QVMDevice):
     def expval(self, observable):
         wires = observable.wires
 
-        # Program preparing the state in which to measure observable
-        prep_prog = Program()
-        for instr in self.program.instructions:
-            if isinstance(instr, Gate):
-                # split gate and wires -- assumes 1q and 2q gates
-                tup_gate_wires = instr.out().split(" ")
-                gate = tup_gate_wires[0]
-                str_instr = str(gate)
-                # map wires to qubits
-                for w in tup_gate_wires[1:]:
-                    str_instr += f" {int(w)}"
-                prep_prog += Program(str_instr)
+        if observable.name == "Hermitian":
+            # <H> = \sum_i w_i p_i
+            Hkey = tuple(par[0].flatten().tolist())
+            w = self._eigs[Hkey]["eigval"]
+            return w[0] * p0 + w[1] * p1
 
-        if self.readout_error is not None:
-            for wire in observable.wires:
-                if isinstance(wire, int):
-                    qubit = wire
-                elif isinstance(wire, List):
+        # `measure_observables` called only when parametric compilation is turned off
+        elif not self.parametric_compilation:
+
+            # Single-qubit observable
+            if len(wires) == 1:
+
+                # Ensure sensible observable
+                assert observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"], "Unknown observable"
+
+                # Create appropriate PauliZ operator
+                wire = wires[0]
+                qubit = self.wiring[wire]
+                pauli_obs = sZ(qubit)
+
+            # Multi-qubit observable
+            elif len(wires) > 1 and isinstance(observable, Tensor) and not self.parametric_compilation:
+
+                # All observables are rotated to be measured in the Z-basis, so we just need to
+                # check which wires exist in the observable, map them to physical qubits, and measure
+                # the product of PauliZ operators on those qubits
+                pauli_obs = sI()
+                for wire in observable.wires:
                     qubit = wire[0]
-                prep_prog.define_noisy_readout(
-                    self.wiring[qubit], p00=self.readout_error[0], p11=self.readout_error[1]
-                )
+                    pauli_obs *= sZ(self.wiring[qubit])
 
-        # Single-qubit observable when parametric compilation is turned off
-        if len(wires) == 1 and not self.parametric_compilation:            
-            # Identify qubit
-            wire = wires[0]
-            qubit = self.wiring[wire]
 
-            # Ensure sensible observable
-            assert observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"], "Unknown observable"
+            # Program preparing the state in which to measure observable
+            prep_prog = Program()
+            for instr in self.program.instructions:
+                if isinstance(instr, Gate):
+                    # split gate and wires -- assumes 1q and 2q gates
+                    tup_gate_wires = instr.out().split(" ")
+                    gate = tup_gate_wires[0]
+                    str_instr = str(gate)
+                    # map wires to qubits
+                    for w in tup_gate_wires[1:]:
+                        str_instr += f" {int(w)}"
+                    prep_prog += Program(str_instr)
 
-            # All observables are rotated and measured in the PauliZ basis
-            tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), sZ(qubit))],
-                                   program=prep_prog)
-            grouped_tomo_expt = group_experiments(tomo_expt)
-            meas_obs = list(
-                measure_observables(
-                    self.qc,
-                    grouped_tomo_expt,
-                    active_reset=self.active_reset,
-                    symmetrize_readout=self.symmetrize_readout,
-                    calibrate_readout=self.calibrate_readout,
-                )
-            )
-            return np.sum([expt_result.expectation for expt_result in meas_obs])
-
-        # Multi-qubit observable
-        elif len(wires) > 1 and isinstance(observable, Tensor) and not self.parametric_compilation:
-
-            # All observables are rotated to be measured in the Z-basis, so we just need to
-            # check which wires exist in the observable, map them to physical qubits, and measure
-            # the product of PauliZ operators on those qubits
-            pauli_obs = sI()
-            for wire in observable.wires:
-                qubit = wire[0]
-                pauli_obs *= sZ(self.wiring[qubit])
+            if self.readout_error is not None:
+                for wire in observable.wires:
+                    if isinstance(wire, int):
+                        qubit = wire
+                    elif isinstance(wire, List):
+                        qubit = wire[0]
+                    prep_prog.define_noisy_readout(
+                        self.wiring[qubit], p00=self.readout_error[0], p11=self.readout_error[1]
+                    )
 
             # Measure out multi-qubit observable
             tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), pauli_obs)],
@@ -231,11 +228,5 @@ class QPUDevice(QVMDevice):
                 )
             )
             return np.sum([expt_result.expectation for expt_result in meas_obs])
-
-        elif observable.name == "Hermitian":
-            # <H> = \sum_i w_i p_i
-            Hkey = tuple(par[0].flatten().tolist())
-            w = self._eigs[Hkey]["eigval"]
-            return w[0] * p0 + w[1] * p1
 
         return super().expval(observable)
