@@ -178,9 +178,9 @@ class ForestDevice(QubitDevice):
             variable ``QUILC_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
     """
-    pennylane_requires = ">=0.6"
+    pennylane_requires = ">=0.8"
     version = __version__
-    author = "Josh Izaac"
+    author = "Rigetti Computing Inc."
 
     _operation_map = pyquil_operation_map
     _capabilities = {"model": "qubit", "tensor_observables": True}
