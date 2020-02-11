@@ -160,14 +160,8 @@ class QPUDevice(QVMDevice):
     def expval(self, observable):
         wires = observable.wires
 
-        if observable.name == "Hermitian":
-            # <H> = \sum_i w_i p_i
-            Hkey = tuple(par[0].flatten().tolist())
-            w = self._eigs[Hkey]["eigval"]
-            return w[0] * p0 + w[1] * p1
-
         # `measure_observables` called only when parametric compilation is turned off
-        elif not self.parametric_compilation:
+        if not self.parametric_compilation:
 
             # Single-qubit observable
             if len(wires) == 1:
