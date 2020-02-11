@@ -222,6 +222,9 @@ class QPUDevice(QVMDevice):
                     calibrate_readout=self.calibrate_readout,
                 )
             )
+
+            # Return the estimated expectation value
             return np.sum([expt_result.expectation for expt_result in meas_obs])
 
+        # Calculation of expectation value without using `measure_observables`
         return super().expval(observable)
