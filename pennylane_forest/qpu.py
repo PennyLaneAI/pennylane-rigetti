@@ -102,7 +102,6 @@ class QPUDevice(QVMDevice):
         """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
         compilation is turned on, this will be a parametric program."""
 
-
         if kwargs.get("parametric_compilation", False):
             # Raise a warning if parametric compilation was explicitly turned on by the user
             # about turning the operator estimation off
