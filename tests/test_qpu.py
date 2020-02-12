@@ -256,6 +256,7 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(results[:3], 1.0, atol=2e-2)
         assert np.allclose(results[3:], -1.0, atol=2e-2)
 
+    @flaky(max_runs=5, min_passes=3)
     def test_multi_qub_no_readout_errors(self):
         """Test the QPU plugin with no readout errors or correction"""
         device = np.random.choice(VALID_QPU_LATTICES)
@@ -281,6 +282,7 @@ class TestQPUBasic(BaseTest):
 
         assert np.isclose(result, 0.5, atol=2e-2)
 
+    @flaky(max_runs=5, min_passes=3)
     def test_multi_qub_readout_errors(self):
         """Test the QPU plugin with readout errors"""
         device = np.random.choice(VALID_QPU_LATTICES)
