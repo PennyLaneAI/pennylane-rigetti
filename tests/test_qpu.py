@@ -415,7 +415,7 @@ class TestQPUBasic(BaseTest):
     @flaky(max_runs=5, min_passes=3)
     @pytest.mark.parametrize("a", np.linspace(-np.pi / 2, 0, 3))
     @pytest.mark.parametrize("b", np.linspace(0, np.pi / 2, 3))
-    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, a, b):
+    def test_2q_circuit_pauliz_pauliz_tensor(self, a, b):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         is turned off.
 
@@ -431,7 +431,6 @@ class TestQPUBasic(BaseTest):
             symmetrize_readout="exhaustive",
             calibrate_readout="plus-eig",
             shots=QVM_SHOTS,
-            parametric_compilation=False,
         )
 
         @qml.qnode(dev_qpu)
@@ -451,6 +450,46 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(circuit(a, b), analytic_value, atol=2e-2)
         # Check that repeated calling of the QNode works correctly
         assert np.allclose(circuit(a, b), analytic_value, atol=2e-2)
+
+    @pytest.mark.parametrize("a", np.linspace(-np.pi / 2, 0, 3))
+    @pytest.mark.parametrize("b", np.linspace(0, np.pi / 2, 3))
+    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, a, b):
+        """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
+        is turned off.
+
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        """
+
+        device = np.random.choice(VALID_QPU_LATTICES)
+        dev_qpu = qml.device(
+            "forest.qpu",
+            device=device,
+            load_qc=False,
+            readout_error=[0.9, 0.75],
+            symmetrize_readout="exhaustive",
+            calibrate_readout="plus-eig",
+            shots=QVM_SHOTS // 20,
+            parametric_compilation=False,
+        )
+
+        @qml.qnode(dev_qpu)
+        def circuit(x, y):
+            qml.RY(x, wires=[0])
+            qml.RY(y, wires=[1])
+            qml.CNOT(wires=[0, 1])
+            return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
+
+        analytic_value = (
+            np.cos(a / 2) ** 2 * np.cos(b / 2) ** 2
+            + np.cos(b / 2) ** 2 * np.sin(a / 2) ** 2
+            - np.cos(a / 2) ** 2 * np.sin(b / 2) ** 2
+            - np.sin(a / 2) ** 2 * np.sin(b / 2) ** 2
+        )
+
+        expt = np.mean([circuit(a, b) for _ in range(20)])
+        theory = analytic_value
+
+        assert np.allclose(expt, theory, atol=2e-2)
 
     def test_timeout_set_correctly(self, shots):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
