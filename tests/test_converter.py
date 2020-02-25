@@ -1242,7 +1242,7 @@ class TestIntegration:
         program += g.CNOT(0, 1)
         program += g.CNOT(1, 2)
 
-        # convert to a PennyLane circuit
+        # Convert to a PennyLane circuit
         program_pl = qml.load(program, format="pyquil_program")
 
         dev = qml.device("default.qubit", wires=3, analytic=analytic)
