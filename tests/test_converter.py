@@ -1221,3 +1221,46 @@ class TestIntegration:
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
         assert np.array_equal(circuit.jacobian([angle]), circuit_reg.jacobian([angle]))
+
+    THETA = np.linspace(0.11, 3, 5)
+    PHI = np.linspace(0.32, 3, 5)
+    VARPHI = np.linspace(0.02, 3, 5)
+
+    @pytest.mark.parametrize("analytic", [True])
+    @pytest.mark.parametrize("theta,phi,varphi", list(zip(THETA, PHI, VARPHI)))
+    def test_gradient(self, theta, phi, varphi, analytic, tol):
+        """Test that the gradient works correctly"""
+        program = pyquil.Program()
+
+        delta1 = program.declare("delta1", "REAL")
+        delta2 = program.declare("delta2", "REAL")
+        delta3 = program.declare("delta3", "REAL")
+
+        program += g.RX(delta1, 0)
+        program += g.RX(delta2, 1)
+        program += g.RX(delta3, 2)
+        program += g.CNOT(0, 1)
+        program += g.CNOT(1, 2)
+
+        # Convert to a PennyLane circuit
+        program_pl = qml.load(program, format="pyquil_program")
+
+        dev = qml.device("default.qubit", wires=3, analytic=analytic)
+
+        @qml.qnode(dev)
+        def circuit(params):
+            program_pl(parameter_map={delta1: params[0],
+                                      delta2: params[1],
+                                      delta3: params[2]},
+                                      wires=range(len(program_pl.defined_qubits)))
+            return qml.expval(qml.PauliX(0) @ qml.PauliY(2))
+
+        dcircuit = qml.grad(circuit, 0)
+        res = dcircuit([theta, phi, varphi])
+        expected = [
+            np.cos(theta) * np.sin(phi) * np.sin(varphi),
+            np.sin(theta) * np.cos(phi) * np.sin(varphi),
+            np.sin(theta) * np.sin(phi) * np.cos(varphi)
+        ]
+
+        assert np.allclose(res, expected, tol)
