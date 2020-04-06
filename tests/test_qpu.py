@@ -22,6 +22,11 @@ VALID_QPU_LATTICES = [
     qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)
 ]
 
+pattern_four_qubit = "Aspen-.-4Q-."
+VALID_FOUR_QUBIT_LATTICES = [
+    qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern_four_qubit, qc)
+]
+
 
 class TestQPUIntegration(BaseTest):
     """Test the wavefunction simulator works correctly from the PennyLane frontend."""
@@ -33,7 +38,7 @@ class TestQPUIntegration(BaseTest):
         device = [qpu for qpu in VALID_QPU_LATTICES if "-2Q" in qpu][0]
         dev = qml.device("forest.qpu", device=device, load_qc=False)
         self.assertEqual(dev.num_wires, 2)
-        self.assertEqual(dev.shots, 1024)
+        self.assertEqual(dev.shots, 1000)
         self.assertEqual(dev.short_name, "forest.qpu")
 
     def test_load_virtual_qpu_device(self):
@@ -67,17 +72,18 @@ class TestQPUIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
+        device = np.random.choice(VALID_FOUR_QUBIT_LATTICES)
         p = np.pi / 8
         dev = qml.device(
             "forest.qpu",
-            device="Aspen-4-4Q-E",
+            device=device,
             shots=10000,
             load_qc=False,
             parametric_compilation=True,
         )
         dev_1 = qml.device(
             "forest.qpu",
-            device="Aspen-4-4Q-E",
+            device=device,
             shots=10000,
             load_qc=False,
             parametric_compilation=True,
@@ -113,17 +119,18 @@ class TestQPUIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
+        device = np.random.choice(VALID_FOUR_QUBIT_LATTICES)
         p = np.pi / 7
         dev = qml.device(
             "forest.qpu",
-            device="Aspen-4-4Q-E",
+            device=device,
             shots=1000,
             load_qc=False,
             parametric_compilation=False,
         )
         dev_1 = qml.device(
             "forest.qpu",
-            device="Aspen-4-4Q-E",
+            device=device,
             shots=1000,
             load_qc=False,
             parametric_compilation=False,
@@ -161,7 +168,7 @@ class TestQPUBasic(BaseTest):
         with pytest.warns(Warning, match="Operator estimation is being turned off."):
             dev = qml.device(
                 "forest.qpu",
-                device="Aspen-4-4Q-E",
+                device=device,
                 shots=1000,
                 load_qc=False,
                 parametric_compilation=True,
