@@ -60,28 +60,3 @@ class NumpyWavefunctionDevice(ForestDevice):
         # pennylane_forest/wavefunction.py
         self._state = self.qc.execute(self.prog).wf_simulator.wf.flatten()
 
-    def analytic_probability(self, wires=None):
-        """Return the (marginal) probability of each computational basis
-        state from the last run of the device.
-
-        If no wires are specified, then all the basis states representable by
-        the device are considered and no marginalization takes place.
-
-        .. warning:: This method will have to be redefined for hardware devices, since it uses
-            the ``device._state`` attribute. This attribute might not be available for such devices.
-
-        Args:
-            wires (Sequence[int]): Sequence of wires to return
-                marginal probabilities for. Wires not provided
-                are traced out of the system.
-
-        Returns:
-            List[float]: list of the probabilities
-        """
-        if self._state is None:
-            return None
-
-        wires = wires or range(self.num_wires)
-        wires = self.remap_wires(wires)
-        prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
-        return prob
