@@ -359,7 +359,7 @@ class ForestDevice(QubitDevice):
 
         return np.reshape(state_multi_index, 2 ** self.num_wires)
 
-    def probability(self, wires=None):
+    def analytic_probability(self, wires=None):
         """Return the (marginal) probability of each computational basis
         state from the last run of the device.
 

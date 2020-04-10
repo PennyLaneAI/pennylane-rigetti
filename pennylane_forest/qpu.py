@@ -82,7 +82,7 @@ class QPUDevice(QVMDevice):
         self,
         device,
         *,
-        shots=1024,
+        shots=1000,
         active_reset=True,
         load_qc=True,
         readout_error=None,
