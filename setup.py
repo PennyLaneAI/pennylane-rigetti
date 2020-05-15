@@ -7,7 +7,7 @@ with open("pennylane_forest/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 
-requirements = ["pyquil>=2.16", "pennylane>=0.8"]
+requirements = ["pyquil>=2.16", "pennylane>=0.9"]
 
 info = {
     "name": "PennyLane-Forest",
@@ -54,6 +54,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Physics",
 ]

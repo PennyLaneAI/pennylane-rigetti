@@ -896,7 +896,8 @@ class TestQVMIntegration(BaseTest):
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_compiled_program_was_stored_mutable_qnode_with_loop(self, qvm, device):
-        """Test that QVM device stores the compiled program when the QNode is mutated correctly"""
+        """Test that QVM device stores the compiled program when the QNode is
+        mutated correctly"""
         dev = qml.device("forest.qvm", device=device, timeout=80)
 
         assert len(dev._compiled_program_dict.items()) == 0

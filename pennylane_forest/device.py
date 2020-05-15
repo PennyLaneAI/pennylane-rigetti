@@ -178,7 +178,7 @@ class ForestDevice(QubitDevice):
             variable ``QUILC_URL``, or in the ``~/.forest_config`` configuration file.
             Default value is ``"http://127.0.0.1:6000"``.
     """
-    pennylane_requires = ">=0.8"
+    pennylane_requires = ">=0.9"
     version = __version__
     author = "Rigetti Computing Inc."
 
