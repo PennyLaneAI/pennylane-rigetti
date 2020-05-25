@@ -106,29 +106,6 @@ class QVMDevice(ForestDevice):
         if analytic:
             raise ValueError("QVM device cannot be run in analytic=True mode.")
 
-        # get the number of wires
-        if isinstance(device, nx.Graph):
-            # load a QVM based on a graph topology
-            num_wires = device.number_of_nodes()
-        elif isinstance(device, str):
-            # the device string must match a valid QVM device, i.e.
-            # N-qvm, or 9q-square-qvm, or Aspen-8
-            wire_match = re.search(r"(\d+)(q|Q)", device)
-
-            if wire_match is None:
-                # with the current Rigetti naming scheme, this error should never
-                # appear as long as the QVM quantum computer has the correct name
-                raise ValueError("QVM device string does not indicate the number of qubits!")
-
-            num_wires = int(wire_match.groups()[0])
-        else:
-            raise ValueError(
-                "Required argument device must be a string corresponding to "
-                "a valid QVM quantum computer, or a NetworkX graph object."
-            )
-
-        super().__init__(num_wires, shots, analytic=analytic, **kwargs)
-
         # get the qc
         if isinstance(device, nx.Graph):
             self.qc = _get_qvm_with_topology(
@@ -136,6 +113,10 @@ class QVMDevice(ForestDevice):
             )
         elif isinstance(device, str):
             self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
+
+        num_wires = len(self.qc.qubits())
+
+        super().__init__(num_wires, shots, analytic=analytic, **kwargs)
 
         if timeout is not None:
             self.qc.compiler.client.timeout = timeout
