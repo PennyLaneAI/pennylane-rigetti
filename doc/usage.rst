@@ -27,7 +27,7 @@ You can instantiate these devices in PennyLane as follows:
 >>> dev_simulator = qml.device('forest.wavefunction', wires=2)
 >>> dev_pyqvm = qml.device('forest.qvm', device='2q-pyqvm', shots=1000)
 >>> dev_qvm = qml.device('forest.qvm', device='2q-qvm', shots=1000)
->>> dev_qpu = qml.device('forest.qpu', device='Aspen-0-12Q-A', shots=1000)
+>>> dev_qpu = qml.device('forest.qpu', device='Aspen-8', shots=1000)
 
 
 
@@ -166,13 +166,13 @@ The ``forest.qvm`` device provides an interface between PennyLane and the Forest
 
 Note that, unlike ``forest.wavefunction``, you do not pass the number of wires - this is inferred automatically from the requested quantum computer topology.
 
->>> dev = qml.device('forest.qvm', device='Aspen-1-16Q-A')
+>>> dev = qml.device('forest.qvm', device='Aspen-8')
 >>> dev.num_wires
 16
 
 In addition, you may also request a QVM with noise models to better simulate a physical QPU; this is done by passing the keyword argument ``noisy=True``:
 
->>> dev = qml.device('forest.qvm', device='Aspen-1-16Q-A', noisy=True)
+>>> dev = qml.device('forest.qvm', device='Aspen-8', noisy=True)
 
 Note that only the `default noise models <http://docs.rigetti.com/en/stable/noise.html>`_ provided by pyQuil are currently supported.
 
@@ -190,11 +190,11 @@ When initializing the ``forest.qvm`` device, the following required keyword argu
     The name or topology of the quantum computer to initialize.
 
     * ``Nq-qvm``: for a fully connected/unrestricted N-qubit QVM
-    * ``9q-qvm-square``: a :math:`9\times 9` lattice.
-    * ``Nq-pyqvm`` or ``9q-pyqvm-square``, for the same as the above but run
+    * ``9q-square-qvm``: a :math:`9\times 9` lattice.
+    * ``Nq-pyqvm`` or ``9q-square-pyqvm``, for the same as the above but run
        via the built-in pyQuil pyQVM device.
     * Any other supported Rigetti device architecture, for
-      example a QPU lattice such as ``'Aspen-1-16Q-A'``.
+      example a QPU lattice such as ``'Aspen-8'``.
     * Graph topology (as a ``networkx.Graph`` object) representing the device architecture.
 
 

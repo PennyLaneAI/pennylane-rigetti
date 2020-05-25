@@ -45,8 +45,8 @@ class QVMDevice(ForestDevice):
         device (Union[str, nx.Graph]): the name or topology of the device to initialise.
 
             * ``Nq-qvm``: for a fully connected/unrestricted N-qubit QVM
-            * ``9q-qvm-square``: a :math:`9\times 9` lattice.
-            * ``Nq-pyqvm`` or ``9q-pyqvm-square``, for the same as the above but run
+            * ``9q-square-qvm``: a :math:`9\times 9` lattice.
+            * ``Nq-pyqvm`` or ``9q-square-pyqvm``, for the same as the above but run
               via the built-in pyQuil pyQVM device.
             * Any other supported Rigetti device architecture.
             * Graph topology representing the device architecture.
@@ -112,7 +112,7 @@ class QVMDevice(ForestDevice):
             num_wires = device.number_of_nodes()
         elif isinstance(device, str):
             # the device string must match a valid QVM device, i.e.
-            # N-qvm, or 9q-square-qvm, or Aspen-1-16Q-A
+            # N-qvm, or 9q-square-qvm, or Aspen-8
             wire_match = re.search(r"(\d+)(q|Q)", device)
 
             if wire_match is None:
