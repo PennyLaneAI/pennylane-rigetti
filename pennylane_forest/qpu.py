@@ -138,6 +138,8 @@ class QPUDevice(QVMDevice):
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
 
+        self.connection = super()._get_connection(**kwargs)
+
         if load_qc:
             self.qc = get_qc(device, as_qvm=False, connection=self.connection)
             if timeout is not None:

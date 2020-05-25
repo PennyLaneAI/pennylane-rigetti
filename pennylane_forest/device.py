@@ -188,35 +188,21 @@ class ForestDevice(QubitDevice):
     def __init__(self, wires, shots=1000, analytic=False, **kwargs):
         super().__init__(wires, shots, analytic=analytic)
         self.analytic = analytic
-        self.forest_url = kwargs.get("forest_url", pyquil_config.forest_url)
-        self.qvm_url = kwargs.get("qvm_url", pyquil_config.qvm_url)
-        self.compiler_url = kwargs.get("compiler_url", pyquil_config.quilc_url)
+        self.reset()
 
-        self.connection = ForestConnection(
-            sync_endpoint=self.qvm_url,
-            compiler_endpoint=self.compiler_url,
-            forest_cloud_endpoint=self.forest_url,
+    @staticmethod
+    def _get_connection(**kwargs):
+        forest_url = kwargs.get("forest_url", pyquil_config.forest_url)
+        qvm_url = kwargs.get("qvm_url", pyquil_config.qvm_url)
+        compiler_url = kwargs.get("compiler_url", pyquil_config.quilc_url)
+
+        connection = ForestConnection(
+            sync_endpoint=qvm_url,
+            compiler_endpoint=compiler_url,
+            forest_cloud_endpoint=forest_url,
         )
 
-        # The following environment variables are deprecated I think
-
-        # api_key (str): the Forest API key. Can also be set by the environment
-        #     variable ``FOREST_API_KEY``, or in the ``~/.qcs_config`` configuration file.
-        # user_id (str): the Forest user ID. Can also be set by the environment
-        #     variable ``FOREST_USER_ID``, or in the ``~/.qcs_config`` configuration file.
-        # qpu_url (str): the QPU server URL. Can also be set by the environment
-        #     variable ``QPU_URL``, or in the ``~/.forest_config`` configuration file.
-
-        # if 'api_key' in kwargs:
-        #     os.environ['FOREST_API_KEY'] = kwargs['api_key']
-
-        # if 'user_id' in kwargs:
-        #     os.environ['FOREST_USER_ID'] = kwargs['user_id']
-
-        # if 'qpu_url' in kwargs:
-        #     os.environ['QPU_URL'] = kwargs['qpu_url']
-
-        self.reset()
+        return connection
 
     @property
     def program(self):

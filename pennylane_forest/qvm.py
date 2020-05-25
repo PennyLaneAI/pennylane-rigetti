@@ -106,6 +106,8 @@ class QVMDevice(ForestDevice):
         if analytic:
             raise ValueError("QVM device cannot be run in analytic=True mode.")
 
+        self.connection = super()._get_connection(**kwargs)
+
         # get the qc
         if isinstance(device, nx.Graph):
             self.qc = _get_qvm_with_topology(
