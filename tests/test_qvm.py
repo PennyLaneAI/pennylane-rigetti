@@ -29,7 +29,7 @@ from flaky import flaky
 log = logging.getLogger(__name__)
 
 # Creating pattern for devices that have at most 5 qubits
-pattern = "Aspen-.-[1-5]Q-."
+pattern = "Aspen-."
 VALID_QPU_LATTICES = [
     qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)
 ]
@@ -475,14 +475,6 @@ class TestQVMBasic(BaseTest):
         with pytest.raises(ValueError, match="QVM device cannot be run in analytic=True mode."):
             dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
 
-    def test_raise_error_if_qubits_not_indicated(self, shots):
-        """Test that instantiating a QVMDevice if the number of qubits were not indicated
-        in the name raises an error"""
-        with pytest.raises(
-            ValueError, match="QVM device string does not indicate the number of qubits!"
-        ):
-            dev = plf.QVMDevice(device="-qvm", shots=shots)
-
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
     def test_timeout_set_correctly(self, shots, device):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
@@ -711,18 +703,6 @@ class TestQVMIntegration(BaseTest):
         """Test that the QPU simulators load correctly"""
         qml.device("forest.qvm", device=np.random.choice(VALID_QPU_LATTICES))
 
-    def test_incorrect_qc_name(self):
-        """Test that exception is raised if name is incorrect"""
-        with pytest.raises(
-            ValueError, match="QVM device string does not indicate the number of qubits"
-        ):
-            qml.device("forest.qvm", device="Aspen-1-B")
-
-    def test_incorrect_qc_type(self):
-        """Test that exception is raised device is not a string or graph"""
-        with pytest.raises(ValueError, match="Required argument device must be a string"):
-            qml.device("forest.qvm", device=3)
-
     def test_qvm_args(self):
         """Test that the QVM plugin requires correct arguments"""
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
@@ -884,7 +864,6 @@ class TestQVMIntegration(BaseTest):
         for idx, stmt in enumerate(statements):
             qnodes[idx]([], statement=stmt)
             assert dev.circuit_hash in dev._compiled_program_dict
-            print(dev.circuit_hash, dev._compiled_program_dict)
 
         # Using that True evaluates to 1
         number_of_true = sum(statements)

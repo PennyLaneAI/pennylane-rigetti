@@ -17,14 +17,9 @@ from flaky import flaky
 
 log = logging.getLogger(__name__)
 
-pattern = "Aspen-.-[1-5]Q-."
+pattern = "Aspen-."
 VALID_QPU_LATTICES = [
     qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)
-]
-
-pattern_four_qubit = "Aspen-.-4Q-."
-VALID_FOUR_QUBIT_LATTICES = [
-    qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern_four_qubit, qc)
 ]
 
 
@@ -72,7 +67,7 @@ class TestQPUIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        device = np.random.choice(VALID_FOUR_QUBIT_LATTICES)
+        device = np.random.choice(VALID_QPU_LATTICES)
         p = np.pi / 8
         dev = qml.device(
             "forest.qpu",
@@ -119,7 +114,7 @@ class TestQPUIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        device = np.random.choice(VALID_FOUR_QUBIT_LATTICES)
+        device = np.random.choice(VALID_QPU_LATTICES)
         p = np.pi / 7
         dev = qml.device(
             "forest.qpu",
