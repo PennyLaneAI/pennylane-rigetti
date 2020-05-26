@@ -17,10 +17,7 @@ from flaky import flaky
 
 log = logging.getLogger(__name__)
 
-pattern = "Aspen-."
-VALID_QPU_LATTICES = [
-    qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)
-]
+TEST_QPU_LATTICES = ["4q-qvm"]
 
 
 class TestQPUIntegration(BaseTest):
@@ -30,9 +27,9 @@ class TestQPUIntegration(BaseTest):
 
     def test_load_qpu_device(self):
         """Test that the QPU device loads correctly"""
-        device = VALID_QPU_LATTICES[0]
+        device = TEST_QPU_LATTICES[0]
         dev = qml.device("forest.qpu", device=device, load_qc=False)
-        qc = pyquil.get_qc(device + "-qvm")
+        qc = pyquil.get_qc(device)
         num_wires = len(qc.qubits())
         self.assertEqual(dev.num_wires, num_wires)
         self.assertEqual(dev.shots, 1000)
@@ -40,12 +37,12 @@ class TestQPUIntegration(BaseTest):
 
     def test_load_virtual_qpu_device(self):
         """Test that the QPU simulators load correctly"""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         qml.device("forest.qpu", device=device, load_qc=False)
 
     def test_qpu_args(self):
         """Test that the QPU plugin requires correct arguments"""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
 
         with pytest.raises(ValueError, match="QPU device does not support a wires parameter"):
             qml.device("forest.qpu", device=device, wires=2)
@@ -69,7 +66,7 @@ class TestQPUIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         p = np.pi / 8
         dev = qml.device(
             "forest.qpu",
@@ -116,7 +113,7 @@ class TestQPUIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         p = np.pi / 7
         dev = qml.device(
             "forest.qpu",
@@ -161,7 +158,7 @@ class TestQPUBasic(BaseTest):
 
     def test_warnings_raised_parametric_compilation_and_operator_estimation(self):
         """Test that a warning is raised if parameter compilation and operator estimation are both turned on."""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         with pytest.warns(Warning, match="Operator estimation is being turned off."):
             dev = qml.device(
                 "forest.qpu",
@@ -173,7 +170,7 @@ class TestQPUBasic(BaseTest):
 
     def test_no_readout_correction(self):
         """Test the QPU plugin with no readout correction"""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -235,7 +232,7 @@ class TestQPUBasic(BaseTest):
 
     def test_readout_correction(self):
         """Test the QPU plugin with readout correction"""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -298,7 +295,7 @@ class TestQPUBasic(BaseTest):
     @flaky(max_runs=5, min_passes=3)
     def test_multi_qub_no_readout_errors(self):
         """Test the QPU plugin with no readout errors or correction"""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -324,7 +321,7 @@ class TestQPUBasic(BaseTest):
     @flaky(max_runs=5, min_passes=3)
     def test_multi_qub_readout_errors(self):
         """Test the QPU plugin with readout errors"""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -349,7 +346,7 @@ class TestQPUBasic(BaseTest):
     @flaky(max_runs=5, min_passes=3)
     def test_multi_qub_readout_correction(self):
         """Test the QPU plugin with readout errors and correction"""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -378,7 +375,7 @@ class TestQPUBasic(BaseTest):
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
 
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -403,7 +400,7 @@ class TestQPUBasic(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -429,7 +426,7 @@ class TestQPUBasic(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -461,7 +458,7 @@ class TestQPUBasic(BaseTest):
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
 
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -499,7 +496,7 @@ class TestQPUBasic(BaseTest):
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
 
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "forest.qpu",
             device=device,
@@ -533,14 +530,14 @@ class TestQPUBasic(BaseTest):
     def test_timeout_set_correctly(self, shots):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev = plf.QVMDevice(device=device, shots=shots, timeout=100)
         assert dev.qc.compiler.client.timeout == 100
 
     def test_timeout_default(self, shots):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set to default when no specific value is being passed."""
-        device = np.random.choice(VALID_QPU_LATTICES)
+        device = np.random.choice(TEST_QPU_LATTICES)
         dev = plf.QVMDevice(device=device, shots=shots)
         qc = pyquil.get_qc(device, as_qvm=True)
 
