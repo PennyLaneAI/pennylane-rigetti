@@ -166,17 +166,6 @@ class ForestDevice(QubitDevice):
         shots (int): Number of circuit evaluations/random samples used
             to estimate expectation values of observables.
             For simulator devices, 0 means the exact EV is returned.
-
-    Keyword args:
-        forest_url (str): the Forest URL server. Can also be set by
-            the environment variable ``FOREST_URL``, or in the ``~/.qcs_config``
-            configuration file. Default value is ``"https://forest-server.qcs.rigetti.com"``.
-        qvm_url (str): the QVM server URL. Can also be set by the environment
-            variable ``QVM_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:5000"``.
-        quilc_url (str): the compiler server URL. Can also be set by the environment
-            variable ``QUILC_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:6000"``.
     """
     pennylane_requires = ">=0.9"
     version = __version__
