@@ -138,10 +138,7 @@ class QPUDevice(QVMDevice):
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
 
-        aspen_match = re.match(r"Aspen-\d+-([\d]+)Q", device)
-        num_wires = int(aspen_match.groups()[0])
-
-        super(QVMDevice, self).__init__(num_wires, shots, **kwargs)
+        self.connection = super()._get_connection(**kwargs)
 
         if load_qc:
             self.qc = get_qc(device, as_qvm=False, connection=self.connection)
@@ -151,6 +148,10 @@ class QPUDevice(QVMDevice):
             self.qc = get_qc(device, as_qvm=True, connection=self.connection)
             if timeout is not None:
                 self.qc.compiler.client.timeout = timeout
+
+        num_wires = len(self.qc.qubits())
+
+        super(QVMDevice, self).__init__(num_wires, shots, **kwargs)
 
         self.active_reset = active_reset
         self.symmetrize_readout = symmetrize_readout

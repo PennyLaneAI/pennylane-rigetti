@@ -73,6 +73,7 @@ class WavefunctionDevice(ForestDevice):
 
     def __init__(self, wires, *, shots=1000, analytic=True, **kwargs):
         super().__init__(wires, shots, analytic, **kwargs)
+        self.connection = super()._get_connection(**kwargs)
         self.qc = WavefunctionSimulator(connection=self.connection)
         self._state = None
 

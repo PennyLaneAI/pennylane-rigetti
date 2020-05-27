@@ -54,7 +54,7 @@ You can instantiate these devices for PennyLane as follows:
     dev_simulator = qml.device('forest.wavefunction', wires=2)
     dev_pyqvm = qml.device('forest.qvm', device='2q-pyqvm', shots=1000)
     dev_qvm = qml.device('forest.qvm', device='2q-qvm', shots=1000)
-    dev_qpu = qml.device('forest.qpu', device='Aspen-0-12Q-A', shots=1000)
+    dev_qpu = qml.device('forest.qpu', device='Aspen-8', shots=1000)
 
 These devices can then be used just like other devices for the definition and evaluation of QNodes within PennyLane. For more details, see the `plugin usage guide <https://pennylane-forest.readthedocs.io/en/latest/usage.html>`_ and refer to the PennyLane documentation.
 

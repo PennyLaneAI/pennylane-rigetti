@@ -45,8 +45,8 @@ class QVMDevice(ForestDevice):
         device (Union[str, nx.Graph]): the name or topology of the device to initialise.
 
             * ``Nq-qvm``: for a fully connected/unrestricted N-qubit QVM
-            * ``9q-qvm-square``: a :math:`9\times 9` lattice.
-            * ``Nq-pyqvm`` or ``9q-pyqvm-square``, for the same as the above but run
+            * ``9q-square-qvm``: a :math:`9\times 9` lattice.
+            * ``Nq-pyqvm`` or ``9q-square-pyqvm``, for the same as the above but run
               via the built-in pyQuil pyQVM device.
             * Any other supported Rigetti device architecture.
             * Graph topology representing the device architecture.
@@ -106,28 +106,7 @@ class QVMDevice(ForestDevice):
         if analytic:
             raise ValueError("QVM device cannot be run in analytic=True mode.")
 
-        # get the number of wires
-        if isinstance(device, nx.Graph):
-            # load a QVM based on a graph topology
-            num_wires = device.number_of_nodes()
-        elif isinstance(device, str):
-            # the device string must match a valid QVM device, i.e.
-            # N-qvm, or 9q-square-qvm, or Aspen-1-16Q-A
-            wire_match = re.search(r"(\d+)(q|Q)", device)
-
-            if wire_match is None:
-                # with the current Rigetti naming scheme, this error should never
-                # appear as long as the QVM quantum computer has the correct name
-                raise ValueError("QVM device string does not indicate the number of qubits!")
-
-            num_wires = int(wire_match.groups()[0])
-        else:
-            raise ValueError(
-                "Required argument device must be a string corresponding to "
-                "a valid QVM quantum computer, or a NetworkX graph object."
-            )
-
-        super().__init__(num_wires, shots, analytic=analytic, **kwargs)
+        self.connection = super()._get_connection(**kwargs)
 
         # get the qc
         if isinstance(device, nx.Graph):
@@ -136,6 +115,10 @@ class QVMDevice(ForestDevice):
             )
         elif isinstance(device, str):
             self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
+
+        num_wires = len(self.qc.qubits())
+
+        super().__init__(num_wires, shots, analytic=analytic, **kwargs)
 
         if timeout is not None:
             self.qc.compiler.client.timeout = timeout

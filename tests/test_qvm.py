@@ -28,11 +28,7 @@ from flaky import flaky
 
 log = logging.getLogger(__name__)
 
-# Creating pattern for devices that have at most 5 qubits
-pattern = "Aspen-.-[1-5]Q-."
-VALID_QPU_LATTICES = [
-    qc for qc in pyquil.list_quantum_computers() if "qvm" not in qc and re.match(pattern, qc)
-]
+TEST_QPU_LATTICES = ["4q-qvm"]
 
 
 compiled_program = (
@@ -475,22 +471,14 @@ class TestQVMBasic(BaseTest):
         with pytest.raises(ValueError, match="QVM device cannot be run in analytic=True mode."):
             dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
 
-    def test_raise_error_if_qubits_not_indicated(self, shots):
-        """Test that instantiating a QVMDevice if the number of qubits were not indicated
-        in the name raises an error"""
-        with pytest.raises(
-            ValueError, match="QVM device string does not indicate the number of qubits!"
-        ):
-            dev = plf.QVMDevice(device="-qvm", shots=shots)
-
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_timeout_set_correctly(self, shots, device):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
         dev = plf.QVMDevice(device=device, shots=shots, timeout=100)
         assert dev.qc.compiler.client.timeout == 100
 
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_timeout_default(self, shots, device):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
@@ -709,19 +697,7 @@ class TestQVMIntegration(BaseTest):
 
     def test_load_virtual_qpu_device(self, qvm):
         """Test that the QPU simulators load correctly"""
-        qml.device("forest.qvm", device=np.random.choice(VALID_QPU_LATTICES))
-
-    def test_incorrect_qc_name(self):
-        """Test that exception is raised if name is incorrect"""
-        with pytest.raises(
-            ValueError, match="QVM device string does not indicate the number of qubits"
-        ):
-            qml.device("forest.qvm", device="Aspen-1-B")
-
-    def test_incorrect_qc_type(self):
-        """Test that exception is raised device is not a string or graph"""
-        with pytest.raises(ValueError, match="Required argument device must be a string"):
-            qml.device("forest.qvm", device=3)
+        qml.device("forest.qvm", device=np.random.choice(TEST_QPU_LATTICES))
 
     def test_qvm_args(self):
         """Test that the QVM plugin requires correct arguments"""
@@ -757,7 +733,7 @@ class TestQVMIntegration(BaseTest):
         )
 
     @flaky(max_runs=5, min_passes=2)
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
         """Test that the wavefunction plugin provides correct result for simple circuit.
 
@@ -781,7 +757,7 @@ class TestQVMIntegration(BaseTest):
         self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=3 / np.sqrt(shots))
 
     @flaky(max_runs=5, min_passes=3)
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_2q_gate(self, device, qvm, compiler):
         """Test that the two qubit gate with the PauliZ observable works correctly.
 
@@ -798,7 +774,7 @@ class TestQVMIntegration(BaseTest):
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
     @flaky(max_runs=5, min_passes=3)
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_2q_gate_pauliz_identity_tensor(self, device, qvm, compiler):
         """Test that the PauliZ tensor Identity observable works correctly.
 
@@ -815,7 +791,7 @@ class TestQVMIntegration(BaseTest):
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
     @flaky(max_runs=5, min_passes=3)
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_2q_gate_pauliz_pauliz_tensor(self, device, qvm, compiler):
         """Test that the PauliZ tensor PauliZ observable works correctly.
 
@@ -831,7 +807,7 @@ class TestQVMIntegration(BaseTest):
 
         assert np.allclose(circuit(), 1.0, atol=2e-2)
 
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_stored(self, qvm, device):
         """Test that QVM device stores the compiled program correctly"""
         dev = qml.device("forest.qvm", device=device, timeout=100)
@@ -862,7 +838,7 @@ class TestQVMIntegration(BaseTest):
             [False, False, False, False, False, False],
         ],
     )
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_stored_mutable_qnode_with_if_statement(
         self, qvm, device, statements
     ):
@@ -884,7 +860,6 @@ class TestQVMIntegration(BaseTest):
         for idx, stmt in enumerate(statements):
             qnodes[idx]([], statement=stmt)
             assert dev.circuit_hash in dev._compiled_program_dict
-            print(dev.circuit_hash, dev._compiled_program_dict)
 
         # Using that True evaluates to 1
         number_of_true = sum(statements)
@@ -894,7 +869,7 @@ class TestQVMIntegration(BaseTest):
         length = 1 if (number_of_true == 6 or number_of_true == 0) else 2
         assert len(dev._compiled_program_dict.items()) == length
 
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_stored_mutable_qnode_with_loop(self, qvm, device):
         """Test that QVM device stores the compiled program when the QNode is
         mutated correctly"""
@@ -918,7 +893,7 @@ class TestQVMIntegration(BaseTest):
 
         assert len(dev._compiled_program_dict.items()) == len(qnodes)
 
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_used(self, qvm, device, monkeypatch):
         """Test that QVM device used the compiled program correctly, after it was stored"""
         dev = qml.device("forest.qvm", device=device, timeout=100)
@@ -949,7 +924,7 @@ class TestQVMIntegration(BaseTest):
         assert len(dev._compiled_program_dict.items()) == 1
 
     @flaky(max_runs=5, min_passes=1)
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_correct_compared_with_default_qubit(self, qvm, device, tol):
         """Test that QVM device stores the compiled program correctly by comparing it with default.qubit.
 
@@ -976,7 +951,7 @@ class TestQVMIntegration(BaseTest):
         assert len(dev._compiled_program_dict.items()) == 1
 
     @flaky(max_runs=5, min_passes=3)
-    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(VALID_QPU_LATTICES)])
+    @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, device, qvm, compiler):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         was turned off.
