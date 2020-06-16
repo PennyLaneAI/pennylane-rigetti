@@ -198,16 +198,16 @@ class ForestDevice(QubitDevice):
         """View the last evaluated Quil program"""
         return self.prog
 
-    def remap_wires(self, wires):
+    def remap_registers(self, registers):
         """Use the wiring specified for the device if applicable.
 
         Returns:
-            list: wires as integers corresponding to the wiring if applicable
+            list[int]: wires as integers corresponding to the wiring if applicable
         """
         if hasattr(self, "wiring"):
-            return [int(self.wiring[i]) for i in wires]
+            return [int(self.wiring[i]) for i in registers]
 
-        return [int(w) for w in wires]
+        return registers
 
     def apply(self, operations, **kwargs):
         # pylint: disable=attribute-defined-outside-init
@@ -218,8 +218,9 @@ class ForestDevice(QubitDevice):
 
         # Apply the circuit operations
         for i, operation in enumerate(operations):
-            # map the operation wires to the physical device qubits
-            wires = self.remap_wires(operation.wires)
+            # map the user's wires to the physical device qubits
+            registers = self.wire_map(operation.wires)
+            registers = self.remap_registers(registers)
             par = operation.parameters
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
@@ -227,7 +228,7 @@ class ForestDevice(QubitDevice):
                     "Operation {} cannot be used after other Operations have already "
                     "been applied on a {} device.".format(operation.name, self.short_name)
                 )
-            self.prog += self._operation_map[operation.name](*par, *wires)
+            self.prog += self._operation_map[operation.name](*par, *registers)
 
         self.prog += self.apply_rotations(rotations)
 
@@ -245,9 +246,10 @@ class ForestDevice(QubitDevice):
         """
         rotation_operations = Program()
         for operation in rotations:
-            wires = self.remap_wires(operation.wires)
+            registers = self.wire_map(operation.wires)
+            registers = self.remap_registers(registers)
             par = operation.parameters
-            rotation_operations += self._operation_map[operation.name](*par, *wires)
+            rotation_operations += self._operation_map[operation.name](*par, *registers)
 
         return rotation_operations
 
@@ -260,18 +262,18 @@ class ForestDevice(QubitDevice):
     def operations(self):
         return set(self._operation_map.keys())
 
-    def mat_vec_product(self, mat, vec, wires):
+    def mat_vec_product(self, mat, vec, registers):
         r"""Apply multiplication of a matrix to subsystems of the quantum state.
 
         Args:
             mat (array): matrix to multiply
             vec (array): state vector to multiply
-            wires (Sequence[int]): target subsystems
+            registers (Sequence[int]): target subsystems
 
         Returns:
             array: output vector after applying ``mat`` to input ``vec`` on specified subsystems
         """
-        num_wires = len(wires)
+        num_wires = len(registers)
 
         if mat.shape != (2 ** num_wires, 2 ** num_wires):
             raise ValueError(
@@ -294,7 +296,7 @@ class ForestDevice(QubitDevice):
         # and wires=[0, 1], then
         # the reshaped dimensions of mat are such that
         # mat[i, j, k, l] == c_{ijkl}.
-        mat = np.reshape(mat, [2] * len(wires) * 2)
+        mat = np.reshape(mat, [2] * len(registers) * 2)
 
         # Reshape the state vector to ``size=[2, 2, ..., 2]``,
         # where ``len(size) == num_wires``.
@@ -313,7 +315,7 @@ class ForestDevice(QubitDevice):
         # For example, if num_wires=3 and wires=[2, 0], then
         # axes=((2, 3), (2, 0)). This is equivalent to doing
         # np.einsum("ijkl,lnk", mat, vec).
-        axes = (np.arange(len(wires), 2 * len(wires)), wires)
+        axes = (np.arange(len(registers), 2 * len(registers)), registers)
 
         # After the tensor dot operation, the resulting array
         # will have shape ``size=[2, 2, ..., 2]``,
@@ -325,8 +327,8 @@ class ForestDevice(QubitDevice):
         # of the resulting tensor. This corresponds to a (partial) transpose of
         # the correct output state
         # We'll need to invert this permutation to put the indices in the correct place
-        unused_idxs = [idx for idx in range(self.num_wires) if idx not in wires]
-        perm = wires + unused_idxs
+        unused_idxs = [idx for idx in range(self.num_wires) if idx not in registers]
+        perm = registers + unused_idxs
 
         # argsort gives the inverse permutation
         inv_perm = np.argsort(perm)
@@ -356,6 +358,7 @@ class ForestDevice(QubitDevice):
             return None
 
         wires = wires or range(self.num_wires)
-        wires = self.remap_wires(wires)
-        prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
+        registers = self.wire_map(wires)
+        registers = self.remap_registers(registers)
+        prob = self.marginal_prob(np.abs(self._state) ** 2, registers)
         return prob
