@@ -183,7 +183,7 @@ class QPUDevice(QVMDevice):
                 # the product of PauliZ operators on those qubits
                 pauli_obs = sI()
                 for wire in observable.wires:
-                    qubit = wire[0]
+                    qubit = wire
                     pauli_obs *= sZ(self.wiring[qubit])
 
 
@@ -202,10 +202,7 @@ class QPUDevice(QVMDevice):
 
             if self.readout_error is not None:
                 for wire in observable.wires:
-                    if isinstance(wire, int):
-                        qubit = wire
-                    elif isinstance(wire, List):
-                        qubit = wire[0]
+                    qubit = wire
                     prep_prog.define_noisy_readout(
                         self.wiring[qubit], p00=self.readout_error[0], p11=self.readout_error[1]
                     )
