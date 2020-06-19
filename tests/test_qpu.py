@@ -372,7 +372,8 @@ class TestQPUBasic(BaseTest):
     def test_2q_gate(self):
         """Test that the two qubit gate with the PauliZ observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3
+        out of 5 runs was added.
         """
 
         device = np.random.choice(TEST_QPU_LATTICES)
