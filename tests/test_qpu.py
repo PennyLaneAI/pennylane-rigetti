@@ -366,7 +366,7 @@ class TestQPUBasic(BaseTest):
 
         result = circuit()
 
-        assert np.isclose(result, 0.5, atol=2e-2)
+        assert np.isclose(result, 0.5, atol=3e-2)
 
     @flaky(max_runs=5, min_passes=3)
     def test_2q_gate(self):
