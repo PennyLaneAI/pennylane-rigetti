@@ -1,4 +1,4 @@
 pyquil>=2.16
-pennylane>=0.9
+pennylane>=0.10
 networkx
 flaky
