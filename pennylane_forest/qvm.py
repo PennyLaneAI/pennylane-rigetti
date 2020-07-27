@@ -171,7 +171,7 @@ class QVMDevice(ForestDevice):
 
             # Prepare for parametric compilation
             par = []
-            for param in operation.data:
+            for param in operation.params:
                 if isinstance(param, Variable):
                     # Using the idx for each Variable instance to specify the
                     # corresponding symbolic parameter
