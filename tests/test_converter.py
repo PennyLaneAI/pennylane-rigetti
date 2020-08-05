@@ -6,7 +6,7 @@ import pennylane as qml
 import pyquil
 import pyquil.gates as g
 import pytest
-from pennylane.utils import OperationRecorder
+from pennylane._queuing import OperationRecorder
 from pennylane_forest.converter import *
 
 
