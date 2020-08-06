@@ -320,7 +320,7 @@ class TestProgramConverter:
 
     @pytest.mark.parametrize("wires", [[0, 1, 2, 3], [4, 5]])
     def test_convert_wire_error(self, wires):
-        """Test that the conversion raises an error if the given number 
+        """Test that the conversion raises an error if the given number
         of wires doesn't match the number of qubits in the Program."""
         program = pyquil.Program()
 
@@ -397,7 +397,7 @@ class TestProgramConverter:
             assert converted.data == expected.data
 
     def test_convert_program_with_controlled_operations_not_in_pl_core(self, tol):
-        """Test that a program with controlled operations out of scope of PL core/PLF 
+        """Test that a program with controlled operations out of scope of PL core/PLF
         is properly converted, i.e. the operations are replaced with controlled operations."""
         program = pyquil.Program()
 
@@ -561,7 +561,7 @@ class TestProgramConverter:
             assert np.allclose(converted.data, expected.data, atol=tol, rtol=0)
 
     def test_convert_program_with_defpermutationgates(self):
-        """Test that a program with gates defined via DefPermutationGate is 
+        """Test that a program with gates defined via DefPermutationGate is
         properly converted."""
         program = pyquil.Program()
 
@@ -592,7 +592,7 @@ class TestProgramConverter:
             assert np.array_equal(converted.data, expected.data)
 
     def test_convert_program_with_controlled_defpermutationgates(self):
-        """Test that a program that uses controlled permutation gates 
+        """Test that a program that uses controlled permutation gates
         is properly converted."""
         program = pyquil.Program()
 
@@ -628,7 +628,7 @@ class TestProgramConverter:
             assert np.array_equal(converted.data, expected.data)
 
     def test_forked_gate_error(self):
-        """Test that an error is raised if conversion of a 
+        """Test that an error is raised if conversion of a
         forked gate is attempted."""
         program = pyquil.Program()
 
@@ -966,7 +966,7 @@ class TestInspectionProperties:
             DEFGATE SQRT-X:
                 0.5+0.5i, 0.5-0.5i
                 0.5-0.5i, 0.5+0.5i
-            
+
             H 0
             DAGGER RZ(0.34) 1
             CNOT 0 3
@@ -1009,7 +1009,7 @@ class TestInspectionProperties:
             DECLARE gamma REAL[1]
             DEFGATE SQRT-X:
                 0.5+0.5i, 0.5-0.5i
-                0.5-0.5i, 0.5+0.5i            
+                0.5-0.5i, 0.5+0.5i
             H 0
             DAGGER RZ(0.34) 1
             CNOT 0 3

@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 np.random.seed(42)
 
 
+@pytest.mark.skip()
 class TestPyQVMBasic(BaseTest):
     """Unit tests for the pyQVM simulator."""
 
@@ -338,6 +339,7 @@ class TestPyQVMBasic(BaseTest):
         self.assertAllAlmostEqual(res, expected, delta=3 / np.sqrt(shots))
 
 
+@pytest.mark.skip()
 class TestQVMIntegration(BaseTest):
     """Test the pyQVM simulator works correctly from the PennyLane frontend."""
 
