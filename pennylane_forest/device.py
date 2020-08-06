@@ -40,7 +40,7 @@ from pyquil.api._base_connection import ForestConnection
 from pyquil.api._config import PyquilConfig
 
 from pyquil.quil import DefGate
-from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT, S, T, CSWAP
+from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT, S, T, CSWAP, I
 
 # following gates are not supported by PennyLane
 from pyquil.gates import CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, ISWAP, PSWAP
@@ -66,7 +66,8 @@ def basis_state(par, *wires):
         list: list of PauliX matrix operators acting on each wire
     """
     # pylint: disable=unused-argument
-    return [X(w) for w, p in zip(wires, par) if p == 1]
+    # need the identity here because otherwise only the "p=1" wires register in the circuit
+    return [X(w) if p == 1 else I(w) for w, p in zip(wires, par)]
 
 
 def qubit_unitary(par, *wires):
