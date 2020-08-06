@@ -60,7 +60,7 @@ class TestQPUIntegration(BaseTest):
     @pytest.mark.parametrize(
         "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
     )
-    def test_tensor_wires_expval_parametric_compilation(self, obs):
+    def test_tensor_expval_parametric_compilation(self, obs):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
         turned on.
 
@@ -107,7 +107,7 @@ class TestQPUIntegration(BaseTest):
     @pytest.mark.parametrize(
         "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
     )
-    def test_tensor_wires_expval_operator_estimation(self, obs):
+    def test_tensor_expval_operator_estimation(self, obs):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
         turned off allowing operator estimation.
 
@@ -366,7 +366,7 @@ class TestQPUBasic(BaseTest):
 
         result = circuit()
 
-        assert np.isclose(result, 0.5, atol=2e-2)
+        assert np.isclose(result, 0.5, atol=3e-2)
 
     @flaky(max_runs=5, min_passes=3)
     def test_2q_gate(self):
