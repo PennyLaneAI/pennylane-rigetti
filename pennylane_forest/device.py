@@ -33,17 +33,20 @@ import uuid
 
 import numpy as np
 
+from collections import OrderedDict
+
 from pyquil import Program
 from pyquil.api._base_connection import ForestConnection
 from pyquil.api._config import PyquilConfig
 
 from pyquil.quil import DefGate
-from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT
+from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT, S, T, CSWAP
 
 # following gates are not supported by PennyLane
-from pyquil.gates import S, T, CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, CSWAP, ISWAP, PSWAP
+from pyquil.gates import CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, ISWAP, PSWAP
 
 from pennylane import QubitDevice, DeviceError
+from pennylane.wires import Wires
 
 from ._version import __version__
 
@@ -162,12 +165,14 @@ class ForestDevice(QubitDevice):
     r"""Abstract Forest device for PennyLane.
 
     Args:
-        wires (int): the number of modes to initialize the device in
+        wires (int or Iterable[Number, str]]): Number of subsystems represented by the device,
+            or iterable that contains unique labels for the subsystems as numbers (i.e., ``[-1, 0, 2]``)
+            or strings (``['ancilla', 'q1', 'q2']``).
         shots (int): Number of circuit evaluations/random samples used
             to estimate expectation values of observables.
             For simulator devices, 0 means the exact EV is returned.
     """
-    pennylane_requires = ">=0.9"
+    pennylane_requires = ">=0.11"
     version = __version__
     author = "Rigetti Computing Inc."
 
@@ -198,16 +203,15 @@ class ForestDevice(QubitDevice):
         """View the last evaluated Quil program"""
         return self.prog
 
-    def remap_wires(self, wires):
-        """Use the wiring specified for the device if applicable.
+    def define_wire_map(self, wires):
 
-        Returns:
-            list: wires as integers corresponding to the wiring if applicable
-        """
         if hasattr(self, "wiring"):
-            return [int(self.wiring[i]) for i in wires]
+            device_wires = Wires(self.wiring)
+        else:
+            # if no wiring given, use consecutive wire labels
+            device_wires = Wires(range(self.num_wires))
 
-        return [int(w) for w in wires]
+        return OrderedDict(zip(wires, device_wires))
 
     def apply(self, operations, **kwargs):
         # pylint: disable=attribute-defined-outside-init
@@ -218,8 +222,8 @@ class ForestDevice(QubitDevice):
 
         # Apply the circuit operations
         for i, operation in enumerate(operations):
-            # map the operation wires to the physical device qubits
-            wires = self.remap_wires(operation.wires)
+            # map the ops' wires to the wire labels used by the device
+            device_wires = self.map_wires(operation.wires)
             par = operation.parameters
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
@@ -227,7 +231,7 @@ class ForestDevice(QubitDevice):
                     "Operation {} cannot be used after other Operations have already "
                     "been applied on a {} device.".format(operation.name, self.short_name)
                 )
-            self.prog += self._operation_map[operation.name](*par, *wires)
+            self.prog += self._operation_map[operation.name](*par, *device_wires.labels)
 
         self.prog += self.apply_rotations(rotations)
 
@@ -245,33 +249,34 @@ class ForestDevice(QubitDevice):
         """
         rotation_operations = Program()
         for operation in rotations:
-            wires = self.remap_wires(operation.wires)
+            # map the ops' wires to the wire labels used by the device
+            device_wires = self.map_wires(operation.wires)
             par = operation.parameters
-            rotation_operations += self._operation_map[operation.name](*par, *wires)
+            rotation_operations += self._operation_map[operation.name](*par, *device_wires.labels)
 
         return rotation_operations
 
     def reset(self):
         self.prog = Program()
-        self._active_wires = set()
+        self._active_wires = Wires([])
         self._state = None
 
     @property
     def operations(self):
         return set(self._operation_map.keys())
 
-    def mat_vec_product(self, mat, vec, wires):
+    def mat_vec_product(self, mat, vec, device_wire_labels):
         r"""Apply multiplication of a matrix to subsystems of the quantum state.
 
         Args:
             mat (array): matrix to multiply
             vec (array): state vector to multiply
-            wires (Sequence[int]): target subsystems
+            device_wire_labels (Sequence[int]): labels of device subsystems
 
         Returns:
             array: output vector after applying ``mat`` to input ``vec`` on specified subsystems
         """
-        num_wires = len(wires)
+        num_wires = len(device_wire_labels)
 
         if mat.shape != (2 ** num_wires, 2 ** num_wires):
             raise ValueError(
@@ -294,7 +299,7 @@ class ForestDevice(QubitDevice):
         # and wires=[0, 1], then
         # the reshaped dimensions of mat are such that
         # mat[i, j, k, l] == c_{ijkl}.
-        mat = np.reshape(mat, [2] * len(wires) * 2)
+        mat = np.reshape(mat, [2] * len(device_wire_labels) * 2)
 
         # Reshape the state vector to ``size=[2, 2, ..., 2]``,
         # where ``len(size) == num_wires``.
@@ -313,7 +318,7 @@ class ForestDevice(QubitDevice):
         # For example, if num_wires=3 and wires=[2, 0], then
         # axes=((2, 3), (2, 0)). This is equivalent to doing
         # np.einsum("ijkl,lnk", mat, vec).
-        axes = (np.arange(len(wires), 2 * len(wires)), wires)
+        axes = (np.arange(len(device_wire_labels), 2 * len(device_wire_labels)), device_wire_labels)
 
         # After the tensor dot operation, the resulting array
         # will have shape ``size=[2, 2, ..., 2]``,
@@ -325,8 +330,8 @@ class ForestDevice(QubitDevice):
         # of the resulting tensor. This corresponds to a (partial) transpose of
         # the correct output state
         # We'll need to invert this permutation to put the indices in the correct place
-        unused_idxs = [idx for idx in range(self.num_wires) if idx not in wires]
-        perm = wires + unused_idxs
+        unused_idxs = [idx for idx in range(self.num_wires) if idx not in device_wire_labels]
+        perm = device_wire_labels + unused_idxs
 
         # argsort gives the inverse permutation
         inv_perm = np.argsort(perm)
@@ -345,7 +350,7 @@ class ForestDevice(QubitDevice):
             the ``device._state`` attribute. This attribute might not be available for such devices.
 
         Args:
-            wires (Sequence[int]): Sequence of wires to return
+            wires (Iterable[Number, str], Number, str, Wires): wires to return
                 marginal probabilities for. Wires not provided
                 are traced out of the system.
 
@@ -356,6 +361,6 @@ class ForestDevice(QubitDevice):
             return None
 
         wires = wires or range(self.num_wires)
-        wires = self.remap_wires(wires)
+        wires = Wires(wires)
         prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
         return prob

@@ -1,8 +1,9 @@
 import numpy as np
 import pennylane as qml
-import pennylane.plugins.default_qubit as dq
+import pennylane.devices.default_qubit as dq
 import pytest
 from pennylane_forest.ops import *
+from pennylane.wires import Wires
 
 
 class TestDecompositions:
@@ -24,9 +25,9 @@ class TestDecompositions:
             gate_matrix = gate.matrix
 
             if gate.num_wires == 1:
-                if gate.wires[0] == 0:
+                if gate.wires[0] == Wires(0):
                     gate_matrix = np.kron(gate_matrix, np.eye(2, dtype=complex))
-                elif gate.wires[0] == 1:
+                elif gate.wires[0] == Wires(1):
                     gate_matrix = np.kron(np.eye(2, dtype=complex), gate_matrix)
 
             calculated_matrix = gate_matrix @ calculated_matrix
@@ -47,9 +48,9 @@ class TestDecompositions:
             gate_matrix = gate.matrix
 
             if gate.num_wires == 1:
-                if gate.wires[0] == 0:
+                if gate.wires[0] == Wires(0):
                     gate_matrix = np.kron(gate_matrix, np.eye(2, dtype=complex))
-                elif gate.wires[0] == 1:
+                elif gate.wires[0] == Wires(1):
                     gate_matrix = np.kron(np.eye(2, dtype=complex), gate_matrix)
 
             calculated_matrix = gate_matrix @ calculated_matrix
@@ -69,9 +70,9 @@ class TestDecompositions:
             gate_matrix = gate.matrix
 
             if gate.num_wires == 1:
-                if gate.wires[0] == 0:
+                if gate.wires[0] == Wires(0):
                     gate_matrix = np.kron(gate_matrix, np.eye(2, dtype=complex))
-                elif gate.wires[0] == 1:
+                elif gate.wires[0] == Wires(1):
                     gate_matrix = np.kron(np.eye(2, dtype=complex), gate_matrix)
 
             calculated_matrix = gate_matrix @ calculated_matrix

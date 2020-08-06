@@ -58,7 +58,7 @@ class TestQVMBasic(BaseTest):
         O2 = qml.expval(qml.Identity(wires=[1]))
 
         circuit_graph = CircuitGraph(
-            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2]
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2], dev.wires
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -83,6 +83,7 @@ class TestQVMBasic(BaseTest):
         circuit_graph = CircuitGraph(
             [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
             {},
+            dev.wires,
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -108,6 +109,7 @@ class TestQVMBasic(BaseTest):
         circuit_graph = CircuitGraph(
             [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
             {},
+            dev.wires,
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -132,6 +134,7 @@ class TestQVMBasic(BaseTest):
         circuit_graph = CircuitGraph(
             [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
             {},
+            dev.wires,
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -157,6 +160,7 @@ class TestQVMBasic(BaseTest):
         circuit_graph = CircuitGraph(
             [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
             {},
+            dev.wires,
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -188,6 +192,7 @@ class TestQVMBasic(BaseTest):
         circuit_graph = CircuitGraph(
             [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
             {},
+            dev.wires,
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -225,7 +230,7 @@ class TestQVMBasic(BaseTest):
         O1 = qml.expval(qml.Hermitian(A, wires=[0, 1]))
 
         circuit_graph = CircuitGraph(
-            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1], {}
+            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1], {}, dev.wires
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -254,7 +259,7 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.var(qml.PauliZ(wires=[0]))
 
-        circuit_graph = CircuitGraph([qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])] + [O1], {})
+        circuit_graph = CircuitGraph([qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])] + [O1], {}, dev.wires)
 
         # test correct variance for <Z> of a rotated state
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -277,7 +282,7 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.var(qml.Hermitian(A, wires=[0]))
 
-        circuit_graph = CircuitGraph([qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])] + [O1], {})
+        circuit_graph = CircuitGraph([qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])] + [O1], {}, dev.wires)
 
         # test correct variance for <A> of a rotated state
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -323,7 +328,7 @@ class TestQVMBasic(BaseTest):
                 state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
                 w = list(range(dev.num_wires))
 
-            circuit_graph = CircuitGraph([op(p, wires=w)] + [obs], {})
+            circuit_graph = CircuitGraph([op(p, wires=w)] + [obs], {}, dev.wires)
         else:
             p = [0.432_423, 2, 0.324][: op.num_params]
             fn = test_operation_map[gate]
@@ -339,10 +344,10 @@ class TestQVMBasic(BaseTest):
             state = apply_unitary(O, 3)
             # Creating the circuit graph using a parametrized operation
             if p:
-                circuit_graph = CircuitGraph([op(*p, wires=w)] + [obs], {})
+                circuit_graph = CircuitGraph([op(*p, wires=w)] + [obs], {}, dev.wires)
             # Creating the circuit graph using an operation that take no parameters
             else:
-                circuit_graph = CircuitGraph([op(wires=w)] + [obs], {})
+                circuit_graph = CircuitGraph([op(wires=w)] + [obs], {}, dev.wires)
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -364,7 +369,7 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.expval(qml.PauliZ(wires=[0]))
 
-        circuit_graph = CircuitGraph([qml.RX(1.5708, wires=[0])] + [O1], {})
+        circuit_graph = CircuitGraph([qml.RX(1.5708, wires=[0])] + [O1], {}, dev.wires)
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -388,7 +393,7 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.sample(qml.Hermitian(A, wires=[0]))
 
-        circuit_graph = CircuitGraph([qml.RX(theta, wires=[0])] + [O1], {})
+        circuit_graph = CircuitGraph([qml.RX(theta, wires=[0])] + [O1], {}, dev.wires)
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -434,6 +439,7 @@ class TestQVMBasic(BaseTest):
         circuit_graph = CircuitGraph(
             [qml.RX(theta, wires=[0]), qml.RY(2 * theta, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1],
             {},
+            dev.wires,
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -502,7 +508,7 @@ class TestQVMBasic(BaseTest):
         O2 = qml.expval(qml.Identity(wires=[1]))
 
         circuit_graph = CircuitGraph(
-            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2]
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2], dev.wires
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -520,7 +526,7 @@ class TestQVMBasic(BaseTest):
 
         O1 = qml.expval(qml.PauliZ(wires=[0]))
 
-        circuit_graph = CircuitGraph([qml.RZ(theta, wires=[0]), qml.CZ(wires=[0, 1])], [O1])
+        circuit_graph = CircuitGraph([qml.RZ(theta, wires=[0]), qml.CZ(wires=[0, 1])], [O1], dev.wires)
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
         dev.generate_samples()
@@ -541,7 +547,7 @@ class TestParametricCompilation(BaseTest):
         O2 = qml.expval(qml.Identity(wires=[1]))
 
         circuit_graph = CircuitGraph(
-            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2]
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2], dev.wires
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -582,7 +588,7 @@ class TestParametricCompilation(BaseTest):
         O2 = qml.expval(qml.Identity(wires=[1]))
 
         circuit_graph = CircuitGraph(
-            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2]
+            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2], dev.wires
         )
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -625,7 +631,7 @@ class TestParametricCompilation(BaseTest):
         for run_idx in range(number_of_runs):
             Variable.positional_arg_values[1] = 0.232 * run_idx
             Variable.positional_arg_values[2] = 0.8764 * run_idx
-            circuit_graph = CircuitGraph(queue, observable_queue)
+            circuit_graph = CircuitGraph(queue, observable_queue, dev.wires)
 
             dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 

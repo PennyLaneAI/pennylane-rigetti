@@ -45,7 +45,7 @@ class NumpyWavefunctionDevice(ForestDevice):
 
     def __init__(self, wires, *, shots=1000, analytic=True, **kwargs):
         super().__init__(wires, shots, analytic, **kwargs)
-        self.qc = PyQVM(n_qubits=wires, quantum_simulator_type=NumpyWavefunctionSimulator)
+        self.qc = PyQVM(n_qubits=len(self.wires), quantum_simulator_type=NumpyWavefunctionSimulator)
         self._state = None
 
     def apply(self, operations, **kwargs):
