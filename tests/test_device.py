@@ -31,7 +31,7 @@ class TestMatVecProduct:
 
         # apply 2 qubit unitary to the full system
         with pytest.raises(ValueError, match="specify a 8 x 8 matrix for 3 wires"):
-            res = dev.mat_vec_product(U2, vec, wires=[0, 1, 2])
+            res = dev.mat_vec_product(U2, vec, device_wire_labels=[0, 1, 2])
 
     def test_full_system(self, tol):
         """Test that matrix-vector multiplication
@@ -47,7 +47,7 @@ class TestMatVecProduct:
         mat = np.kron(U2, H)
 
         # apply to the system
-        res = dev.mat_vec_product(mat, vec, wires=[0, 1, 2])
+        res = dev.mat_vec_product(mat, vec, device_wire_labels=[0, 1, 2])
 
         # perform the same operation using dense matrix multiplication
         expected = mat @ vec
@@ -65,7 +65,7 @@ class TestMatVecProduct:
         vec = np.random.random([2 ** wires])
 
         # apply to the system
-        res = dev.mat_vec_product(U2, vec, wires=[1, 0])
+        res = dev.mat_vec_product(U2, vec, device_wire_labels=[1, 0])
 
         # perform the same operation using dense matrix multiplication
         perm = np.array([0, 2, 1, 3])
@@ -84,7 +84,7 @@ class TestMatVecProduct:
         vec = np.random.random([2 ** wires])
 
         # apply a 2 qubit unitary to wires 1, 2
-        res = dev.mat_vec_product(U2, vec, wires=[1, 2])
+        res = dev.mat_vec_product(U2, vec, device_wire_labels=[1, 2])
 
         # perform the same operation using dense matrix multiplication
         expected = np.kron(I, U2) @ vec
@@ -102,7 +102,7 @@ class TestMatVecProduct:
         vec = np.random.random([2 ** wires])
 
         # apply a 2 qubit unitary to wires 1, 2
-        res = dev.mat_vec_product(U2, vec, wires=[2, 0])
+        res = dev.mat_vec_product(U2, vec, device_wire_labels=[2, 0])
 
         # perform the same operation using dense matrix multiplication
         perm = np.array([0, 4, 1, 5, 2, 6, 3, 7])

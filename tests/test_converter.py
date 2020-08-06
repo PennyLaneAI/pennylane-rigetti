@@ -6,7 +6,7 @@ import pennylane as qml
 import pyquil
 import pyquil.gates as g
 import pytest
-from pennylane.utils import OperationRecorder
+from pennylane._queuing import OperationRecorder
 from pennylane_forest.converter import *
 
 
@@ -142,7 +142,7 @@ class TestProgramConverter:
 
         assert rec.queue[0].name == expected_pl_operation.name
         assert rec.queue[0].wires == expected_pl_operation.wires
-        assert rec.queue[0].params == expected_pl_operation.params
+        assert rec.queue[0].data == expected_pl_operation.data
 
     def test_convert_simple_program(self):
         """Test that a simple program is properly converted."""
@@ -178,7 +178,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_simple_program_with_parameters(self):
         """Test that a simple program with parameters is properly converted."""
@@ -216,7 +216,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_parameter_not_given_error(self):
         """Test that the correct error is raised if a parameter is not given."""
@@ -280,7 +280,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_simple_program_wire_assignment(self):
         """Test that the assignment of qubits to wires works as expected."""
@@ -316,7 +316,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     @pytest.mark.parametrize("wires", [[0, 1, 2, 3], [4, 5]])
     def test_convert_wire_error(self, wires):
@@ -366,7 +366,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_program_with_controlled_operations(self):
         """Test that a program with controlled operations is properly converted."""
@@ -394,7 +394,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_program_with_controlled_operations_not_in_pl_core(self, tol):
         """Test that a program with controlled operations out of scope of PL core/PLF 
@@ -429,7 +429,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert np.allclose(converted.params, expected.params, atol=tol, rtol=0)
+            assert np.allclose(converted.data, expected.data, atol=tol, rtol=0)
 
     def test_convert_program_with_controlled_dagger_operations(self):
         """Test that a program that combines controlled and daggered operations
@@ -468,7 +468,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_program_with_defgates(self):
         """Test that a program that defines its own gates is properly converted."""
@@ -514,7 +514,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_program_with_controlled_defgates(self, tol):
         """Test that a program with controlled defined gates is properly
@@ -558,7 +558,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert np.allclose(converted.params, expected.params, atol=tol, rtol=0)
+            assert np.allclose(converted.data, expected.data, atol=tol, rtol=0)
 
     def test_convert_program_with_defpermutationgates(self):
         """Test that a program with gates defined via DefPermutationGate is 
@@ -589,7 +589,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert np.array_equal(converted.params, expected.params)
+            assert np.array_equal(converted.data, expected.data)
 
     def test_convert_program_with_controlled_defpermutationgates(self):
         """Test that a program that uses controlled permutation gates 
@@ -625,7 +625,7 @@ class TestProgramConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert np.array_equal(converted.params, expected.params)
+            assert np.array_equal(converted.data, expected.data)
 
     def test_forked_gate_error(self):
         """Test that an error is raised if conversion of a 
@@ -682,7 +682,7 @@ class TestQuilConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_program_with_classical_control_flow(self):
         """Test that a program with classical control flow is properly converted."""
@@ -710,7 +710,7 @@ class TestQuilConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_program_with_pragmas(self):
         """Test that a program with pragmas is properly converted."""
@@ -755,7 +755,7 @@ class TestQuilConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_complex_program(self):
         """Test that a more complicated program is properly converted."""
@@ -796,7 +796,7 @@ class TestQuilConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert np.array_equal(converted.params, expected.params)
+            assert np.array_equal(converted.data, expected.data)
 
     def test_convert_simple_program_with_parameters(self):
         """Test that a simple parametrized program is properly converted."""
@@ -836,7 +836,7 @@ class TestQuilConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_program_with_parameters_and_measurements(self):
         """Test that a program with parameters and measurements is properly converted."""
@@ -880,7 +880,7 @@ class TestQuilConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_convert_program_with_defgates(self):
         """Test that a program with defined gates is properly converted."""
@@ -918,7 +918,7 @@ class TestQuilConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert np.array_equal(converted.params, expected.params)
+            assert np.array_equal(converted.data, expected.data)
 
 
 class TestQuilFileConverter:
@@ -949,7 +949,7 @@ class TestQuilFileConverter:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
 
 class TestInspectionProperties:
@@ -1067,7 +1067,7 @@ class TestIntegration:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_load_quil_via_entry_point(self):
         """Test that a quil string can be loaded via the load entrypoint."""
@@ -1105,7 +1105,7 @@ class TestIntegration:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     def test_load_quil_file_via_entry_point(self):
         """Test that a quil file can be loaded via the load entrypoint."""
@@ -1134,7 +1134,7 @@ class TestIntegration:
         for converted, expected in zip(rec.queue, expected_queue):
             assert converted.name == expected.name
             assert converted.wires == expected.wires
-            assert converted.params == expected.params
+            assert converted.data == expected.data
 
     @pytest.mark.parametrize("angle", [0.0, 0.3, 0.5, 0.7, -0.2, 2.4])
     def test_program_in_qnode(self, angle):

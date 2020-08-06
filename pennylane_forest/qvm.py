@@ -161,7 +161,7 @@ class QVMDevice(ForestDevice):
         # Apply the circuit operations
         for i, operation in enumerate(operations):
             # map the operation wires to the physical device qubits
-            wires = self.remap_registers(operation.wires)
+            device_wires = self.map_wires(operation.wires)
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
                 raise DeviceError(
@@ -192,7 +192,7 @@ class QVMDevice(ForestDevice):
                 else:
                     par.append(param)
 
-            self.prog += self._operation_map[operation.name](*par, *wires)
+            self.prog += self._operation_map[operation.name](*par, *device_wires.labels)
 
         self.prog += self.apply_rotations(rotations)
 

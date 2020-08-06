@@ -30,6 +30,7 @@ import itertools
 
 import numpy as np
 from numpy.linalg import eigh
+from pennylane.wires import Wires
 
 from pyquil.api import WavefunctionSimulator
 
@@ -95,17 +96,19 @@ class WavefunctionDevice(ForestDevice):
             # all wires in the device have been initialised
             return
 
-        # there are some wires in the device that have not yet been initialised
-        inactive_wires = set(range(self.num_wires)) - self._active_wires
+        num_inactive_wires = len(self.wires) - len(self._active_wires)
+
+        # translate active wires to the device's labels
+        device_active_wires = self.map_wires(self._active_wires)
 
         # place the inactive subsystems in the vacuum state
-        other_subsystems = np.zeros([2 ** len(inactive_wires)])
+        other_subsystems = np.zeros([2 ** num_inactive_wires])
         other_subsystems[0] = 1
 
         # expand the state of the device into a length-num_wire state vector
         expanded_state = np.kron(self._state, other_subsystems).reshape([2] * self.num_wires)
         expanded_state = np.moveaxis(
-            expanded_state, range(len(self._active_wires)), self._active_wires
+            expanded_state, range(len(device_active_wires)), device_active_wires.labels
         )
         expanded_state = expanded_state.flatten()
 

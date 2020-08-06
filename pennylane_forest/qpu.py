@@ -159,32 +159,31 @@ class QPUDevice(QVMDevice):
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
 
     def expval(self, observable):
-        wires = observable.wires
+        # translate operator wires to wire labels on the device
+        device_wires = self.map_wires(observable.wires)
 
         # `measure_observables` called only when parametric compilation is turned off
         if not self.parametric_compilation:
 
             # Single-qubit observable
-            if len(wires) == 1:
+            if len(device_wires) == 1:
 
                 # Ensure sensible observable
                 assert observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"], "Unknown observable"
 
                 # Create appropriate PauliZ operator
-                wire = wires[0]
-                qubit = self.wiring[wire]
-                pauli_obs = sZ(qubit)
+                wire = device_wires.labels[0]
+                pauli_obs = sZ(wire)
 
             # Multi-qubit observable
-            elif len(wires) > 1 and isinstance(observable, Tensor) and not self.parametric_compilation:
+            elif len(device_wires) > 1 and isinstance(observable, Tensor) and not self.parametric_compilation:
 
                 # All observables are rotated to be measured in the Z-basis, so we just need to
                 # check which wires exist in the observable, map them to physical qubits, and measure
                 # the product of PauliZ operators on those qubits
                 pauli_obs = sI()
-                for wire in observable.wires:
-                    qubit = wire
-                    pauli_obs *= sZ(self.wiring[qubit])
+                for label in device_wires.labels:
+                    pauli_obs *= sZ(label)
 
 
             # Program preparing the state in which to measure observable
@@ -201,10 +200,9 @@ class QPUDevice(QVMDevice):
                     prep_prog += Program(str_instr)
 
             if self.readout_error is not None:
-                for wire in observable.wires:
-                    qubit = wire
+                for label in device_wires.labels:
                     prep_prog.define_noisy_readout(
-                        self.wiring[qubit], p00=self.readout_error[0], p11=self.readout_error[1]
+                        label, p00=self.readout_error[0], p11=self.readout_error[1]
                     )
 
             # Measure out multi-qubit observable

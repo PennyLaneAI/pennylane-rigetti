@@ -32,7 +32,7 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.var(qml.PauliZ(wires=[0]))
 
         observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
 
         # test correct variance for <Z> of a rotated state
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -56,7 +56,7 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.var(qml.Hermitian(H, wires=[0]))
 
         observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
 
         # test correct variance for <Z> of a rotated state
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -102,7 +102,7 @@ class TestWavefunctionBasic(BaseTest):
                 state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
                 w = list(range(dev.num_wires))
 
-            circuit_graph = qml.CircuitGraph([op(p, wires=w)] + [obs], {})
+            circuit_graph = qml.CircuitGraph([op(p, wires=w)] + [obs], {}, dev.wires)
         else:
             p = [0.432_423, 2, 0.324][: op.num_params]
             fn = test_operation_map[gate]
@@ -118,10 +118,10 @@ class TestWavefunctionBasic(BaseTest):
             state = apply_unitary(O, 3)
             # Creating the circuit graph using a parametrized operation
             if p:
-                circuit_graph = qml.CircuitGraph([op(*p, wires=w)] + [obs], {})
+                circuit_graph = qml.CircuitGraph([op(*p, wires=w)] + [obs], {}, dev.wires)
             # Creating the circuit graph using an operation that take no parameters
             else:
-                circuit_graph = qml.CircuitGraph([op(wires=w)] + [obs], {})
+                circuit_graph = qml.CircuitGraph([op(wires=w)] + [obs], {}, dev.wires)
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -143,7 +143,7 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.sample(qml.PauliZ(0))
 
         observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
 
         # test correct variance for <Z> of a rotated state
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
@@ -168,7 +168,7 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.sample(qml.Hermitian(A, wires=[0]))
 
         observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
@@ -217,7 +217,7 @@ class TestWavefunctionBasic(BaseTest):
         O = qml.sample(qml.Hermitian(A, wires=[0, 1]))
 
         observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {})
+        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
 
         dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
 
