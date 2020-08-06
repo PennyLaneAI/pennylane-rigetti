@@ -93,7 +93,7 @@ def _resolve_gate(gate):
     for i, modifier in enumerate(gate.modifiers):
         if modifier == "CONTROLLED":
             if gate.name in _control_map:
-                stripped_gate = Gate(_control_map[gate.name], gate.data, gate.qubits)
+                stripped_gate = Gate(_control_map[gate.name], gate.params, gate.qubits)
                 stripped_gate.modifiers = gate.modifiers.copy()
                 del stripped_gate.modifiers[i]
 
@@ -522,7 +522,7 @@ class ProgramLoader:
                 pl_gate = pyquil_inv_operation_map[resolved_gate.name]
 
             parametrized_gate = ParametrizedGate(
-                pl_gate, gate.qubits, gate.data, _is_inverted(gate)
+                pl_gate, gate.qubits, gate.params, _is_inverted(gate)
             )
 
             self._parametrized_gates.append(parametrized_gate)
