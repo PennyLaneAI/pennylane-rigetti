@@ -1,6 +1,6 @@
 import numpy as np
 import pennylane as qml
-import pennylane.plugins.default_qubit as dq
+import pennylane.devices.default_qubit as dq
 import pytest
 from pennylane_forest.ops import *
 
