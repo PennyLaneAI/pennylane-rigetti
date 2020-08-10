@@ -9,11 +9,17 @@ PennyLane Forest Plugin
     :alt: Documentation Status
     :target: http://pennylane-forest.readthedocs.io/en/latest/?badge=latest
 
-Contains the PennyLane Forest plugin. This plugin allows three Rigetti devices to work with PennyLane --- the wavefunction simulator, the Quantum Virtual Machine (QVM), and Quantum Processing Units (QPUs).
+Contains the PennyLane Forest plugin. This plugin allows three Rigetti devices to work with
+PennyLane --- the wavefunction simulator, the Quantum Virtual Machine (QVM), and Quantum Processing
+Units (QPUs).
 
-`pyQuil <https://pyquil.readthedocs.io>`_ is a Python library for quantum programming using the quantum instruction language (Quil) --- resulting quantum programs can be executed using the `Rigetti Forest SDK <https://www.rigetti.com/forest>`_ and the `Rigetti QCS <https://www.rigetti.com/qcs>`_.
+`pyQuil <https://pyquil.readthedocs.io>`_ is a Python library for quantum programming using the
+quantum instruction language (Quil) --- resulting quantum programs can be executed using the
+`Rigetti Forest SDK <https://www.rigetti.com/forest>`_ and the `Rigetti QCS
+<https://www.rigetti.com/qcs>`_.
 
-`PennyLane <https://pennylane.readthedocs.io>`_ is a machine learning library for optimization and automatic differentiation of hybrid quantum-classical computations.
+`PennyLane <https://pennylane.ai>`_ is a machine learning library for optimization and automatic
+differentiation of hybrid quantum-classical computations.
 
 
 Features
