@@ -34,7 +34,9 @@ class NumpyWavefunctionDevice(ForestDevice):
     r"""NumpyWavefunction simulator device for PennyLane.
 
     Args:
-        wires (int): the number of qubits to initialize the device in
+        wires (int or Iterable[Number, str]]): Number of subsystems represented by the device,
+            or iterable that contains unique labels for the subsystems as numbers (i.e., ``[-1, 0, 2]``)
+            or strings (``['ancilla', 'q1', 'q2']``).
         shots (int): Number of circuit evaluations/random samples used
             to estimate expectation values of observables.
     """

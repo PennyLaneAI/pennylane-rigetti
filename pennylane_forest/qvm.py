@@ -53,6 +53,11 @@ class QVMDevice(ForestDevice):
 
         shots (int): number of circuit evaluations/random samples used
             to estimate expectation values of observables.
+        wires (Iterable[Number, str]): Iterable that contains unique labels for the
+            qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``).
+            The number of labels must match the number of qubits accessible on the backend.
+            If not provided, qubits are addressed as consecutive integers [0, 1, ...], and their number
+            is inferred from the backend.
         noisy (bool): set to ``True`` to add noise models to your QVM.
 
     Keyword args:
@@ -73,13 +78,11 @@ class QVMDevice(ForestDevice):
     short_name = "forest.qvm"
     observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
-    def __init__(self, device, *, shots=1000, noisy=False, **kwargs):
+    def __init__(self, device, *, wires=None, shots=1000, noisy=False, **kwargs):
 
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
 
-        # ignore any 'wires' keyword argument passed to the device
-        kwargs.pop("wires", None)
         analytic = kwargs.get("analytic", False)
         timeout = kwargs.pop("timeout", None)
 
@@ -116,9 +119,26 @@ class QVMDevice(ForestDevice):
         elif isinstance(device, str):
             self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
 
-        num_wires = len(self.qc.qubits())
+        self.num_wires = len(self.qc.qubits())
 
-        super().__init__(num_wires, shots, analytic=analytic, **kwargs)
+        if wires is None:
+            # infer the number of modes from the device specs
+            # and use consecutive integer wire labels
+            wires = range(self.num_wires)
+
+        if isinstance(wires, int):
+            raise ValueError(
+                "Device has a fixed number of {} qubits. The wires argument can only be used "
+                "to specify an iterable of wire labels.".format(self.num_wires)
+            )
+
+        if self.num_wires != len(wires):
+            raise ValueError(
+                "Device has a fixed number of {} qubits and "
+                "cannot be created with {} wires.".format(self.num_wires, len(wires))
+            )
+
+        super().__init__(wires, shots, analytic=analytic, **kwargs)
 
         if timeout is not None:
             self.qc.compiler.client.timeout = timeout

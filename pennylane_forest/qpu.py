@@ -46,6 +46,11 @@ class QPUDevice(QVMDevice):
         device (str): the name of the device to initialise.
         shots (int): number of circuit evaluations/random samples used
             to estimate expectation values of observables.
+         wires (Iterable[Number, str]): Iterable that contains unique labels for the
+            qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``).
+            The number of labels must match the number of qubits accessible on the backend.
+            If not provided, qubits are addressed as consecutive integers ``[0, 1, ...]``, and their number
+            is inferred from the backend.
         active_reset (bool): whether to actively reset qubits instead of waiting for
             for qubits to decay to the ground state naturally.
             Setting this to ``True`` results in a significantly faster expectation value
@@ -83,6 +88,7 @@ class QPUDevice(QVMDevice):
         device,
         *,
         shots=1000,
+        wires=None,
         active_reset=True,
         load_qc=True,
         readout_error=None,
@@ -132,9 +138,6 @@ class QPUDevice(QVMDevice):
 
         timeout = kwargs.pop("timeout", None)
 
-        if "wires" in kwargs:
-            raise ValueError("QPU device does not support a wires parameter.")
-
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
 
@@ -149,9 +152,26 @@ class QPUDevice(QVMDevice):
             if timeout is not None:
                 self.qc.compiler.client.timeout = timeout
 
-        num_wires = len(self.qc.qubits())
+        self.num_wires = len(self.qc.qubits())
 
-        super(QVMDevice, self).__init__(num_wires, shots, **kwargs)
+        if wires is None:
+            # infer the number of modes from the device specs
+            # and use consecutive integer wire labels
+            wires = range(self.num_wires)
+
+        if isinstance(wires, int):
+            raise ValueError(
+                "Device has a fixed number of {} qubits. The wires argument can only be used "
+                "to specify an iterable of wire labels.".format(self.num_wires)
+            )
+
+        if self.num_wires != len(wires):
+            raise ValueError(
+                "Device has a fixed number of {} qubits and "
+                "cannot be created with {} wires.".format(self.num_wires, len(wires))
+            )
+
+        super(QVMDevice, self).__init__(wires, shots, **kwargs)
 
         self.active_reset = active_reset
         self.symmetrize_readout = symmetrize_readout
