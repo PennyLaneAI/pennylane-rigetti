@@ -361,7 +361,7 @@ class ForestDevice(QubitDevice):
         if self._state is None:
             return None
 
-        wires = wires or range(self.num_wires)
+        wires = wires or self.wires
         wires = Wires(wires)
         prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
         return prob

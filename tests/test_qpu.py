@@ -118,14 +118,14 @@ class TestQPUIntegration(BaseTest):
         dev = qml.device(
             "forest.qpu",
             device=device,
-            shots=1000,
+            shots=2000,
             load_qc=False,
             parametric_compilation=False,
         )
         dev_1 = qml.device(
             "forest.qpu",
             device=device,
-            shots=1000,
+            shots=2000,
             load_qc=False,
             parametric_compilation=False,
         )
