@@ -13,6 +13,7 @@ from pennylane import numpy as np
 from pennylane.operation import Tensor
 from pennylane.circuit_graph import CircuitGraph
 from pennylane.variable import Variable
+from pennylane.wires import Wires
 
 from pyquil.quil import Pragma, Program
 from pyquil.api._quantum_computer import QuantumComputer
@@ -464,6 +465,21 @@ class TestQVMBasic(BaseTest):
             + 6
         ) / 32
         assert np.allclose(np.mean(s1), expected, atol=0.1, rtol=0)
+
+    def test_wires_argument(self):
+        """Test that the wires argument gets processed correctly."""
+
+        dev_no_wires = plf.QVMDevice(device="2q-qvm", shots=5)
+        assert dev_no_wires.wires == Wires(range(2))
+
+        with pytest.raises(ValueError, match="Device has a fixed number of"):
+            plf.QVMDevice(device="2q-qvm", shots=5, wires=1000)
+
+        dev_iterable_wires = plf.QVMDevice(device="2q-qvm", shots=5, wires=range(2))
+        assert dev_iterable_wires.wires == Wires(range(2))
+
+        with pytest.raises(ValueError, match="Device has a fixed number of"):
+            plf.QVMDevice(device="2q-qvm", shots=5, wires=range(1000))
 
     @pytest.mark.parametrize("shots", list(range(0, -10, -1)))
     def test_raise_error_if_shots_is_not_positive(self, shots):

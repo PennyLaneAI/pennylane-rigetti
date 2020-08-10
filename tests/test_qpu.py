@@ -10,6 +10,7 @@ import pyquil
 import pennylane as qml
 from pennylane import numpy as np
 from pennylane.operation import Tensor
+from pennylane.wires import Wires
 import pennylane_forest as plf
 from conftest import BaseTest, QVM_SHOTS
 
@@ -44,9 +45,6 @@ class TestQPUIntegration(BaseTest):
         """Test that the QPU plugin requires correct arguments"""
         device = np.random.choice(TEST_QPU_LATTICES)
 
-        with pytest.raises(ValueError, match="QPU device does not support a wires parameter"):
-            qml.device("forest.qpu", device=device, wires=2)
-
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
             qml.device("forest.qpu")
 
@@ -55,6 +53,18 @@ class TestQPUIntegration(BaseTest):
 
         with pytest.raises(ValueError, match="Readout error cannot be set on the physical QPU"):
             qml.device("forest.qpu", device=device, load_qc=True, readout_error=[0.9, 0.75])
+
+        dev_no_wires = qml.device("forest.qpu", device=device, shots=5, load_qc=False)
+        assert dev_no_wires.wires == Wires(range(4))
+
+        with pytest.raises(ValueError, match="Device has a fixed number of"):
+            qml.device("forest.qpu", device=device, shots=5, wires=100, load_qc=False)
+
+        dev_iterable_wires = qml.device("forest.qpu", device=device, shots=5, wires=range(4), load_qc=False)
+        assert dev_iterable_wires.wires == Wires(range(4))
+
+        with pytest.raises(ValueError, match="Device has a fixed number of"):
+            qml.device("forest.qpu", device=device, shots=5, wires=range(100), load_qc=False)
 
     @flaky(max_runs=5, min_passes=3)
     @pytest.mark.parametrize(
