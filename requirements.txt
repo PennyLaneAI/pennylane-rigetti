@@ -1,4 +1,4 @@
 pyquil>=2.16
-git+https://github.com/PennyLaneAI/pennylane.git
+pennylane>=0.11
 networkx
 flaky
