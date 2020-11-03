@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.8]
 
     steps:
       - name: Cancel Previous Runs
@@ -60,6 +60,12 @@ jobs:
         uses: styfle/cancel-workflow-action@0.4.1
         with:
           access_token: ${{ github.token }}
+
+      - name: Run Forest Quilc
+        run: docker run --rm -d -p 5555:5555 rigetti/quilc -R
+
+      - name: Run Forest QVM
+        run: docker run --rm -d -p 5000:5000 rigetti/qvm -S
 
       - uses: actions/checkout@v2
 
