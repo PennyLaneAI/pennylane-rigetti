@@ -12,9 +12,9 @@ requirements = ["pyquil>=2.16", "pennylane>=0.11"]
 info = {
     "name": "PennyLane-Forest",
     "version": version,
-    "maintainer": "Rigetti Computing Inc.",
-    "maintainer_email": "sohaib@rigetti.com",
-    "url": "http://rigetti.com",
+    "maintainer": "Xanadu Inc.",
+    "maintainer_email": "software@xanadu.ai",
+    "url": "https://github.com/PennyLaneAI/pennylane-forest",
     "license": "BSD 3-Clause",
     "packages": ["pennylane_forest"],
     "entry_points": {
@@ -34,14 +34,10 @@ info = {
     "long_description": open("README.rst").read(),
     "provides": ["pennylane_forest"],
     "install_requires": requirements,
-    # 'extras_require': extra_requirements,
-    "command_options": {
-        "build_sphinx": {"version": ("setup.py", version), "release": ("setup.py", version)}
-    },
 }
 
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
