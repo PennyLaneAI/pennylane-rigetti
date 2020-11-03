@@ -49,11 +49,11 @@ _control_map = {
 
 def _direct_sum(A, B):
     """Return the direct sums of two arrays.
-    
+
     Args:
         A (np.array): The first array (upper left array)
         B (np.array): The second array (lower right array)
-    
+
     Returns:
         np.array: The direct sum of the two input arrays
     """
@@ -66,11 +66,11 @@ def _direct_sum(A, B):
 
 def _controlled_matrix(op):
     """Return the matrix associated with the controlled operation.
-    
+
     Args:
-        op (np.array): Array representing the operation 
+        op (np.array): Array representing the operation
                        that should be controlled
-    
+
     Returns:
         np.array: Array representing the controlled operations. If the input
         array has shape (N, N) the output shape is (2*N, 2*N).
@@ -81,12 +81,12 @@ def _controlled_matrix(op):
 def _resolve_gate(gate):
     """Resolve the given pyquil Gate as far as possible.
 
-    For example, the gate ``CONTROLLED CONTROLLED X`` will be resolved to ``CCNOT``. 
+    For example, the gate ``CONTROLLED CONTROLLED X`` will be resolved to ``CCNOT``.
     The gate ``CONTROLLED CONTROLLED RX(0.3)`` will be resolved to ``CONTROLLED CRX(0.3)``.
-    
+
     Args:
         gate (pyquil.quil.Gate): The gate that should be resolved
-    
+
     Returns:
         pyquil.quil.Gate: The maximally resolved gate
     """
@@ -106,11 +106,11 @@ def _resolve_gate(gate):
 
 def _resolve_params(params, parameter_map):
     """Resolve a parameter list with a given variable map.
-    
+
     Args:
         params (List[Union[pyquil.quilatom.MemoryReference, object]]): The parameter list
         parameter_map (Dict[str, object]): The map that assigns values to variable names
-    
+
     Returns:
         List[object]: The resolved parameters. This list does not contain MemoryReferences anymore.
     """
@@ -131,10 +131,10 @@ def _normalize_parameter_map(parameter_map):
     Variable maps can have keys that are either strings or
     pyquil.quil.MemoryReference instances. This methods replaces
     all MemoryReference instances with their name.
-    
+
     Args:
         parameter_map (Dict[Union[str, pyquil.quil.MemoryReference], object]): The initial variable map.
-    
+
     Returns:
         Dict[str, object]: Variable map with all MemoryReference instances replaced by their name
     """
@@ -150,10 +150,10 @@ def _normalize_parameter_map(parameter_map):
 
 def _is_controlled(gate):
     """Determine if a gate is controlled.
-    
+
     Args:
         gate (pyquil.quil.Gate): The gate that should be checked
-    
+
     Returns:
         bool: True if the gate is controlled, False otherwise
     """
@@ -162,10 +162,10 @@ def _is_controlled(gate):
 
 def _is_forked(gate):
     """Determine if a gate is forked.
-    
+
     Args:
         gate (pyquil.quil.Gate): The gate that should be checked
-    
+
     Returns:
         bool: True if the gate is forked, False otherwise
     """
@@ -174,10 +174,10 @@ def _is_forked(gate):
 
 def _is_inverted(gate):
     """Determine if a gate is inverted.
-    
+
     Args:
         gate (pyquil.quil.Gate): The gate that should be checked
-    
+
     Returns:
         bool: True if the gate is inverted, False otherwise
     """
@@ -186,10 +186,10 @@ def _is_inverted(gate):
 
 def _is_gate(instruction):
     """Determine if an instruction is a gate.
-    
+
     Args:
         instruction (pyquil.quil.AbstractInstruction): The instruction that should be checked
-    
+
     Returns:
         bool: True if the instruction is a gate, False otherwise
     """
@@ -198,10 +198,10 @@ def _is_gate(instruction):
 
 def _is_declaration(instruction):
     """Determine if an instruction is a declaration.
-    
+
     Args:
         instruction (pyquil.quil.AbstractInstruction): The instruction that should be checked
-    
+
     Returns:
         bool: True if the instruction is a declaration, False otherwise
     """
@@ -210,10 +210,10 @@ def _is_declaration(instruction):
 
 def _is_measurement(instruction):
     """Determine if an instruction is a measurement.
-    
+
     Args:
         instruction (pyquil.quil.AbstractInstruction): The instruction that should be checked
-    
+
     Returns:
         bool: True if the instruction is a measurement, False otherwise
     """
@@ -225,10 +225,10 @@ def _get_qubit_index(qubit):
 
     This function accepts qubit instances and integers and returns
     the integer index that is associated with the qubit.
-    
+
     Args:
         qubit (Union[pyquil.quilatom.Qubit, int]): The qubit whose index shall be determined
-    
+
     Returns:
         int: The qubit index
     """
@@ -241,11 +241,11 @@ def _get_qubit_index(qubit):
 
 def _qubits_to_wires(qubits, qubit_to_wire_map):
     """Transform the given qubits with the given map between qubits and wires.
-    
+
     Args:
         qubits (Union[Sequence[int], int]): The qubit(s) for which the wires shall be determined
         qubit_to_wire_map (Dict[int, int]): The map between qubits and wires
-    
+
     Returns:
         Union[Sequence[int], int]: The wire(s) corresponding to the given qubit(s)
     """
@@ -257,7 +257,7 @@ def _qubits_to_wires(qubits, qubit_to_wire_map):
 
 class ParametrizedGate:
     """Represent a parametrized PennyLane gate.
-    
+
     Args:
         pl_gate (type): The PennyLane gate
         pyquil_qubits ([type]): The qubits the gate acts on in the corresponding pyquil Program
@@ -273,11 +273,11 @@ class ParametrizedGate:
 
     def instantiate(self, parameter_map, qubit_to_wire_map):
         """Instantiate the parametrized gate.
-        
+
         Args:
             parameter_map (Dict[str, object]): The map that assigns values to variable names
             qubit_to_wire_map ([type]): The map that assigns wires to qubits
-        
+
         Returns:
             qml.Operation: The initiated instance of the parametrized PennyLane gate
         """
@@ -294,7 +294,7 @@ class ParametrizedGate:
 
 class ParametrizedQubitUnitary:
     """Represents a QubitUnitary instance already parametrized with a matrix.
-    
+
     Args:
         matrix (np.array): The unitary gate matrix
     """
@@ -304,10 +304,10 @@ class ParametrizedQubitUnitary:
 
     def __call__(self, wires):
         """Instantiate the QubitUnitary on the given wires.
-        
+
         Args:
             wires (List[int]): The wires the QubitUnitary acts on
-        
+
         Returns:
             qml.QubitUnitary: The instantiate QubitUnitary instance
         """
@@ -317,9 +317,9 @@ class ParametrizedQubitUnitary:
 class ProgramLoader:
     """Loads the given pyquil Program as a PennyLane template.
 
-    The pyquil Program is parsed once at instantiation and can be 
+    The pyquil Program is parsed once at instantiation and can be
     applied as often as desired.
-        
+
     Args:
         program (pyquil.quil.Program): The pyquil Program instance that should be loaded
     """
@@ -368,10 +368,10 @@ class ProgramLoader:
 
     def _is_defined_gate(self, gate):
         """Determine if the given gate was defined in the pyquil Program.
-        
+
         Args:
             gate (pyquil.quil.Gate): The gate that shall be checked
-        
+
         Returns:
             bool: True if the gate is defined, False otherwise
         """
@@ -379,13 +379,13 @@ class ProgramLoader:
 
     def _load_qubit_to_wire_map(self, wires):
         """Build the map that assigns wires to qubits.
-        
+
         Args:
             wires (Sequence[int]): The wires that should be assigned to the qubits
-        
+
         Raises:
             qml.DeviceError: When the number of given wires does not match the number of qubits in the pyquil Program
-        
+
         Returns:
             Dict[int, int]: The map that assigns wires to qubits
         """
@@ -401,10 +401,10 @@ class ProgramLoader:
 
     def _resolve_gate_matrix(self, gate):
         """Resolve the matrix of the given pyquil gate.
-        
+
         Args:
             gate (pyquil.quil.Gate): The gate whose matrix should be resolved
-        
+
         Returns:
             np.array: The matrix of the given gate
         """
@@ -420,10 +420,10 @@ class ProgramLoader:
         """Check that all variables of the program are defined.
 
         Only variables used in measurements need not be defined.
-        
+
         Args:
             parameter_map (Dict[str, object]): Map that assigns values to variables
-        
+
         Raises:
             qml.DeviceError: When not all variables are defined in the variable map
         """
@@ -441,7 +441,7 @@ class ProgramLoader:
     @property
     def defined_gates(self):
         """The custom gates defined in the pyquil Program.
-        
+
         Returns:
             List[Union[pyquil.quil.DefGate, pyquil.quil.DefPermutationGate]]: The gates defined in the pyquil Program
         """
@@ -450,7 +450,7 @@ class ProgramLoader:
     @property
     def defined_qubits(self):
         """The qubit indices defined in the pyquil Program.
-        
+
         Returns:
             List[int]: The qubit indices defined in the pyquil Program
         """
@@ -477,7 +477,7 @@ class ProgramLoader:
     @property
     def defined_variable_names(self):
         """The names of the variables defined in the pyquil Program
-        
+
         Returns:
             List[str]: The names of the variables defined in the pyquil Program
         """
@@ -485,7 +485,7 @@ class ProgramLoader:
 
     def _load_template(self):
         """Load the template corresponding to the pyquil Program.
-        
+
         Raises:
             qml.DeviceError: When the import of a forked gate is attempted
         """
@@ -529,10 +529,10 @@ class ProgramLoader:
 
     def template(self, wires, parameter_map=None):
         """Executes the template extracted from the pyquil Program.
-        
+
         Args:
-            wires (Sequence[int]): The wires on which the template shall be applied. 
-            parameter_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
+            wires (Sequence[int]): The wires on which the template shall be applied.
+            parameter_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The
                 map that assigns values to variables. Defaults to an empty dictionary.
 
         Returns:
@@ -554,10 +554,10 @@ class ProgramLoader:
 
     def __call__(self, wires, parameter_map=None):
         """Executes the template extracted from the pyquil Program.
-        
+
         Args:
             wires (Sequence[int]): The wires on which the template shall be applied.
-            parameter_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The 
+            parameter_map (Dict[Union[str, pyquil.quilatom.MemoryReference], object], optional): The
                 map that assigns values to variables. Defaults to an empty dictionary.
 
         Returns:
@@ -567,7 +567,7 @@ class ProgramLoader:
 
     def __str__(self):
         """Give the string representation of the ProgramLoader.
-        
+
         Returns:
             str: The string representation of the ProgramLoader
         """
@@ -583,11 +583,11 @@ def load_program(program: pyquil.Program):
     classical control flow and measurements).
 
     Every variable that is present in the Program and that is not used as the target
-    register of a measurement has to be provided in the ``parameter_map`` of the template. 
-    
+    register of a measurement has to be provided in the ``parameter_map`` of the template.
+
     Args:
         program (pyquil.Program): The program that should be loaded
-    
+
     Returns:
         ProgramLoader: a ProgramLoader instance that can be called like a template
     """
@@ -604,11 +604,11 @@ def load_quil(quil_str: str):
     classical control flow and measurements).
 
     Every variable that is present in the Program and that is not used as the target
-    register of a measurement has to be provided in the ``parameter_map`` of the template. 
-    
+    register of a measurement has to be provided in the ``parameter_map`` of the template.
+
     Args:
         quil_str (str): The program that should be loaded
-    
+
     Returns:
         ProgramLoader: a ProgramLoader instance that can be called like a template
     """
@@ -625,11 +625,11 @@ def load_quil_from_file(file_path: str):
     classical control flow and measurements).
 
     Every variable that is present in the Program and that is not used as the target
-    register of a measurement has to be provided in the ``parameter_map`` of the template. 
-    
+    register of a measurement has to be provided in the ``parameter_map`` of the template.
+
     Args:
         file_path (str): The path to the quil file that should be loaded
-    
+
     Returns:
         ProgramLoader: a ProgramLoader instance that can be called like a template
     """

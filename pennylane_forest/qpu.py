@@ -24,9 +24,13 @@ import warnings
 
 import numpy as np
 from pyquil import get_qc
-from pyquil.operator_estimation import (Experiment, ExperimentSetting,
-                                        TensorProductState, group_experiments,
-                                        measure_observables)
+from pyquil.operator_estimation import (
+    Experiment,
+    ExperimentSetting,
+    TensorProductState,
+    group_experiments,
+    measure_observables,
+)
 from pyquil.paulis import sI, sX, sY, sZ
 from pyquil.quil import Program
 from pyquil.quilbase import Gate
@@ -189,14 +193,24 @@ class QPUDevice(QVMDevice):
             if len(device_wires) == 1:
 
                 # Ensure sensible observable
-                assert observable.name in ["PauliX", "PauliY", "PauliZ", "Identity", "Hadamard"], "Unknown observable"
+                assert observable.name in [
+                    "PauliX",
+                    "PauliY",
+                    "PauliZ",
+                    "Identity",
+                    "Hadamard",
+                ], "Unknown observable"
 
                 # Create appropriate PauliZ operator
                 wire = device_wires.labels[0]
                 pauli_obs = sZ(wire)
 
             # Multi-qubit observable
-            elif len(device_wires) > 1 and isinstance(observable, Tensor) and not self.parametric_compilation:
+            elif (
+                len(device_wires) > 1
+                and isinstance(observable, Tensor)
+                and not self.parametric_compilation
+            ):
 
                 # All observables are rotated to be measured in the Z-basis, so we just need to
                 # check which wires exist in the observable, map them to physical qubits, and measure
@@ -204,7 +218,6 @@ class QPUDevice(QVMDevice):
                 pauli_obs = sI()
                 for label in device_wires.labels:
                     pauli_obs *= sZ(label)
-
 
             # Program preparing the state in which to measure observable
             prep_prog = Program()
@@ -226,8 +239,9 @@ class QPUDevice(QVMDevice):
                     )
 
             # Measure out multi-qubit observable
-            tomo_expt = Experiment(settings=[ExperimentSetting(TensorProductState(), pauli_obs)],
-                                   program=prep_prog)
+            tomo_expt = Experiment(
+                settings=[ExperimentSetting(TensorProductState(), pauli_obs)], program=prep_prog
+            )
             grouped_tomo_expt = group_experiments(tomo_expt)
             meas_obs = list(
                 measure_observables(
