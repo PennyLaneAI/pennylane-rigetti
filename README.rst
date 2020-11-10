@@ -56,8 +56,8 @@ Features
 * All provided devices support all core qubit PennyLane operations and observables.
 
 
-* Provides custom PennyLane operations to cover additional pyQuil operations: ``T``, ``S``,
-  ``ISWAP``, ``CCNOT``, ``PSWAP``, and many more. Every custom operation supports analytic
+* Provides custom PennyLane operations to cover additional pyQuil operations:
+  ``ISWAP``, ``PSWAP``, and ``CPHASE``. Every custom operation supports analytic
   differentiation.
 
 * Combine Forest and the Rigetti Cloud Services with PennyLane's automatic differentiation and

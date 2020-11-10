@@ -171,6 +171,9 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="wavefunction.html" title="The Wavefunction device"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -209,7 +212,6 @@
     
       <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html#id1">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Usage</span></p>
@@ -218,6 +220,10 @@
 <li class="toctree-l1"><a class="reference internal" href="wavefunction.html">The Wavefunction device</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qvm.html">The QVM device</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qpu.html">The QPU device</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../code.html">pennylane-forest</a></li>
 </ul>
 
     
@@ -289,38 +295,10 @@ depends on three classical input parameters would look like:</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="device-options">
-<h2>Device options<a class="headerlink" href="#device-options" title="Permalink to this headline">¶</a></h2>
-<p>On initialization, the PennyLane-Forest devices accept additional keyword
-arguments beyond the PennyLane default device arguments.</p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">forest_url</span></code> (<em>str</em>)</dt>
-<dd>the Forest URL server. Can also be set by
-the environment variable <code class="docutils literal notranslate"><span class="pre">FOREST_SERVER_URL</span></code>, or in the <code class="docutils literal notranslate"><span class="pre">~/.qcs_config</span></code>
-configuration file. Default value is <code class="docutils literal notranslate"><span class="pre">&quot;https://forest-server.qcs.rigetti.com&quot;</span></code>.</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">qvm_url</span></code> (<em>str</em>)</dt>
-<dd>the QVM server URL. Can also be set by the environment
-variable <code class="docutils literal notranslate"><span class="pre">QVM_URL</span></code>, or in the <code class="docutils literal notranslate"><span class="pre">~/.forest_config</span></code> configuration file.
-Default value is <code class="docutils literal notranslate"><span class="pre">&quot;http://127.0.0.1:5000&quot;</span></code>.</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">compiler_url</span></code> (<em>str</em>)</dt>
-<dd>the compiler server URL. Can also be set by the environment
-variable <code class="docutils literal notranslate"><span class="pre">COMPILER_URL</span></code>, or in the <code class="docutils literal notranslate"><span class="pre">~/.forest_config</span></code> configuration file.
-Default value is <code class="docutils literal notranslate"><span class="pre">&quot;http://127.0.0.1:6000&quot;</span></code>.</dd>
-</dl>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>If using the downloadable Forest SDK with the default server configurations
-for the QVM and the Quil compiler (i.e., you launch them with the commands
-<code class="docutils literal notranslate"><span class="pre">qvm</span> <span class="pre">-S</span></code> and <code class="docutils literal notranslate"><span class="pre">quilc</span> <span class="pre">-R</span></code>), then you will not need to set these keyword arguments.</p>
-<p class="last">Likewise, if you are running PennyLane using the Rigetti Quantum Cloud Service (QCS)
-on a provided QMI, these environment variables are set automatically and will also
-not need to be passed in PennyLane.</p>
-</div>
-</div>
 <div class="section" id="supported-operations">
 <h2>Supported operations<a class="headerlink" href="#supported-operations" title="Permalink to this headline">¶</a></h2>
-<p>All devices support all PennyLane <a class="reference external" href="https://pennylane.readthedocs.io/en/latest/code/ops/qubit.html">operations and observables</a>, with
-he exception of the PennyLane <code class="docutils literal notranslate"><span class="pre">QubitStateVector</span></code> state preparation operation.</p>
+<p>All Forest devices support all PennyLane <a class="reference external" href="https://pennylane.readthedocs.io/en/latest/code/ops/qubit.html">operations and observables</a>, with
+the exception of the PennyLane <code class="docutils literal notranslate"><span class="pre">QubitStateVector</span></code> state preparation operation.</p>
 <p>In addition, PennyLane-Forest provides the following PyQuil-specific operations for PennyLane.
 These are all importable from <code class="xref py py-mod docutils literal notranslate"><span class="pre">pennylane_forest.ops</span></code>.</p>
 <p>These operations include:</p>
@@ -330,20 +308,8 @@ These are all importable from <code class="xref py py-mod docutils literal notra
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.S</span></code>(wires)</td>
-<td>The single-qubit phase gate</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.T</span></code>(wires)</td>
-<td>The single-qubit T gate</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CCNOT</span></code></td>
-<td>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">pennylane.ops.qubit.Toffoli</span></code></td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CPHASE</span></code>(*params[,&nbsp;…])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CPHASE</span></code>(*params[,&nbsp;…])</td>
 <td>CHPASE(phi, q, wires) Controlled-phase gate.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CSWAP</span></code>(wires)</td>
-<td>The controlled-swap operator</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.ISWAP</span></code>(wires)</td>
 <td>iSWAP gate.</td>
@@ -381,7 +347,6 @@ These are all importable from <code class="xref py py-mod docutils literal notra
       <ul class='current'>
 <li class='current'><a class="reference internal" href="#">The Numpy-Wavefunction device</a><ul class='current'>
 <li class='current'><a class="reference internal" href="#usage">Usage</a></li>
-<li class='current'><a class="reference internal" href="#device-options">Device options</a></li>
 <li class='current'><a class="reference internal" href="#supported-operations">Supported operations</a></li>
 </ul>
 </li>
@@ -419,6 +384,9 @@ These are all importable from <code class="xref py py-mod docutils literal notra
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="wavefunction.html" title="The Wavefunction device"
              >next</a> |</li>

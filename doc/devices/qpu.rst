@@ -58,11 +58,7 @@ These are all importable from :mod:`pennylane_forest.ops <.ops>`.
 These operations include:
 
 .. autosummary::
-    pennylane_forest.ops.S
-    pennylane_forest.ops.T
-    pennylane_forest.ops.CCNOT
     pennylane_forest.ops.CPHASE
-    pennylane_forest.ops.CSWAP
     pennylane_forest.ops.ISWAP
     pennylane_forest.ops.PSWAP
 

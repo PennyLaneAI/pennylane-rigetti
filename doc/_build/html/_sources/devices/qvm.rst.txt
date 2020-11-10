@@ -2,7 +2,7 @@ The QVM device
 ===============
 
 The ``forest.qvm`` device provides an interface between PennyLane and the Forest
-SDK `quantum virtual machine <http://docs.rigetti.com/en/stable/qvm.html>`_ or the pyQuil built-in
+SDK `quantum virtual machine <https://pyquil-docs.rigetti.com/en/1.9/qvm.html>`_ or the pyQuil built-in
 pyQVM. The QVM is used to simulate various quantum abstract machines, ranging from simulations of
 physical QPUs to completely connected lattices.
 
@@ -16,10 +16,8 @@ When initializing the ``forest.qvm`` device, the following required keyword argu
 
     * ``Nq-qvm``: for a fully connected/unrestricted N-qubit QVM
     * ``9q-square-qvm``: a :math:`9\times 9` lattice.
-    * ``Nq-pyqvm`` or ``9q-square-pyqvm``, for the same as the above but run
-       via the built-in pyQuil pyQVM device.
-    * Any other supported Rigetti device architecture, for
-      example a QPU lattice such as ``'Aspen-8'``.
+    * ``Nq-pyqvm`` or ``9q-square-pyqvm``, for the same as the above but run via the built-in pyQuil pyQVM device.
+    * Any other supported Rigetti device architecture, for example a QPU lattice such as ``'Aspen-8'``.
     * Graph topology (as a ``networkx.Graph`` object) representing the device architecture.
 
 Note that, unlike ``forest.wavefunction``, you do not pass the number of wires - this is inferred
@@ -35,7 +33,7 @@ QPU; this is done by passing the keyword argument ``noisy=True``:
 
 >>> dev = qml.device('forest.qvm', device='Aspen-8', noisy=True)
 
-Note that only the `default noise models <http://docs.rigetti.com/en/stable/noise.html>`_ provided by
+Note that only the `default noise models <https://pyquil-docs.rigetti.com/en/stable/apidocs/noise.html>`_ provided by
 pyQuil are currently supported.
 
 To specify the pyQVM, simply append ``pyqvm`` to the end of the device name instead of ``qvm``:
@@ -107,11 +105,7 @@ These are all importable from :mod:`pennylane_forest.ops <.ops>`.
 These operations include:
 
 .. autosummary::
-    pennylane_forest.ops.S
-    pennylane_forest.ops.T
-    pennylane_forest.ops.CCNOT
     pennylane_forest.ops.CPHASE
-    pennylane_forest.ops.CSWAP
     pennylane_forest.ops.ISWAP
     pennylane_forest.ops.PSWAP
 

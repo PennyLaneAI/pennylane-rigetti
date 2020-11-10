@@ -98,6 +98,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pennylane-forest" href="../code.html" />
     <link rel="prev" title="The QVM device" href="qvm.html" /> 
   </head><body><!--Navbar-->
 <nav class="navbar navbar-expand-lg navbar-light white sticky-top">
@@ -170,6 +171,12 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../code.html" title="pennylane-forest"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
           <a href="qvm.html" title="The QVM device"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">PennyLane-Forest 0.13.0-dev documentation</a> &#187;</li> 
@@ -205,7 +212,6 @@
     
       <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html#id1">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Usage</span></p>
@@ -214,6 +220,10 @@
 <li class="toctree-l1"><a class="reference internal" href="wavefunction.html">The Wavefunction device</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qvm.html">The QVM device</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">The QPU device</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../code.html">pennylane-forest</a></li>
 </ul>
 
     
@@ -257,7 +267,7 @@ evaluation when the number of shots is larger than ~1000.</dd>
 </pre></div>
 </div>
 <p>Note that additional Quil gates not provided directly in PennyLane are importable from <code class="xref py py-mod docutils literal notranslate"><span class="pre">ops</span></code>.
-An example that demonstrates the use of the native <code class="xref py py-class docutils literal notranslate"><span class="pre">PSWAP</span></code> plugin gate is this:</p>
+An example that demonstrates the use of the native <a class="reference internal" href="../code/api/pennylane_forest.PSWAP.html#pennylane_forest.PSWAP" title="pennylane_forest.PSWAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PSWAP</span></code></a> plugin gate is this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pennylane</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span> <span class="nn">pennylane_forest.ops</span> <span class="kn">import</span> <span class="n">PSWAP</span>
 
@@ -293,20 +303,8 @@ These are all importable from <code class="xref py py-mod docutils literal notra
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.S</span></code>(wires)</td>
-<td>The single-qubit phase gate</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.T</span></code>(wires)</td>
-<td>The single-qubit T gate</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CCNOT</span></code></td>
-<td>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">pennylane.ops.qubit.Toffoli</span></code></td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CPHASE</span></code>(*params[,&nbsp;…])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CPHASE</span></code>(*params[,&nbsp;…])</td>
 <td>CHPASE(phi, q, wires) Controlled-phase gate.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CSWAP</span></code>(wires)</td>
-<td>The controlled-swap operator</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.ISWAP</span></code>(wires)</td>
 <td>iSWAP gate.</td>
@@ -356,6 +354,9 @@ not need to be passed in PennyLane.</p>
         <a class="btn btn-xanadu" href="qvm.html" title="previous chapter (use the left arrow)"><i class="fas fa-arrow-left"></i> Previous</a>
       </div>
     
+      <div class="pull-right">
+        <a class="btn btn-xanadu" href="../code.html" title="next chapter (use the right arrow)">Next <i class="fas fa-arrow-right"></i></a>
+      </div>
     </div>
     <div class="clearer"></div>
   
@@ -407,6 +408,12 @@ not need to be passed in PennyLane.</p>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../code.html" title="pennylane-forest"
+             >next</a> |</li>
         <li class="right" >
           <a href="qvm.html" title="The QVM device"
              >previous</a> |</li>

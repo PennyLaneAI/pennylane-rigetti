@@ -12,11 +12,8 @@ Operations
 ----------
 
 .. autosummary::
-    S
-    T
-    CCNOT
+
     CPHASE
-    CSWAP
     ISWAP
     PSWAP
 

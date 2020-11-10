@@ -171,6 +171,9 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="qpu.html" title="The QPU device"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -209,7 +212,6 @@
     
       <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html#id1">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Usage</span></p>
@@ -218,6 +220,10 @@
 <li class="toctree-l1"><a class="reference internal" href="wavefunction.html">The Wavefunction device</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">The QVM device</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qpu.html">The QPU device</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../code.html">pennylane-forest</a></li>
 </ul>
 
     
@@ -243,7 +249,7 @@
   <div class="section" id="the-qvm-device">
 <h1>The QVM device<a class="headerlink" href="#the-qvm-device" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">forest.qvm</span></code> device provides an interface between PennyLane and the Forest
-SDK <a class="reference external" href="http://docs.rigetti.com/en/stable/qvm.html">quantum virtual machine</a> or the pyQuil built-in
+SDK <a class="reference external" href="https://pyquil-docs.rigetti.com/en/1.9/qvm.html">quantum virtual machine</a> or the pyQuil built-in
 pyQVM. The QVM is used to simulate various quantum abstract machines, ranging from simulations of
 physical QPUs to completely connected lattices.</p>
 <div class="section" id="usage">
@@ -255,13 +261,8 @@ physical QPUs to completely connected lattices.</p>
 <ul class="last simple">
 <li><code class="docutils literal notranslate"><span class="pre">Nq-qvm</span></code>: for a fully connected/unrestricted N-qubit QVM</li>
 <li><code class="docutils literal notranslate"><span class="pre">9q-square-qvm</span></code>: a <span class="math notranslate nohighlight">\(9\times 9\)</span> lattice.</li>
-<li><dl class="first docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">Nq-pyqvm</span></code> or <code class="docutils literal notranslate"><span class="pre">9q-square-pyqvm</span></code>, for the same as the above but run</dt>
-<dd>via the built-in pyQuil pyQVM device.</dd>
-</dl>
-</li>
-<li>Any other supported Rigetti device architecture, for
-example a QPU lattice such as <code class="docutils literal notranslate"><span class="pre">'Aspen-8'</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">Nq-pyqvm</span></code> or <code class="docutils literal notranslate"><span class="pre">9q-square-pyqvm</span></code>, for the same as the above but run via the built-in pyQuil pyQVM device.</li>
+<li>Any other supported Rigetti device architecture, for example a QPU lattice such as <code class="docutils literal notranslate"><span class="pre">'Aspen-8'</span></code>.</li>
 <li>Graph topology (as a <code class="docutils literal notranslate"><span class="pre">networkx.Graph</span></code> object) representing the device architecture.</li>
 </ul>
 </dd>
@@ -279,7 +280,7 @@ QPU; this is done by passing the keyword argument <code class="docutils literal 
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dev</span> <span class="o">=</span> <span class="n">qml</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;forest.qvm&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;Aspen-8&#39;</span><span class="p">,</span> <span class="n">noisy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Note that only the <a class="reference external" href="http://docs.rigetti.com/en/stable/noise.html">default noise models</a> provided by
+<p>Note that only the <a class="reference external" href="https://pyquil-docs.rigetti.com/en/stable/apidocs/noise.html">default noise models</a> provided by
 pyQuil are currently supported.</p>
 <p>To specify the pyQVM, simply append <code class="docutils literal notranslate"><span class="pre">pyqvm</span></code> to the end of the device name instead of <code class="docutils literal notranslate"><span class="pre">qvm</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dev</span> <span class="o">=</span> <span class="n">qml</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;forest.qvm&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;4q-pyqvm&#39;</span><span class="p">)</span>
@@ -345,20 +346,8 @@ These are all importable from <code class="xref py py-mod docutils literal notra
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.S</span></code>(wires)</td>
-<td>The single-qubit phase gate</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.T</span></code>(wires)</td>
-<td>The single-qubit T gate</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CCNOT</span></code></td>
-<td>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">pennylane.ops.qubit.Toffoli</span></code></td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CPHASE</span></code>(*params[,&nbsp;…])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CPHASE</span></code>(*params[,&nbsp;…])</td>
 <td>CHPASE(phi, q, wires) Controlled-phase gate.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CSWAP</span></code>(wires)</td>
-<td>The controlled-swap operator</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.ISWAP</span></code>(wires)</td>
 <td>iSWAP gate.</td>
@@ -545,6 +534,9 @@ not need to be passed in PennyLane.</p>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="qpu.html" title="The QPU device"
              >next</a> |</li>

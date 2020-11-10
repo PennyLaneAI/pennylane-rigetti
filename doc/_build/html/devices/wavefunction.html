@@ -171,6 +171,9 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="qvm.html" title="The QVM device"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -209,7 +212,6 @@
     
       <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html#id1">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Usage</span></p>
@@ -218,6 +220,10 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">The Wavefunction device</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qvm.html">The QVM device</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qpu.html">The QPU device</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../code.html">pennylane-forest</a></li>
 </ul>
 
     
@@ -243,7 +249,7 @@
   <div class="section" id="the-wavefunction-device">
 <h1>The Wavefunction device<a class="headerlink" href="#the-wavefunction-device" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">forest.wavefunction</span></code> device provides an interface between PennyLane and
-the Forest SDK <a class="reference external" href="http://docs.rigetti.com/en/stable/wavefunction_simulator.html">wavefunction simulator</a>. Because
+the Forest SDK <a class="reference external" href="https://pyquil-docs.rigetti.com/en/stable/wavefunction_simulator.html">wavefunction simulator</a>. Because
 the wavefunction simulator allows access and manipulation of the underlying quantum state vector,
 <code class="docutils literal notranslate"><span class="pre">forest.wavefunction</span></code> is able to support the full suite of PennyLane and Quil quantum operations and observables.</p>
 <p>In addition, it is generally faster than running equivalent simulations on the QVM, as the final state
@@ -324,20 +330,8 @@ These are all importable from <code class="xref py py-mod docutils literal notra
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.S</span></code>(wires)</td>
-<td>The single-qubit phase gate</td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.T</span></code>(wires)</td>
-<td>The single-qubit T gate</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CCNOT</span></code></td>
-<td>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">pennylane.ops.qubit.Toffoli</span></code></td>
-</tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CPHASE</span></code>(*params[,&nbsp;…])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CPHASE</span></code>(*params[,&nbsp;…])</td>
 <td>CHPASE(phi, q, wires) Controlled-phase gate.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.CSWAP</span></code>(wires)</td>
-<td>The controlled-swap operator</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">pennylane_forest.ops.ISWAP</span></code>(wires)</td>
 <td>iSWAP gate.</td>
@@ -413,6 +407,9 @@ These are all importable from <code class="xref py py-mod docutils literal notra
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="qvm.html" title="The QVM device"
              >next</a> |</li>
