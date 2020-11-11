@@ -110,7 +110,7 @@ Alternatively, you may sign up for Rigetti's Quantum Cloud Services (QCS) to acq
 Image (QMI) which will allow you to compile your quantum code and run on real quantum processing units (QPUs),
 or on a preinstalled QVM. Note that this requires a valid QCS account.
 
-* `Quantum Cloud Services <https://www.rigetti.com/>`_
+* `Quantum Cloud Services <https://docs.rigetti.com/en/>`_
 
 Tests
 ~~~~~
