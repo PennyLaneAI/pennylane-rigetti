@@ -94,7 +94,7 @@ PennyLane-Forest requires the following libraries be installed:
 as well as the following Python packages:
 
 * `PennyLane <http://pennylane.readthedocs.io/>`_
-* `pyQuil <http://docs.rigetti.com/>`_
+* `pyQuil <https://pyquil-docs.rigetti.com/en/stable/>`_
 
 If you currently do not have Python 3 installed, we recommend
 `Anaconda for Python 3 <https://www.anaconda.com/download/>`_, a distributed version
@@ -110,7 +110,7 @@ Alternatively, you may sign up for Rigetti's Quantum Cloud Services (QCS) to acq
 Image (QMI) which will allow you to compile your quantum code and run on real quantum processing units (QPUs),
 or on a preinstalled QVM. Note that this requires a valid QCS account.
 
-* `Quantum Cloud Services <https://www.rigetti.com/>`_
+* `Quantum Cloud Services <https://docs.rigetti.com/en/>`_
 
 Tests
 ~~~~~
