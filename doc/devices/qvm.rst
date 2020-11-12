@@ -2,7 +2,7 @@ The QVM device
 ===============
 
 The ``forest.qvm`` device provides an interface between PennyLane and the Forest
-SDK `quantum virtual machine <https://pyquil-docs.rigetti.com/en/1.9/qvm.html>`_ or the pyQuil built-in
+SDK `quantum virtual machine <https://pyquil-docs.rigetti.com/en/stable/qvm.html>>`_ or the pyQuil built-in
 pyQVM. The QVM is used to simulate various quantum abstract machines, ranging from simulations of
 physical QPUs to completely connected lattices.
 
@@ -96,7 +96,7 @@ Printing out the results of the three device expectation values:
 Supported operations
 ~~~~~~~~~~~~~~~~~~~~
 
-All devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/latest/code/ops/qubit.html>`_, with
+All devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with
 he exception of the PennyLane ``QubitStateVector`` state preparation operation.
 
 In addition, PennyLane-Forest provides the following PyQuil-specific operations for PennyLane.
@@ -143,7 +143,8 @@ Since :math:`U` is unitary, it can be applied to the specified qubit before meas
 | ``qml.Hadamard`` | :math:`R_y(-\pi/4)`               |
 +------------------+-----------------------------------+
 
-To see how this affects the resultant quil program, you may use the :attr:`~.ForestDevice.program` property to print out the quil program after evaluation on the device.
+To see how this affects the resultant Quil program, you may use the :attr:`~.ForestDevice.program` property
+to print out the Quil program after evaluation on the device.
 
 .. code-block:: python
 
@@ -167,7 +168,10 @@ MEASURE 0 ro[0]
 
 .. note::
 
-    :attr:`~.ForestDevice.program` will return the **last evaluated quantum program** performed on the device. If viewing :attr:`~.ForestDevice.program` after evaluating a quantum gradient or performing an optimization, this may not match the user-defined QNode, as PennyLane automatically modifies the QNode to take into account the `parameter shift rule <https://pennylane.readthedocs.io/en/latest/concepts/autograd_quantum.html>`_, product rule, and chain rule.
+    :attr:`~.ForestDevice.program` will return the **last evaluated quantum program** performed on the device.
+If viewing :attr:`~.ForestDevice.program` after evaluating a quantum gradient or performing an optimization,
+this may not match the user-defined QNode, as PennyLane automatically modifies the QNode to take into account
+the `parameter shift rule <https://pennylane.ai/qml/glossary/parameter_shift.html>`_, product rule, and chain rule.
 
 
 Arbitrary Hermitian observables

@@ -2,15 +2,11 @@ The Numpy-Wavefunction device
 =============================
 
 The ``forest.numpy_wavefunction`` device provides an interface between PennyLane
-and the pyQuil `NumPy wavefunction simulator <http://docs.rigetti.com/en/stable/wavefunction_simulator.html>`_.
+and the pyQuil `NumPy wavefunction simulator <https://pyquil-docs.rigetti.com/en/stable/apidocs/autogen/pyquil.numpy_simulator.NumpyWavefunctionSimulator.html>>`_.
 
 Because the NumPy wavefunction simulator allows access and manipulation of the underlying
 quantum state vector, ``forest.numpy_wavefunction`` is able to support the full
 suite of PennyLane and Quil quantum operations and observables.
-
-
-In addition, it is generally faster than running equivalent simulations on the QVM, as the
-final state can be inspected and the expectation value calculated analytically, rather than by sampling measurements.
 
 
 .. note::
@@ -21,7 +17,7 @@ final state can be inspected and the expectation value calculated analytically, 
 
 .. note::
 
-    By default, ``forest.numpy_wavefunction`` is initialized with ``shots=0``, indicating
+    By default, ``forest.numpy_wavefunction`` is initialized with ``analytic=True``, indicating
     that the exact analytic expectation value is to be returned.
 
     If the number of trials or shots provided to the ``forest.numpy_wavefunction`` is
@@ -63,7 +59,7 @@ array([0.97517033, 0.04904283])
 Supported operations
 ~~~~~~~~~~~~~~~~~~~~
 
-All Forest devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/latest/code/ops/qubit.html>`_, with
+All Forest devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with
 the exception of the PennyLane ``QubitStateVector`` state preparation operation.
 
 In addition, PennyLane-Forest provides the following PyQuil-specific operations for PennyLane.

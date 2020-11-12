@@ -84,7 +84,7 @@ arguments beyond the PennyLane default device arguments.
 Supported operations
 ~~~~~~~~~~~~~~~~~~~~
 
-All devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/latest/code/ops/qubit.html>`_, with
+All devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with
 he exception of the PennyLane ``QubitStateVector`` state preparation operation.
 
 In addition, PennyLane-Forest provides the following PyQuil-specific operations for PennyLane.
