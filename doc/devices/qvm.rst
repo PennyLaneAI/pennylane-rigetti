@@ -2,7 +2,7 @@ The QVM device
 ===============
 
 The ``forest.qvm`` device provides an interface between PennyLane and the Forest
-SDK `quantum virtual machine <https://pyquil-docs.rigetti.com/en/1.9/qvm.html>`_ or the pyQuil built-in
+SDK `quantum virtual machine <https://pyquil-docs.rigetti.com/en/stable/qvm.html>`_ or the pyQuil built-in
 pyQVM. The QVM is used to simulate various quantum abstract machines, ranging from simulations of
 physical QPUs to completely connected lattices.
 
@@ -219,5 +219,4 @@ arguments beyond the PennyLane default device arguments.
     Likewise, if you are running PennyLane using the Rigetti Quantum Cloud Service (QCS)
     on a provided QMI, these environment variables are set automatically and will also
     not need to be passed in PennyLane.
-
 
