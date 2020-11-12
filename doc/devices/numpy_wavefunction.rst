@@ -2,9 +2,9 @@ The Numpy-Wavefunction device
 =============================
 
 The ``forest.numpy_wavefunction`` device provides an interface between PennyLane
-and the pyQuil `NumPy wavefunction simulator <https://pyquil-docs.rigetti.com/en/stable/apidocs/autogen/pyquil.numpy_simulator.NumpyWavefunctionSimulator.html>>`_.
+and the pyQuil `NumpyWavefunctionSimulator`.
 
-Because the NumPy wavefunction simulator allows access and manipulation of the underlying
+As the NumPy wavefunction simulator allows access and manipulation of the underlying
 quantum state vector, ``forest.numpy_wavefunction`` is able to support the full
 suite of PennyLane and Quil quantum operations and observables.
 

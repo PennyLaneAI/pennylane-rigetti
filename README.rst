@@ -27,7 +27,7 @@ PennyLane Forest Plugin
 
 .. header-start-inclusion-marker-do-not-remove
 
-Contains the PennyLane Forest plugin. This plugin allows different Rigetti-pyQuil devices to work with
+Contains the PennyLane Forest plugin. This plugin allows different Rigetti devices to work with
 PennyLane --- the wavefunction simulator, the Quantum Virtual Machine (QVM), and Quantum Processing
 Units (QPUs).
 
