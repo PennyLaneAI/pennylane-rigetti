@@ -169,9 +169,9 @@ MEASURE 0 ro[0]
 .. note::
 
     :attr:`~.ForestDevice.program` will return the **last evaluated quantum program** performed on the device.
-If viewing :attr:`~.ForestDevice.program` after evaluating a quantum gradient or performing an optimization,
-this may not match the user-defined QNode, as PennyLane automatically modifies the QNode to take into account
-the `parameter shift rule <https://pennylane.ai/qml/glossary/parameter_shift.html>`_, product rule, and chain rule.
+    If viewing :attr:`~.ForestDevice.program` after evaluating a quantum gradient or performing an optimization,
+    this may not match the user-defined QNode, as PennyLane automatically modifies the QNode to take into account
+    the `parameter shift rule <https://pennylane.ai/qml/glossary/parameter_shift.html>`_, product rule, and chain rule.
 
 
 Arbitrary Hermitian observables
@@ -223,4 +223,3 @@ arguments beyond the PennyLane default device arguments.
     Likewise, if you are running PennyLane using the Rigetti Quantum Cloud Service (QCS)
     on a provided QMI, these environment variables are set automatically and will also
     not need to be passed in PennyLane.
-

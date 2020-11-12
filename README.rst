@@ -69,7 +69,7 @@ Features
 Installation
 ============
 
-Installation of PennyLane-Forest, as well as all required Python packages mentioned above, can be installed via ``pip``:
+PennyLane-Forest, as well as all required Python packages mentioned above, can be installed via ``pip``:
 ::
 
    	$ python -m pip install pennylane-forest
@@ -77,7 +77,7 @@ Installation of PennyLane-Forest, as well as all required Python packages mentio
 
 Make sure you are using the Python 3 version of pip.
 
-Alternatively, you can install PennyLane-Forest from the source code by navigating to the top directory and running
+Alternatively, you can install PennyLane-Forest from the source code by navigating to the top-LEVEL directory and running
 ::
 
 	$ python setup.py install
