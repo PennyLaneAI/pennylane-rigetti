@@ -14,7 +14,6 @@ suite of PennyLane and Quil quantum operations and observables.
     Since the NumPy wavefunction simulator is written entirely in NumPy, no external
     Quil compiler is required.
 
-
 .. note::
 
     By default, ``forest.numpy_wavefunction`` is initialized with ``analytic=True``, indicating
