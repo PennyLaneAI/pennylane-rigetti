@@ -176,7 +176,7 @@ class TestQVMBasic(BaseTest):
         ) / np.sqrt(2)
         self.assertAllAlmostEqual(res, expected, delta=3 / np.sqrt(shots))
 
-    @flaky(max_runs=5, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     def test_hermitian_expectation(self, shots, qvm, compiler):
         """Test that arbitrary Hermitian expectation values are correct.
 
@@ -754,7 +754,7 @@ class TestQVMIntegration(BaseTest):
             circuit2(), np.vdot(out_state, obs @ out_state), delta=3 / np.sqrt(shots)
         )
 
-    @flaky(max_runs=5, min_passes=2)
+    @flaky(max_runs=10, min_passes=2)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
         """Test that the wavefunction plugin provides correct result for simple circuit.
@@ -778,7 +778,7 @@ class TestQVMIntegration(BaseTest):
 
         self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=3 / np.sqrt(shots))
 
-    @flaky(max_runs=5, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_2q_gate(self, device, qvm, compiler):
         """Test that the two qubit gate with the PauliZ observable works correctly.
@@ -795,7 +795,7 @@ class TestQVMIntegration(BaseTest):
 
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
-    @flaky(max_runs=5, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_2q_gate_pauliz_identity_tensor(self, device, qvm, compiler):
         """Test that the PauliZ tensor Identity observable works correctly.
@@ -812,7 +812,7 @@ class TestQVMIntegration(BaseTest):
 
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
-    @flaky(max_runs=5, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_2q_gate_pauliz_pauliz_tensor(self, device, qvm, compiler):
         """Test that the PauliZ tensor PauliZ observable works correctly.
@@ -945,7 +945,7 @@ class TestQVMIntegration(BaseTest):
         assert dev.circuit_hash in dev._compiled_program_dict
         assert len(dev._compiled_program_dict.items()) == 1
 
-    @flaky(max_runs=5, min_passes=1)
+    @flaky(max_runs=10, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_correct_compared_with_default_qubit(self, qvm, device, tol):
         """Test that QVM device stores the compiled program correctly by comparing it with default.qubit.
@@ -972,7 +972,7 @@ class TestQVMIntegration(BaseTest):
         assert dev.circuit_hash in dev._compiled_program_dict
         assert len(dev._compiled_program_dict.items()) == 1
 
-    @flaky(max_runs=5, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, device, qvm, compiler):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation

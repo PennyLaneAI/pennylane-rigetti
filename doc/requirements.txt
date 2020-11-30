@@ -1,0 +1,4 @@
+pennylane
+pyquil
+sphinx-automodapi
+pygments-github-lexers

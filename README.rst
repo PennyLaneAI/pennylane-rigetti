@@ -27,20 +27,22 @@ PennyLane Forest Plugin
 
 .. header-start-inclusion-marker-do-not-remove
 
-Contains the PennyLane Forest plugin. This plugin allows three Rigetti devices to work with
+Contains the PennyLane Forest plugin. This plugin allows different Rigetti devices to work with
 PennyLane --- the wavefunction simulator, the Quantum Virtual Machine (QVM), and Quantum Processing
 Units (QPUs).
 
 `pyQuil <https://pyquil.readthedocs.io>`_ is a Python library for quantum programming using the
 quantum instruction language (Quil) --- resulting quantum programs can be executed using the
-`Rigetti Forest SDK <https://www.PennyLaneAI.com/forest>`_ and the `Rigetti QCS
-<https://www.PennyLaneAI.com/qcs>`_.
+`Rigetti Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`_ and the `Rigetti QCS
+<https://qcs.rigetti.com/>`_.
 
-`PennyLane <https://pennylane.ai>`_ is a machine learning library for optimization and automatic
-differentiation of hybrid quantum-classical computations.
+`PennyLane <https://pennylane.readthedocs.io>`__ is a cross-platform Python library for quantum machine
+learning, automatic differentiation, and optimization of hybrid quantum-classical computations.
 
 
 .. header-end-inclusion-marker-do-not-remove
+
+The plugin documentation can be found here: `<https://pennylane-forest.readthedocs.io/en/latest/>`__.
 
 Features
 ========
@@ -54,8 +56,8 @@ Features
 * All provided devices support all core qubit PennyLane operations and observables.
 
 
-* Provides custom PennyLane operations to cover additional pyQuil operations: ``T``, ``S``,
-  ``ISWAP``, ``CCNOT``, ``PSWAP``, and many more. Every custom operation supports analytic
+* Provides custom PennyLane operations to cover additional pyQuil operations:
+  ``ISWAP``, ``PSWAP``, and ``CPHASE``. Every custom operation supports analytic
   differentiation.
 
 * Combine Forest and the Rigetti Cloud Services with PennyLane's automatic differentiation and
@@ -67,36 +69,73 @@ Features
 Installation
 ============
 
-PennyLane-Forest requires both PennyLane and pyQuil. It can be installed via ``pip``:
+PennyLane-Forest, as well as all required Python packages mentioned above, can be installed via ``pip``:
+::
+
+   	$ python -m pip install pennylane-forest
+
+
+Make sure you are using the Python 3 version of pip.
+
+Alternatively, you can install PennyLane-Forest from the source code by navigating to the top-level directory and running
+::
+
+	$ python setup.py install
+
+Dependencies
+~~~~~~~~~~~~
+
+.. highlight:: bash
+
+PennyLane-Forest requires the following libraries be installed:
+
+* `Python <http://python.org/>`_ >=3.6
+
+as well as the following Python packages:
+
+* `PennyLane <http://pennylane.readthedocs.io/>`_
+* `pyQuil <https://pyquil-docs.rigetti.com/en/stable/>`_
+
+If you currently do not have Python 3 installed, we recommend
+`Anaconda for Python 3 <https://www.anaconda.com/download/>`_, a distributed version
+of Python packaged for scientific computation.
+
+Additionally, if you would like to compile the quantum instruction language (Quil) and run it
+locally using a quantum virtual machine (QVM) server, you will need to download and install the
+Forest software development kit (SDK):
+
+* `Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`_
+
+Alternatively, you may sign up for Rigetti's Quantum Cloud Services (QCS) to acquire a Quantum Machine
+Image (QMI) which will allow you to compile your quantum code and run on real quantum processing units (QPUs),
+or on a preinstalled QVM. Note that this requires a valid QCS account.
+
+* `Quantum Cloud Services <https://docs.rigetti.com/en/>`_
+
+Tests
+~~~~~
+
+To test that the PennyLane-Forest plugin is working correctly you can run
 
 .. code-block:: bash
 
-    $ python -m pip install pennylane-forest
+    $ make test
 
+in the source folder.
+
+Documentation
+~~~~~~~~~~~~~
+
+To build the HTML documentation, go to the top-level directory and run:
+
+.. code-block:: bash
+
+  $ make docs
+
+
+The documentation can then be found in the ``doc/_build/html/`` directory.
 
 .. installation-end-inclusion-marker-do-not-remove
-
-Getting started
-===============
-
-Once the PennyLane-Forest plugin is installed, the three provided pyQuil devices can be accessed straight away in PennyLane.
-
-You can instantiate these devices for PennyLane as follows:
-
-.. code-block:: python
-
-    import pennylane as qml
-    dev_numpy = qml.device('forest.numpy_wavefunction', wires=2)
-    dev_simulator = qml.device('forest.wavefunction', wires=2)
-    dev_pyqvm = qml.device('forest.qvm', device='2q-pyqvm', shots=1000)
-    dev_qvm = qml.device('forest.qvm', device='2q-qvm', shots=1000)
-    dev_qpu = qml.device('forest.qpu', device='Aspen-8', shots=1000)
-
-These devices can then be used just like other devices for the definition and evaluation of QNodes
-within PennyLane. For more details, see the `plugin usage guide
-<https://pennylane-forest.readthedocs.io/en/latest/usage.html>`_ and refer to the PennyLane
-documentation.
-
 
 Contributing
 ============
@@ -121,7 +160,7 @@ If you are doing research using PennyLane and PennyLane-Forest, please cite `our
     Zeyue Niu, Antal Száva, and Nathan Killoran.
     *PennyLane: Automatic differentiation of hybrid quantum-classical computations.* 2018. arXiv:1811.04968
 
-
+.. support-start-inclusion-marker-do-not-remove
 
 Support
 =======

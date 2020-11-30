@@ -1,61 +1,89 @@
-PennyLane-Forest
-################
+PennyLane-Forest Plugin
+#######################
 
 :Release: |release|
-:Date: |today|
+
+.. image:: _static/puzzle_forest.png
+    :align: center
+    :width: 70%
+    :target: javascript:void(0);
+
+|
+
+.. include:: ../README.rst
+  :start-after:	header-start-inclusion-marker-do-not-remove
+  :end-before: header-end-inclusion-marker-do-not-remove
+
+Once Pennylane-Forest is installed, the provided Forest devices can be accessed straight
+away in PennyLane, without the need to import any additional packages.
+
+Devices
+~~~~~~~
+Currently, PennyLane-Forest provides these Forest devices for PennyLane:
+
+.. devicegalleryitem::
+    :name: 'forest.numpy_wavefunction'
+    :description: Forest's Numpy wavefunction simulator backend.
+    :link: devices/numpy_wavefunction.html
+
+.. devicegalleryitem::
+    :name: 'forest.wavefunction'
+    :description: The Forest SDK wavefunction simulator backend.
+    :link: devices/wavefunction.html
+
+.. devicegalleryitem::
+    :name: 'forest.qvm'
+    :description: Forest's QVM and pyQuil pyQVM simulator.
+    :link: devices/qvm.html
+
+.. devicegalleryitem::
+    :name: 'forest.qpu'
+    :description: Forest's QPU hardware devices.
+    :link: devices/qpu.html
+
+.. raw:: html
+
+        <div style='clear:both'></div>
+        </br>
 
 
+Tutorials
+~~~~~~~~~
 
-This PennyLane plugin allows the Rigetti Forest and pyQuil simulators to be used as PennyLane devices.
+To see the PennyLane-Forest plugin in action, you can use any of the qubit based `demos
+from the PennyLane documentation <https://pennylane.ai/qml/demonstrations.html>`_, for example
+the tutorial on `qubit rotation <https://pennylane.ai/qml/demos/tutorial_qubit_rotation.html>`_,
+and simply replace ``'default.qubit'`` with a ``'forest.XXX'`` device:
 
-`pyQuil <https://pyquil.readthedocs.io>`_ is a Python library for quantum programming using the quantum instruction language (Quil) - resulting quantum programs can be executed using the Rigetti Forest platform.
+.. code-block:: python
 
-`PennyLane <https://pennylane.readthedocs.io>`_ is a machine learning library for optimization and automatic differentiation of hybrid quantum-classical computations.
+    dev = qml.device('forest.XXX', wires=XXX)
 
-
-Features
-========
-
-* Provides four devices to be used with PennyLane: ``forest.numpy_wavefunction``, ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the pyQVM Numpy wavefunction simulator, Forest wavefunction simulator, quantum virtual machine (QVM), and quantum processing unit (QPU) respectively.
-
-
-* All provided devices support all core qubit PennyLane operations and observables.
-
-
-* Provides custom PennyLane operations to cover additional pyQuil operations: ``T``, ``S``, ``ISWAP``, ``CCNOT``, ``PSWAP``, and many more. Every custom operation supports analytic differentiation.
-
-
-* Leverage PennyLane’s automatic differentiation and optimization together with Rigetti's Forest SDK and Quantum Cloud Services.
-
-
-To get started with the PennyLane Strawberry Fields plugin, follow the :ref:`installation steps <installation>`, then see the :ref:`usage <usage>` page.
-
-Authors
-=======
-
-`Josh Izaac <https://github.com/josh146>`_, `Keri A. McKiernan <https://github.com/kmckiern>`_
-
-Contents
-========
-
-.. rst-class:: contents local topic
+Tutorials that originally showcase the forest device are the demos on
+`noisy devices <https://pennylane.ai/qml/demos/pytorch_noise.html>`_ and
+`ensemble classification <https://pennylane.ai/qml/demos/tutorial_ensemble_multi_qpu.html>`_.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Getting started
+   :titlesonly:
+   :hidden:
 
-   installing
-   usage
+   installation
+   support
 
-.. rst-class:: contents local topic
+.. toctree::
+   :maxdepth: 2
+   :caption: Usage
+   :hidden:
+
+   devices/numpy_wavefunction
+   devices/wavefunction
+   devices/qvm
+   devices/qpu
 
 .. toctree::
    :maxdepth: 1
-   :caption: Code details
+   :caption: API
+   :hidden:
 
-   code/ops
-   code/device
-   code/numpy_wavefunction
-   code/wavefunction
-   code/qvm
-   code/qpu
+   code

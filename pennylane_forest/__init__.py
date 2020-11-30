@@ -2,7 +2,7 @@
 Plugin overview
 ===============
 """
-from .ops import S, T, CCNOT, CPHASE, CSWAP, ISWAP, PSWAP
+from .ops import CPHASE, ISWAP, PSWAP
 from .qpu import QPUDevice
 from .qvm import QVMDevice
 from .wavefunction import WavefunctionDevice
