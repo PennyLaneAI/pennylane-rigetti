@@ -1,2 +1,3 @@
 git+https://github.com/XanaduAI/pennylane.git#egg=pennylane
+pyquil
 sphinx-automodapi
