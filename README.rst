@@ -77,7 +77,7 @@ PennyLane-Forest, as well as all required Python packages mentioned above, can b
 
 Make sure you are using the Python 3 version of pip.
 
-Alternatively, you can install PennyLane-Forest from the source code by navigating to the top-LEVEL directory and running
+Alternatively, you can install PennyLane-Forest from the source code by navigating to the top-level directory and running
 ::
 
 	$ python setup.py install
