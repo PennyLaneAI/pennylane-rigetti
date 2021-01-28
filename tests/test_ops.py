@@ -25,9 +25,9 @@ class TestDecompositions:
             gate_matrix = gate.matrix
 
             if gate.num_wires == 1:
-                if gate.wires[0] == Wires(0):
+                if gate.wires[0] == 0:
                     gate_matrix = np.kron(gate_matrix, np.eye(2, dtype=complex))
-                elif gate.wires[0] == Wires(1):
+                elif gate.wires[0] == 1:
                     gate_matrix = np.kron(np.eye(2, dtype=complex), gate_matrix)
 
             calculated_matrix = gate_matrix @ calculated_matrix
@@ -48,9 +48,9 @@ class TestDecompositions:
             gate_matrix = gate.matrix
 
             if gate.num_wires == 1:
-                if gate.wires[0] == Wires(0):
+                if gate.wires[0] == 0:
                     gate_matrix = np.kron(gate_matrix, np.eye(2, dtype=complex))
-                elif gate.wires[0] == Wires(1):
+                elif gate.wires[0] == 1:
                     gate_matrix = np.kron(np.eye(2, dtype=complex), gate_matrix)
 
             calculated_matrix = gate_matrix @ calculated_matrix
@@ -70,9 +70,9 @@ class TestDecompositions:
             gate_matrix = gate.matrix
 
             if gate.num_wires == 1:
-                if gate.wires[0] == Wires(0):
+                if gate.wires[0] == 0:
                     gate_matrix = np.kron(gate_matrix, np.eye(2, dtype=complex))
-                elif gate.wires[0] == Wires(1):
+                elif gate.wires[0] == 1:
                     gate_matrix = np.kron(np.eye(2, dtype=complex), gate_matrix)
 
             calculated_matrix = gate_matrix @ calculated_matrix
