@@ -102,7 +102,7 @@ class QPUDevice(QVMDevice):
     ):
         raise ValueError("Using the QPU via Forest is being deprecated.")
 
-        if readout_error is not None and load_qc:
+        if readout_error is not None and load_qc: # pylint: disable=unreachable
             raise ValueError("Readout error cannot be set on the physical QPU")
 
         self.readout_error = readout_error
