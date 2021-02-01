@@ -329,7 +329,7 @@ class ProgramLoader:
     def __init__(self, program):
         raise ValueError("The PyQuil program conversion feature is currently not supported.")
 
-        self.program = program # pylint: disable=unreachable
+        self.program = program  # pylint: disable=unreachable
         self.qubits = program.get_qubits()
 
         self._load_defined_gate_names()
