@@ -102,10 +102,12 @@ class QPUDevice(QVMDevice):
         calibrate_readout="plus-eig",
         **kwargs,
     ):
-        pl_version = pkg_resources.get_distribution('pennylane').version
+        pl_version = pkg_resources.get_distribution("pennylane").version
         if version.parse(pl_version) >= version.parse("0.14.0.dev"):
-            raise ValueError("Using the QPU via PennyLane-Forest is being deprecated \
-                    with PennyLane version 0.14.0 and higher.")
+            raise ValueError(
+                "Using the QPU via PennyLane-Forest is being deprecated \
+                    with PennyLane version 0.14.0 and higher."
+            )
 
         if readout_error is not None and load_qc:  # pylint: disable=unreachable
             raise ValueError("Readout error cannot be set on the physical QPU")

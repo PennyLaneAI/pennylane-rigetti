@@ -1,7 +1,7 @@
 import warnings
+from collections.abc import Sequence
 import pkg_resources
 from packaging import version
-from collections.abc import Sequence
 
 import numpy as np
 import pennylane as qml
@@ -329,10 +329,12 @@ class ProgramLoader:
     _matrix_dictionary = pyquil.simulation.matrices.QUANTUM_GATES
 
     def __init__(self, program):
-        pl_version = pkg_resources.get_distribution('pennylane').version
+        pl_version = pkg_resources.get_distribution("pennylane").version
         if version.parse(pl_version) >= version.parse("0.14.0.dev"):
-            raise ValueError("The PyQuil program conversion feature is not \
-                supported with PennyLane version 0.14.0 and higher.")
+            raise ValueError(
+                "The PyQuil program conversion feature is not \
+                supported with PennyLane version 0.14.0 and higher."
+            )
 
         self.program = program  # pylint: disable=unreachable
         self.qubits = program.get_qubits()
