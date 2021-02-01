@@ -1,16 +1,28 @@
-# Release 0.13.0-dev
+# Release 0.14.0
 
 ### New features since last release
 
 ### Improvements
 
+* Updated the CI.
+  [(#63)](https://github.com/PennyLaneAI/pennylane-forest/pull/63)
+
 ### Bug fixes
 
+* Updated the plugin to be compatible with the new core of PennyLane.
+  [(#67)](https://github.com/PennyLaneAI/pennylane-forest/pull/67)
+  [(#68)](https://github.com/PennyLaneAI/pennylane-forest/pull/68)
+
 ### Documentation
+
+* Adapted the documentation to the PennyLane theme.
+  [(#64)](https://github.com/PennyLaneAI/pennylane-forest/pull/64)
 
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Thomas Bromley, Theodor Isacsson, Josh Izaac, Maria Schuld, Antal Száva.
 
 ---
 
