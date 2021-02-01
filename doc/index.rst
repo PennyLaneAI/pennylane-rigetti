@@ -36,11 +36,6 @@ Currently, PennyLane-Forest provides these Forest devices for PennyLane:
     :description: Forest's QVM and pyQuil pyQVM simulator.
     :link: devices/qvm.html
 
-.. devicegalleryitem::
-    :name: 'forest.qpu'
-    :description: Forest's QPU hardware devices.
-    :link: devices/qpu.html
-
 .. raw:: html
 
         <div style='clear:both'></div>
@@ -79,7 +74,6 @@ Tutorials that originally showcase the forest device are the demos on
    devices/numpy_wavefunction
    devices/wavefunction
    devices/qvm
-   devices/qpu
 
 .. toctree::
    :maxdepth: 1

@@ -1,5 +1,7 @@
 import warnings
 from collections.abc import Sequence
+import pkg_resources
+from packaging import version
 
 import numpy as np
 import pennylane as qml
@@ -327,6 +329,13 @@ class ProgramLoader:
     _matrix_dictionary = pyquil.simulation.matrices.QUANTUM_GATES
 
     def __init__(self, program):
+        pl_version = pkg_resources.get_distribution("pennylane").version
+        if version.parse(pl_version) >= version.parse("0.14.0.dev"):
+            raise ValueError(
+                "The PyQuil program conversion feature is not \
+                supported with PennyLane version 0.14.0 and higher."
+            )
+
         self.program = program
         self.qubits = program.get_qubits()
 
@@ -585,6 +594,12 @@ def load_program(program: pyquil.Program):
     Every variable that is present in the Program and that is not used as the target
     register of a measurement has to be provided in the ``parameter_map`` of the template.
 
+    .. warning::
+
+        Starting from version 0.14.0 of PennyLane and PennyLane-Forest,
+        converting from Forest is not supported.
+
+
     Args:
         program (pyquil.Program): The program that should be loaded
 
@@ -606,6 +621,11 @@ def load_quil(quil_str: str):
     Every variable that is present in the Program and that is not used as the target
     register of a measurement has to be provided in the ``parameter_map`` of the template.
 
+    .. warning::
+
+        Starting from version 0.14.0 of PennyLane and PennyLane-Forest,
+        converting from Forest is not supported.
+
     Args:
         quil_str (str): The program that should be loaded
 
@@ -626,6 +646,11 @@ def load_quil_from_file(file_path: str):
 
     Every variable that is present in the Program and that is not used as the target
     register of a measurement has to be provided in the ``parameter_map`` of the template.
+
+    .. warning::
+
+        Starting from version 0.14.0 of PennyLane and PennyLane-Forest,
+        converting from Forest is not supported.
 
     Args:
         file_path (str): The path to the quil file that should be loaded
