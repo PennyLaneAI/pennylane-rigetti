@@ -587,6 +587,10 @@ def load_program(program: pyquil.Program):
     Every variable that is present in the Program and that is not used as the target
     register of a measurement has to be provided in the ``parameter_map`` of the template.
 
+    .. warning::
+
+        Converting from Forest is not supported with PennyLane version 0.14.0.
+
     Args:
         program (pyquil.Program): The program that should be loaded
 
@@ -608,6 +612,10 @@ def load_quil(quil_str: str):
     Every variable that is present in the Program and that is not used as the target
     register of a measurement has to be provided in the ``parameter_map`` of the template.
 
+    .. warning::
+
+        Converting from Forest is not supported with PennyLane version 0.14.0.
+
     Args:
         quil_str (str): The program that should be loaded
 
@@ -628,6 +636,10 @@ def load_quil_from_file(file_path: str):
 
     Every variable that is present in the Program and that is not used as the target
     register of a measurement has to be provided in the ``parameter_map`` of the template.
+
+    .. warning::
+
+        Converting from Forest is not supported with PennyLane version 0.14.0.
 
     Args:
         file_path (str): The path to the quil file that should be loaded
