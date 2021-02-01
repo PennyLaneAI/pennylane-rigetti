@@ -109,7 +109,7 @@ class QPUDevice(QVMDevice):
                     with PennyLane version 0.14.0 and higher."
             )
 
-        if readout_error is not None and load_qc:  # pylint: disable=unreachable
+        if readout_error is not None and load_qc:
             raise ValueError("Readout error cannot be set on the physical QPU")
 
         self.readout_error = readout_error

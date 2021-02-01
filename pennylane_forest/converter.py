@@ -336,7 +336,7 @@ class ProgramLoader:
                 supported with PennyLane version 0.14.0 and higher."
             )
 
-        self.program = program  # pylint: disable=unreachable
+        self.program = program
         self.qubits = program.get_qubits()
 
         self._load_defined_gate_names()
