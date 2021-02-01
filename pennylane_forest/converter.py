@@ -327,6 +327,8 @@ class ProgramLoader:
     _matrix_dictionary = pyquil.simulation.matrices.QUANTUM_GATES
 
     def __init__(self, program):
+        raise ValueError("The PyQuil program conversion feature is currently not supported.")
+
         self.program = program
         self.qubits = program.get_qubits()
 

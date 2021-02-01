@@ -100,6 +100,7 @@ class QPUDevice(QVMDevice):
         calibrate_readout="plus-eig",
         **kwargs,
     ):
+        raise ValueError("Using the QPU via Forest is being deprecated.")
 
         if readout_error is not None and load_qc:
             raise ValueError("Readout error cannot be set on the physical QPU")
