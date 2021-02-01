@@ -589,7 +589,9 @@ def load_program(program: pyquil.Program):
 
     .. warning::
 
-        Converting from Forest is not supported with PennyLane version 0.14.0.
+        Starting from version 0.14.0 of PennyLane and PennyLane-Forest,
+        converting from Forest is not supported.
+
 
     Args:
         program (pyquil.Program): The program that should be loaded
@@ -614,7 +616,8 @@ def load_quil(quil_str: str):
 
     .. warning::
 
-        Converting from Forest is not supported with PennyLane version 0.14.0.
+        Starting from version 0.14.0 of PennyLane and PennyLane-Forest,
+        converting from Forest is not supported.
 
     Args:
         quil_str (str): The program that should be loaded
@@ -639,7 +642,8 @@ def load_quil_from_file(file_path: str):
 
     .. warning::
 
-        Converting from Forest is not supported with PennyLane version 0.14.0.
+        Starting from version 0.14.0 of PennyLane and PennyLane-Forest,
+        converting from Forest is not supported.
 
     Args:
         file_path (str): The path to the quil file that should be loaded

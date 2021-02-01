@@ -19,7 +19,6 @@ info = {
     "packages": ["pennylane_forest"],
     "entry_points": {
         "pennylane.plugins": [
-            "forest.qpu = pennylane_forest:QPUDevice",
             "forest.qvm = pennylane_forest:QVMDevice",
             "forest.wavefunction = pennylane_forest:WavefunctionDevice",
             "forest.numpy_wavefunction = pennylane_forest:NumpyWavefunctionDevice",
