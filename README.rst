@@ -30,10 +30,10 @@ PennyLane Forest Plugin
 Contains the PennyLane Forest plugin. This plugin allows different Rigetti devices to work with
 PennyLane --- the wavefunction simulator, and the Quantum Virtual Machine (QVM).
 
-`pyQuil <https://pyquil.readthedocs.io>`_ is a Python library for quantum programming using the
+`pyQuil <https://pyquil.readthedocs.io>`__ is a Python library for quantum programming using the
 quantum instruction language (Quil) --- resulting quantum programs can be executed using the
-`Rigetti Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`_ and the `Rigetti QCS
-<https://qcs.rigetti.com/>`_.
+`Rigetti Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`__ and the `Rigetti QCS
+<https://qcs.rigetti.com/>`__.
 
 `PennyLane <https://pennylane.readthedocs.io>`__ is a cross-platform Python library for quantum machine
 learning, automatic differentiation, and optimization of hybrid quantum-classical computations.
@@ -84,32 +84,30 @@ Alternatively, you can install PennyLane-Forest from the source code by navigati
 Dependencies
 ~~~~~~~~~~~~
 
-.. highlight:: bash
-
 PennyLane-Forest requires the following libraries be installed:
 
-* `Python <http://python.org/>`_ >=3.6
+* `Python <http://python.org/>`__ >=3.6
 
 as well as the following Python packages:
 
-* `PennyLane <http://pennylane.readthedocs.io/>`_
-* `pyQuil <https://pyquil-docs.rigetti.com/en/stable/>`_
+* `PennyLane <http://pennylane.readthedocs.io/>`__
+* `pyQuil <https://pyquil-docs.rigetti.com/en/stable/>`__
 
 If you currently do not have Python 3 installed, we recommend
-`Anaconda for Python 3 <https://www.anaconda.com/download/>`_, a distributed version
+`Anaconda for Python 3 <https://www.anaconda.com/download/>`__, a distributed version
 of Python packaged for scientific computation.
 
 Additionally, if you would like to compile the quantum instruction language (Quil) and run it
 locally using a quantum virtual machine (QVM) server, you will need to download and install the
 Forest software development kit (SDK):
 
-* `Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`_
+* `Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`__
 
 Alternatively, you may sign up for Rigetti's Quantum Cloud Services (QCS) to acquire a Quantum Machine
 Image (QMI) which will allow you to compile your quantum code and run on real quantum processing units (QPUs),
 or on a preinstalled QVM. Note that this requires a valid QCS account.
 
-* `Quantum Cloud Services <https://docs.rigetti.com/en/>`_
+* `Quantum Cloud Services <https://docs.rigetti.com/en/>`__
 
 Tests
 ~~~~~
@@ -140,7 +138,7 @@ Contributing
 ============
 
 We welcome contributions - simply fork the repository of this plugin, and then make a
-`pull request <https://help.github.com/articles/about-pull-requests/>`_ containing your contribution.
+`pull request <https://help.github.com/articles/about-pull-requests/>`__ containing your contribution.
 All contributers to this plugin will be listed as authors on the releases.
 
 We also encourage bug reports, suggestions for new features and enhancements, and even links to cool projects
@@ -150,9 +148,9 @@ or applications built on PennyLane.
 Authors
 =======
 
-PennyLane-Forest is the work of `many contributors <https://github.com/PennyLaneAI/pennylane-forest/graphs/contributors>`_.
+PennyLane-Forest is the work of `many contributors <https://github.com/PennyLaneAI/pennylane-forest/graphs/contributors>`__.
 
-If you are doing research using PennyLane and PennyLane-Forest, please cite `our paper <https://arxiv.org/abs/1811.04968>`_:
+If you are doing research using PennyLane and PennyLane-Forest, please cite `our paper <https://arxiv.org/abs/1811.04968>`__:
 
     Ville Bergholm, Josh Izaac, Maria Schuld, Christian Gogolin, M. Sohaib Alam, Shahnawaz Ahmed,
     Juan Miguel Arrazola, Carsten Blank, Alain Delgado, Soran Jahangiri, Keri McKiernan, Johannes Jakob Meyer,
@@ -179,6 +177,6 @@ License
 =======
 
 PennyLane-Forest is **free** and **open source**, released under the BSD 3-Clause `license
-<https://github.com/PennyLaneAI/pennylane-forest/blob/master/LICENSE>`_.
+<https://github.com/PennyLaneAI/pennylane-forest/blob/master/LICENSE>`__.
 
 .. license-end-inclusion-marker-do-not-remove

@@ -33,6 +33,7 @@ info = {
     "long_description": open("README.rst").read(),
     "provides": ["pennylane_forest"],
     "install_requires": requirements,
+    "long_description_content_type": "text/x-rst"
 }
 
 classifiers = [
