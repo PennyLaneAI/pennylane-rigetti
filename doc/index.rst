@@ -45,18 +45,42 @@ Currently, PennyLane-Forest provides these Forest devices for PennyLane:
 Tutorials
 ~~~~~~~~~
 
-To see the PennyLane-Forest plugin in action, you can use any of the qubit based `demos
-from the PennyLane documentation <https://pennylane.ai/qml/demonstrations.html>`_, for example
-the tutorial on `qubit rotation <https://pennylane.ai/qml/demos/tutorial_qubit_rotation.html>`_,
-and simply replace ``'default.qubit'`` with a ``'forest.XXX'`` device:
+Check out these demos to see the PennyLane-Forest plugin in action:
+
+.. raw:: html
+
+    <div class="row">
+
+.. demogalleryitem::
+    :name: Ensemble classification with Forest and Qiskit devices
+    :figure: https://pennylane.ai/qml/_images/ensemble_diagram.png
+    :link:  https://pennylane.ai/qml/demos/tutorial_ensemble_multi_qpu.html
+    :tooltip: Use multiple QPUs to improve classification.
+
+.. demogalleryitem::
+    :name: PyTorch and noisy devices
+    :figure: https://pennylane.ai/qml/_images/bloch.gif
+    :link:  https://pennylane.ai/qml/demos/pytorch_noise.html
+    :tooltip: Extend PyTorch with real quantum computing power.
+
+.. raw:: html
+
+    </div></div><div style='clear:both'> <br/>
+
+
+You can also try it out using any of the qubit based `demos from the PennyLane documentation
+<https://pennylane.ai/qml/demonstrations.html>`_, for example the tutorial on
+`qubit rotation <https://pennylane.ai/qml/demos/tutorial_qubit_rotation.html>`_.
+Simply replace ``'default.qubit'`` with a ``'forest.XXX'`` device if you have an API key for
+hardware access.
 
 .. code-block:: python
 
     dev = qml.device('forest.XXX', wires=XXX)
 
-Tutorials that originally showcase the forest device are the demos on
-`noisy devices <https://pennylane.ai/qml/demos/pytorch_noise.html>`_ and
-`ensemble classification <https://pennylane.ai/qml/demos/tutorial_ensemble_multi_qpu.html>`_.
+.. raw:: html
+
+    <br/>
 
 .. toctree::
    :maxdepth: 2
