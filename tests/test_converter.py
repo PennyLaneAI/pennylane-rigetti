@@ -1231,9 +1231,8 @@ class TestIntegration:
     PHI = np.linspace(0.32, 3, 5)
     VARPHI = np.linspace(0.02, 3, 5)
 
-    @pytest.mark.parametrize("analytic", [True])
     @pytest.mark.parametrize("theta,phi,varphi", list(zip(THETA, PHI, VARPHI)))
-    def test_gradient(self, theta, phi, varphi, analytic, tol):
+    def test_gradient(self, theta, phi, varphi, tol):
         """Test that the gradient works correctly"""
         program = pyquil.Program()
 
@@ -1250,7 +1249,7 @@ class TestIntegration:
         # Convert to a PennyLane circuit
         program_pl = qml.load(program, format="pyquil_program")
 
-        dev = qml.device("default.qubit", wires=3, analytic=analytic)
+        dev = qml.device("default.qubit", wires=3)
 
         @qml.qnode(dev)
         def circuit(params):

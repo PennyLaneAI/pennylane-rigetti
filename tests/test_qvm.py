@@ -487,10 +487,10 @@ class TestQVMBasic(BaseTest):
         with pytest.raises(ValueError, match="Number of shots must be a positive integer."):
             dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
-    def test_raise_error_if_analytic_true(self, shots):
-        """Test that instantiating a QVMDevice in analytic=True mode raises an error"""
-        with pytest.raises(ValueError, match="QVM device cannot be run in analytic=True mode."):
-            dev = plf.QVMDevice(device="2q-qvm", shots=shots, analytic=True)
+    def test_raise_error_if_shots_is_none(self, shots):
+        """Test that instantiating a QVMDevice to be used for analytic computations raises an error"""
+        with pytest.raises(ValueError, match="QVM device cannot be used for analytic computations."):
+            dev = plf.QVMDevice(device="2q-qvm", shots=None)
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_timeout_set_correctly(self, shots, device):
