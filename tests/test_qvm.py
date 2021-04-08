@@ -12,7 +12,6 @@ import pennylane as qml
 from pennylane import numpy as np
 from pennylane.operation import Tensor
 from pennylane.circuit_graph import CircuitGraph
-from pennylane.variable import Variable
 from pennylane.wires import Wires
 
 from pyquil.quil import Pragma, Program
@@ -622,18 +621,16 @@ class TestParametricCompilation(BaseTest):
         assert len(dev._compiled_program_dict.items()) == 0
         assert len(call_history) == 1
 
-    variable1 = Variable(1)
-    variable2 = Variable(2)
+    param1 = np.array(1, requires_grad=True)
+    param2 = np.array(2, requires_grad=True)
 
-    multiple_symbolic_queue = [([qml.RX(variable1, wires=[0]), qml.RX(variable2, wires=[1])], [])]
+    multiple_symbolic_queue = [([qml.RX(param1, wires=[0]), qml.RX(param2, wires=[1])], [])]
 
     @pytest.mark.parametrize("queue, observable_queue", multiple_symbolic_queue)
     def test_parametric_compilation_with_numeric_and_symbolic_queue(
         self, queue, observable_queue, monkeypatch
     ):
         """Tests that a program containing numeric and symbolic variables as well is only compiled once."""
-
-        Variable.positional_arg_values = {}
 
         dev = qml.device("forest.qvm", device="2q-qvm", timeout=100)
 
@@ -645,8 +642,6 @@ class TestParametricCompilation(BaseTest):
 
         call_history = []
         for run_idx in range(number_of_runs):
-            Variable.positional_arg_values[1] = 0.232 * run_idx
-            Variable.positional_arg_values[2] = 0.8764 * run_idx
             circuit_graph = CircuitGraph(queue, observable_queue, dev.wires)
 
             dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
