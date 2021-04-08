@@ -28,7 +28,6 @@ from pyquil.gates import MEASURE, RESET
 from pyquil.quil import Pragma, Program
 
 from pennylane import DeviceError
-from pennylane.variable import Variable
 
 from ._version import __version__
 from .device import ForestDevice
@@ -192,10 +191,10 @@ class QVMDevice(ForestDevice):
             # Prepare for parametric compilation
             par = []
             for param in operation.data:
-                if isinstance(param, Variable):
-                    # Using the idx for each Variable instance to specify the
+                if getattr(param, "requires_grad", True):
+                    # Using the idx for trainable parameter objects to specify the
                     # corresponding symbolic parameter
-                    parameter_string = "theta" + str(param.idx)
+                    parameter_string = "theta" + id(param)
 
                     if parameter_string not in self._parameter_reference_map:
                         # Create a new PyQuil memory reference and store it in the
