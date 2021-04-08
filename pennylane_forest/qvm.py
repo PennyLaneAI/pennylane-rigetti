@@ -192,7 +192,7 @@ class QVMDevice(ForestDevice):
             # Prepare for parametric compilation
             par = []
             for param in operation.data:
-                if getattr(param, "requires_grad", True):
+                if getattr(param, "requires_grad", False):
                     # Using the idx for trainable parameter objects to specify the
                     # corresponding symbolic parameter
                     parameter_string = "theta" + str(id(param))
@@ -204,7 +204,7 @@ class QVMDevice(ForestDevice):
                         self._parameter_reference_map[parameter_string] = current_ref
 
                     # Store the numeric value bound to the symbolic parameter
-                    self._parameter_map[parameter_string] = [param.val]
+                    self._parameter_map[parameter_string] = [param.unwrap()]
 
                     # Appending the parameter reference to the parameters
                     # of the corresponding operation
