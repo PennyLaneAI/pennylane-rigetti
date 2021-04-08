@@ -93,6 +93,10 @@ class QVMDevice(ForestDevice):
         self.parametric_compilation = kwargs.get("parametric_compilation", True)
 
         if self.parametric_compilation:
+            self._circuit_hash = None
+            """None or int: stores the hash of the circuit from the last execution which
+            can be used for parametric compilation."""
+
             self._compiled_program_dict = {}
             """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
                 with the corresponding compiled programs."""
@@ -145,6 +149,13 @@ class QVMDevice(ForestDevice):
 
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
+
+    def execute(self, circuit, **kwargs):
+
+        if self.parametric_compilation:
+            self._circuit_hash = circuit.graph.hash
+
+        return super().execute(circuit, **kwargs)
 
     def apply(self, operations, **kwargs):
         """Run the QVM"""
@@ -220,8 +231,8 @@ class QVMDevice(ForestDevice):
         if "pyqvm" in self.qc.name:
             return self.qc.run(self.prog, memory_map=self._parameter_map)
 
-        if self.circuit_hash is None or not self.parametric_compilation:
-            # No hash provided or parametric compilation was set to False
+        if self.circuit_hash is None:
+            # Parametric compilation was set to False
             # Compile the program
             self._compiled_program = self.qc.compile(self.prog)
             return self.qc.run(executable=self._compiled_program)
@@ -235,6 +246,13 @@ class QVMDevice(ForestDevice):
         self._compiled_program = self._compiled_program_dict[self.circuit_hash]
         samples = self.qc.run(executable=self._compiled_program, memory_map=self._parameter_map)
         return samples
+
+    @property
+    def circuit_hash(self):
+        if self.parametric_compilation:
+            return self._circuit_hash
+
+        return None
 
     @property
     def compiled_program(self):
@@ -260,5 +278,6 @@ class QVMDevice(ForestDevice):
         super().reset()
 
         if self.parametric_compilation:
+            self._circuit_hash = None
             self._parameter_map = {}
             self._parameter_reference_map = {}
