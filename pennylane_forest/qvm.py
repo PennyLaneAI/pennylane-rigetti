@@ -50,8 +50,10 @@ class QVMDevice(ForestDevice):
             * Any other supported Rigetti device architecture.
             * Graph topology representing the device architecture.
 
-        shots (int): number of circuit evaluations/random samples used
-            to estimate expectation values of observables.
+        shots (None, int, list[int]): Number of circuit evaluations/random samples used to estimate
+            expectation values of observables. If ``None``, the device calculates probability, expectation values,
+            and variances analytically. If an integer, it specifies the number of samples to estimate these quantities.
+            If a list of integers is passed, the circuit evaluations are batched over the list of shots.
         wires (Iterable[Number, str]): Iterable that contains unique labels for the
             qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``).
             The number of labels must match the number of qubits accessible on the backend.
@@ -79,10 +81,9 @@ class QVMDevice(ForestDevice):
 
     def __init__(self, device, *, wires=None, shots=1000, noisy=False, **kwargs):
 
-        if shots <= 0:
-            raise ValueError("Number of shots must be a positive integer.")
+        if shots is not None and shots <= 0:
+            raise ValueError("Number of shots must be a positive integer or None.")
 
-        analytic = kwargs.get("analytic", False)
         timeout = kwargs.pop("timeout", None)
 
         self._compiled_program = None
@@ -105,8 +106,8 @@ class QVMDevice(ForestDevice):
             """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
                 parameters associated with their PyQuil memory references."""
 
-        if analytic:
-            raise ValueError("QVM device cannot be run in analytic=True mode.")
+        if shots is None:
+            raise ValueError("QVM device cannot be used for analytic computations.")
 
         self.connection = super()._get_connection(**kwargs)
 
@@ -137,7 +138,7 @@ class QVMDevice(ForestDevice):
                 "cannot be created with {} wires.".format(self.num_wires, len(wires))
             )
 
-        super().__init__(wires, shots, analytic=analytic, **kwargs)
+        super().__init__(wires, shots, **kwargs)
 
         if timeout is not None:
             self.qc.compiler.client.timeout = timeout
