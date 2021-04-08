@@ -195,7 +195,7 @@ class QVMDevice(ForestDevice):
                 if getattr(param, "requires_grad", True):
                     # Using the idx for trainable parameter objects to specify the
                     # corresponding symbolic parameter
-                    parameter_string = "theta" + id(param)
+                    parameter_string = "theta" + str(id(param))
 
                     if parameter_string not in self._parameter_reference_map:
                         # Create a new PyQuil memory reference and store it in the
