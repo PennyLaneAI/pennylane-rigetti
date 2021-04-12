@@ -47,12 +47,12 @@ class TestWavefunctionBasic(BaseTest):
         with qml.tape.QuantumTape() as tape:
             qml.RX(phi, wires=[0])
             qml.RY(theta, wires=[0])
-            qml.var(qml.PauliZ(wires=[0]))
+            O = qml.var(qml.PauliZ(wires=[0]))
 
         # test correct variance for <Z> of a rotated state
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
-        var = dev.var(qml.PauliZ(0))
+        var = dev.var(O)
         expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
 
         self.assertAlmostEqual(var, expected, delta=tol)
@@ -70,12 +70,12 @@ class TestWavefunctionBasic(BaseTest):
         with qml.tape.QuantumTape() as tape:
             qml.RX(phi, wires=[0])
             qml.RY(theta, wires=[0])
-            qml.var(qml.Hermitian(H, wires=[0]))
+            O = qml.var(qml.Hermitian(H, wires=[0]))
 
         # test correct variance for <Z> of a rotated state
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
-        var = dev.var(qml.Hermitian(H, wires=[0]))
+        var = dev.var(O)
         expected = 0.5 * (
             2 * np.sin(2 * theta) * np.cos(phi) ** 2
             + 24 * np.sin(phi) * np.cos(phi) * (np.sin(theta) - np.cos(theta))
