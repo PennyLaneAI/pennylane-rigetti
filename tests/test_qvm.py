@@ -54,14 +54,14 @@ class TestQVMBasic(BaseTest):
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
-        O1 = qml.expval(qml.Identity(wires=[0]))
-        O2 = qml.expval(qml.Identity(wires=[1]))
+        with qml.tape.QuantumTape() as tape:
+            qml.RX(theta, wires=[0])
+            qml.RX(phi, wires=[1])
+            qml.CNOT(wires=[0, 1])
+            O1 = qml.expval(qml.Identity(wires=[0]))
+            O2 = qml.expval(qml.Identity(wires=[1]))
 
-        circuit_graph = CircuitGraph(
-            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])], [O1, O2], dev.wires
-        )
-
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         dev._samples = dev.generate_samples()
 
@@ -77,17 +77,14 @@ class TestQVMBasic(BaseTest):
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
-        O1 = qml.expval(qml.PauliZ(wires=[0]))
-        O2 = qml.expval(qml.PauliZ(wires=[1]))
+        with qml.tape.QuantumTape() as tape:
+            qml.RX(theta, wires=[0])
+            qml.RX(phi, wires=[1])
+            qml.CNOT(wires=[0, 1])
+            O1 = qml.expval(qml.PauliZ(wires=[0]))
+            O2 = qml.expval(qml.PauliZ(wires=[1]))
 
-        circuit_graph = CircuitGraph(
-            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
-            {},
-            dev.wires,
-        )
-
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
@@ -103,17 +100,15 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        O1 = qml.expval(qml.PauliX(wires=[0]))
-        O2 = qml.expval(qml.PauliX(wires=[1]))
 
-        circuit_graph = CircuitGraph(
-            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
-            {},
-            dev.wires,
-        )
+        with qml.tape.QuantumTape() as tape:
+            qml.RY(theta, wires=[0])
+            qml.RY(phi, wires=[1])
+            qml.CNOT(wires=[0, 1])
+            O1 = qml.expval(qml.PauliX(wires=[0]))
+            O2 = qml.expval(qml.PauliX(wires=[1]))
 
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
@@ -128,17 +123,15 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        O1 = qml.expval(qml.PauliY(wires=[0]))
-        O2 = qml.expval(qml.PauliY(wires=[1]))
 
-        circuit_graph = CircuitGraph(
-            [qml.RX(theta, wires=[0]), qml.RX(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
-            {},
-            dev.wires,
-        )
+        with qml.tape.QuantumTape() as tape:
+            qml.RX(theta, wires=[0])
+            qml.RX(phi, wires=[1])
+            qml.CNOT(wires=[0, 1])
+            O1 = qml.expval(qml.PauliY(wires=[0]))
+            O2 = qml.expval(qml.PauliY(wires=[1]))
 
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
@@ -154,17 +147,15 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        O1 = qml.expval(qml.Hadamard(wires=[0]))
-        O2 = qml.expval(qml.Hadamard(wires=[1]))
 
-        circuit_graph = CircuitGraph(
-            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
-            {},
-            dev.wires,
-        )
+        with qml.tape.QuantumTape() as tape:
+            qml.RY(theta, wires=[0])
+            qml.RY(phi, wires=[1])
+            qml.CNOT(wires=[0, 1])
+            O1 = qml.expval(qml.Hadamard(wires=[0]))
+            O2 = qml.expval(qml.Hadamard(wires=[1]))
 
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
@@ -186,17 +177,15 @@ class TestQVMBasic(BaseTest):
         phi = 0.123
 
         dev = plf.QVMDevice(device="2q-qvm", shots=shots)
-        O1 = qml.expval(qml.Hermitian(H, wires=[0]))
-        O2 = qml.expval(qml.Hermitian(H, wires=[1]))
 
-        circuit_graph = CircuitGraph(
-            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1, O2],
-            {},
-            dev.wires,
-        )
+        with qml.tape.QuantumTape() as tape:
+            qml.RY(theta, wires=[0])
+            qml.RY(phi, wires=[1])
+            qml.CNOT(wires=[0, 1])
+            O1 = qml.expval(qml.Hermitian(H, wires=[0]))
+            O2 = qml.expval(qml.Hermitian(H, wires=[1]))
 
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1), dev.expval(O2)])
@@ -227,14 +216,14 @@ class TestQVMBasic(BaseTest):
         )
 
         dev = plf.QVMDevice(device="2q-qvm", shots=10 * shots)
-        O1 = qml.expval(qml.Hermitian(A, wires=[0, 1]))
 
-        circuit_graph = CircuitGraph(
-            [qml.RY(theta, wires=[0]), qml.RY(phi, wires=[1]), qml.CNOT(wires=[0, 1])] + [O1], {}, dev.wires
-        )
+        with qml.tape.QuantumTape() as tape:
+            qml.RY(theta, wires=[0])
+            qml.RY(phi, wires=[1])
+            qml.CNOT(wires=[0, 1])
+            O1 = qml.expval(qml.Hermitian(A, wires=[0, 1]))
 
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
         res = np.array([dev.expval(O1)])
@@ -257,13 +246,12 @@ class TestQVMBasic(BaseTest):
         phi = 0.543
         theta = 0.6543
 
-        O1 = qml.var(qml.PauliZ(wires=[0]))
+        with qml.tape.QuantumTape() as tape:
+            qml.RX(phi, wires=[0])
+            qml.RY(theta, wires=[0])
+            O1 = qml.var(qml.PauliZ(wires=[0]))
 
-        circuit_graph = CircuitGraph([qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])] + [O1], {}, dev.wires)
-
-        # test correct variance for <Z> of a rotated state
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
         var = np.array([dev.var(O1)])
@@ -280,13 +268,13 @@ class TestQVMBasic(BaseTest):
 
         A = np.array([[4, -1 + 6j], [-1 - 6j, 2]])
 
-        O1 = qml.var(qml.Hermitian(A, wires=[0]))
-
-        circuit_graph = CircuitGraph([qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])] + [O1], {}, dev.wires)
+        with qml.tape.QuantumTape() as tape:
+            qml.RX(phi, wires=[0])
+            qml.RY(theta, wires=[0])
+            O1 = qml.var(qml.Hermitian(A, wires=[0]))
 
         # test correct variance for <A> of a rotated state
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
-
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
         var = np.array([dev.var(O1)])
@@ -304,7 +292,7 @@ class TestQVMBasic(BaseTest):
     )  # pylint: disable=protected-access
     def test_apply(self, gate, apply_unitary, shots, qvm, compiler):
         """Test the application of gates"""
-        dev = plf.QVMDevice(device="3q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="3q-qvm", shots=shots, parametric_compilation=False)
 
         try:
             # get the equivalent pennylane operation class
@@ -316,7 +304,6 @@ class TestQVMBasic(BaseTest):
         # the list of wires to apply the operation to
         w = list(range(op.num_wires))
 
-        obs = qml.expval(qml.PauliZ(0))
         if op.par_domain == "A":
             # the parameter is an array
             if gate == "QubitUnitary":
@@ -328,7 +315,9 @@ class TestQVMBasic(BaseTest):
                 state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
                 w = list(range(dev.num_wires))
 
-            circuit_graph = CircuitGraph([op(p, wires=w)] + [obs], {}, dev.wires)
+            with qml.tape.QuantumTape() as tape:
+                op(p, wires=w)
+                obs = qml.expval(qml.PauliZ(0))
         else:
             p = [0.432_423, 2, 0.324][: op.num_params]
             fn = test_operation_map[gate]
@@ -342,14 +331,19 @@ class TestQVMBasic(BaseTest):
 
             # calculate the expected output
             state = apply_unitary(O, 3)
-            # Creating the circuit graph using a parametrized operation
+            # Creating the tape using a parametrized operation
             if p:
-                circuit_graph = CircuitGraph([op(*p, wires=w)] + [obs], {}, dev.wires)
-            # Creating the circuit graph using an operation that take no parameters
-            else:
-                circuit_graph = CircuitGraph([op(wires=w)] + [obs], {}, dev.wires)
+                with qml.tape.QuantumTape() as tape:
+                    op(*p, wires=w)
+                    obs = qml.expval(qml.PauliZ(0))
 
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+            # Creating the tape using an operation that take no parameters
+            else:
+                with qml.tape.QuantumTape() as tape:
+                    op(wires=w)
+                    obs = qml.expval(qml.PauliZ(0))
+
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         dev._samples = dev.generate_samples()
 
