@@ -44,15 +44,13 @@ class TestWavefunctionBasic(BaseTest):
         phi = 0.543
         theta = 0.6543
 
-        circuit_operations = [qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])]
-
-        O = qml.var(qml.PauliZ(wires=[0]))
-
-        observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
+        with qml.tape.QuantumTape() as tape:
+            qml.RX(phi, wires=[0])
+            qml.RY(theta, wires=[0])
+            qml.var(qml.PauliZ(wires=[0]))
 
         # test correct variance for <Z> of a rotated state
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         var = dev.var(qml.PauliZ(0))
         expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
@@ -69,14 +67,13 @@ class TestWavefunctionBasic(BaseTest):
         # test correct variance for <H> of a rotated state
         H = np.array([[4, -1 + 6j], [-1 - 6j, 2]])
 
-        circuit_operations = [qml.RX(phi, wires=[0]), qml.RY(theta, wires=[0])]
+        with qml.tape.QuantumTape() as tape:
+            qml.RX(phi, wires=[0])
+            qml.RY(theta, wires=[0])
+            qml.var(qml.Hermitian(H, wires=[0]))
 
-        O = qml.var(qml.Hermitian(H, wires=[0]))
-
-        observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
-
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+        # test correct variance for <Z> of a rotated state
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         var = dev.var(qml.Hermitian(H, wires=[0]))
         expected = 0.5 * (
@@ -117,7 +114,9 @@ class TestWavefunctionBasic(BaseTest):
                 state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
                 w = list(range(dev.num_wires))
 
-            circuit_graph = qml.CircuitGraph([op(p, wires=w)] + [obs], {}, dev.wires)
+            with qml.tape.QuantumTape() as tape:
+                op(p, wires=w)
+                obs
         else:
             p = [0.432_423, 2, 0.324][: op.num_params]
             fn = test_operation_map[gate]
@@ -131,14 +130,19 @@ class TestWavefunctionBasic(BaseTest):
 
             # calculate the expected output
             state = apply_unitary(O, 3)
-            # Creating the circuit graph using a parametrized operation
+            # Creating the tape using a parametrized operation
             if p:
-                circuit_graph = qml.CircuitGraph([op(*p, wires=w)] + [obs], {}, dev.wires)
-            # Creating the circuit graph using an operation that take no parameters
-            else:
-                circuit_graph = qml.CircuitGraph([op(wires=w)] + [obs], {}, dev.wires)
+                with qml.tape.QuantumTape() as tape:
+                    op(*p, wires=w)
+                    obs
 
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+            # Creating the tape using an operation that take no parameters
+            else:
+                with qml.tape.QuantumTape() as tape:
+                    op(wires=w)
+                    obs
+
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         res = dev.expval(obs)
 
@@ -152,14 +156,17 @@ class TestWavefunctionBasic(BaseTest):
         dev = plf.WavefunctionDevice(wires=1, shots=10)
         theta = 1.5708
 
-        circuit_operations = [qml.RX(theta, wires=[0])]
+        circuit_operations = []
 
         O = qml.sample(qml.PauliZ(0))
 
         observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
 
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+        with qml.tape.QuantumTape() as tape:
+            qml.RX(theta, wires=[0])
+            qml.sample(qml.PauliZ(0))
+
+        dev.apply(tape._ops, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
         s1 = dev.sample(O)
 
@@ -175,14 +182,12 @@ class TestWavefunctionBasic(BaseTest):
 
         A = np.array([[1, 2j], [-2j, 0]])
 
-        circuit_operations = [qml.RX(theta, wires=[0])]
+        with qml.tape.QuantumTape() as tape:
+            qml.RX(theta, wires=[0])
+            O = qml.sample(qml.Hermitian(A, wires=[0]))
 
-        O = qml.sample(qml.Hermitian(A, wires=[0]))
-
-        observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
-
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+        # test correct variance for <Z> of a rotated state
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         dev._samples = dev.generate_samples()
 
@@ -220,18 +225,14 @@ class TestWavefunctionBasic(BaseTest):
             ]
         )
 
-        circuit_operations = [
+        with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0]),
             qml.RY(2 * theta, wires=[1]),
             qml.CNOT(wires=[0, 1]),
-        ]
+            O = qml.sample(qml.Hermitian(A, wires=[0, 1]))
 
-        O = qml.sample(qml.Hermitian(A, wires=[0, 1]))
-
-        observables = [O]
-        circuit_graph = qml.CircuitGraph(circuit_operations + observables, {}, dev.wires)
-
-        dev.apply(circuit_graph.operations, rotations=circuit_graph.diagonalizing_gates)
+        # test correct variance for <Z> of a rotated state
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         dev._samples = dev.generate_samples()
 
@@ -264,7 +265,7 @@ class TestWavefunctionIntegration(BaseTest):
         """Test that the wavefunction device loads correctly"""
         dev = qml.device("forest.wavefunction", wires=2)
         self.assertEqual(dev.num_wires, 2)
-        self.assertEqual(dev.shots, 1000)
+        self.assertEqual(dev.shots, None)
         self.assertEqual(dev.short_name, "forest.wavefunction")
 
     def test_program_property(self, qvm, compiler):
