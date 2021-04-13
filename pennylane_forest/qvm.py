@@ -203,7 +203,7 @@ class QVMDevice(ForestDevice):
             # Prepare for parametric compilation
             par = []
             for param in operation.data:
-                if getattr(param, "requires_grad", False) and operation.name is not "BasisState":
+                if getattr(param, "requires_grad", False) and operation.name != "BasisState":
                     # Using the idx for trainable parameter objects to specify the
                     # corresponding symbolic parameter
                     parameter_string = "theta" + str(id(param))
