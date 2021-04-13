@@ -732,7 +732,8 @@ class TestQVMIntegration(BaseTest):
 
     @flaky(max_runs=10, min_passes=2)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
-    def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler):
+    @pytest.mark.parametrize("requires_grad", [True, False])
+    def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler, requires_grad):
         """Test that the wavefunction plugin provides correct result for simple circuit.
 
         As the results coming from the qvm are stochastic, a constraint of 2 out of 5 runs was added.
@@ -747,7 +748,7 @@ class TestQVMIntegration(BaseTest):
         @qml.qnode(dev)
         def circuit(x, y, z):
             """Reference QNode"""
-            qml.BasisState(np.array([1], requires_grad=False), wires=0)
+            qml.BasisState(np.array([1], requires_grad=requires_grad), wires=0)
             qml.Hadamard(wires=0)
             qml.Rot(x, y, z, wires=0)
             return qml.expval(qml.PauliZ(0))
