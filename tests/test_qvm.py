@@ -747,7 +747,7 @@ class TestQVMIntegration(BaseTest):
         @qml.qnode(dev)
         def circuit(x, y, z):
             """Reference QNode"""
-            qml.BasisState(np.array([1]), wires=0)
+            qml.BasisState(np.array([1], requires_grad=False), wires=0)
             qml.Hadamard(wires=0)
             qml.Rot(x, y, z, wires=0)
             return qml.expval(qml.PauliZ(0))
