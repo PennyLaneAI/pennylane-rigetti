@@ -28,7 +28,6 @@ from pyquil.gates import MEASURE, RESET
 from pyquil.quil import Pragma, Program
 
 from pennylane import DeviceError
-from pennylane.variable import Variable
 
 from ._version import __version__
 from .device import ForestDevice
@@ -51,8 +50,10 @@ class QVMDevice(ForestDevice):
             * Any other supported Rigetti device architecture.
             * Graph topology representing the device architecture.
 
-        shots (int): number of circuit evaluations/random samples used
-            to estimate expectation values of observables.
+        shots (None, int, list[int]): Number of circuit evaluations/random samples used to estimate
+            expectation values of observables. If ``None``, the device calculates probability, expectation values,
+            and variances analytically. If an integer, it specifies the number of samples to estimate these quantities.
+            If a list of integers is passed, the circuit evaluations are batched over the list of shots.
         wires (Iterable[Number, str]): Iterable that contains unique labels for the
             qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``).
             The number of labels must match the number of qubits accessible on the backend.
@@ -80,10 +81,9 @@ class QVMDevice(ForestDevice):
 
     def __init__(self, device, *, wires=None, shots=1000, noisy=False, **kwargs):
 
-        if shots <= 0:
-            raise ValueError("Number of shots must be a positive integer.")
+        if shots is not None and shots <= 0:
+            raise ValueError("Number of shots must be a positive integer or None.")
 
-        analytic = kwargs.get("analytic", False)
         timeout = kwargs.pop("timeout", None)
 
         self._compiled_program = None
@@ -93,6 +93,10 @@ class QVMDevice(ForestDevice):
         self.parametric_compilation = kwargs.get("parametric_compilation", True)
 
         if self.parametric_compilation:
+            self._circuit_hash = None
+            """None or int: stores the hash of the circuit from the last execution which
+            can be used for parametric compilation."""
+
             self._compiled_program_dict = {}
             """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
                 with the corresponding compiled programs."""
@@ -106,8 +110,8 @@ class QVMDevice(ForestDevice):
             """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
                 parameters associated with their PyQuil memory references."""
 
-        if analytic:
-            raise ValueError("QVM device cannot be run in analytic=True mode.")
+        if shots is None:
+            raise ValueError("QVM device cannot be used for analytic computations.")
 
         self.connection = super()._get_connection(**kwargs)
 
@@ -138,13 +142,20 @@ class QVMDevice(ForestDevice):
                 "cannot be created with {} wires.".format(self.num_wires, len(wires))
             )
 
-        super().__init__(wires, shots, analytic=analytic, **kwargs)
+        super().__init__(wires, shots, **kwargs)
 
         if timeout is not None:
             self.qc.compiler.client.timeout = timeout
 
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
+
+    def execute(self, circuit, **kwargs):
+
+        if self.parametric_compilation:
+            self._circuit_hash = circuit.graph.hash
+
+        return super().execute(circuit, **kwargs)
 
     def apply(self, operations, **kwargs):
         """Run the QVM"""
@@ -192,10 +203,10 @@ class QVMDevice(ForestDevice):
             # Prepare for parametric compilation
             par = []
             for param in operation.data:
-                if isinstance(param, Variable):
-                    # Using the idx for each Variable instance to specify the
+                if getattr(param, "requires_grad", False) and operation.name != "BasisState":
+                    # Using the idx for trainable parameter objects to specify the
                     # corresponding symbolic parameter
-                    parameter_string = "theta" + str(param.idx)
+                    parameter_string = "theta" + str(id(param))
 
                     if parameter_string not in self._parameter_reference_map:
                         # Create a new PyQuil memory reference and store it in the
@@ -204,7 +215,7 @@ class QVMDevice(ForestDevice):
                         self._parameter_reference_map[parameter_string] = current_ref
 
                     # Store the numeric value bound to the symbolic parameter
-                    self._parameter_map[parameter_string] = [param.val]
+                    self._parameter_map[parameter_string] = [param.unwrap()]
 
                     # Appending the parameter reference to the parameters
                     # of the corresponding operation
@@ -220,8 +231,8 @@ class QVMDevice(ForestDevice):
         if "pyqvm" in self.qc.name:
             return self.qc.run(self.prog, memory_map=self._parameter_map)
 
-        if self.circuit_hash is None or not self.parametric_compilation:
-            # No hash provided or parametric compilation was set to False
+        if self.circuit_hash is None:
+            # Parametric compilation was set to False
             # Compile the program
             self._compiled_program = self.qc.compile(self.prog)
             return self.qc.run(executable=self._compiled_program)
@@ -235,6 +246,13 @@ class QVMDevice(ForestDevice):
         self._compiled_program = self._compiled_program_dict[self.circuit_hash]
         samples = self.qc.run(executable=self._compiled_program, memory_map=self._parameter_map)
         return samples
+
+    @property
+    def circuit_hash(self):
+        if self.parametric_compilation:
+            return self._circuit_hash
+
+        return None
 
     @property
     def compiled_program(self):
@@ -260,5 +278,6 @@ class QVMDevice(ForestDevice):
         super().reset()
 
         if self.parametric_compilation:
+            self._circuit_hash = None
             self._parameter_map = {}
             self._parameter_reference_map = {}

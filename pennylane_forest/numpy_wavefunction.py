@@ -45,8 +45,8 @@ class NumpyWavefunctionDevice(ForestDevice):
 
     observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
 
-    def __init__(self, wires, *, shots=1000, analytic=True, **kwargs):
-        super().__init__(wires, shots, analytic, **kwargs)
+    def __init__(self, wires, *, shots=None, **kwargs):
+        super().__init__(wires, shots, **kwargs)
         self.qc = PyQVM(n_qubits=len(self.wires), quantum_simulator_type=NumpyWavefunctionSimulator)
         self._state = None
 

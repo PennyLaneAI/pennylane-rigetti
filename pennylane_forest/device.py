@@ -173,16 +173,15 @@ class ForestDevice(QubitDevice):
             to estimate expectation values of observables.
             For simulator devices, 0 means the exact EV is returned.
     """
-    pennylane_requires = ">=0.11"
+    pennylane_requires = ">=0.15"
     version = __version__
     author = "Rigetti Computing Inc."
 
     _operation_map = pyquil_operation_map
     _capabilities = {"model": "qubit", "tensor_observables": True}
 
-    def __init__(self, wires, shots=1000, analytic=False, **kwargs):
-        super().__init__(wires, shots, analytic=analytic)
-        self.analytic = analytic
+    def __init__(self, wires, shots=1000, **kwargs):
+        super().__init__(wires, shots)
         self.reset()
 
     @staticmethod

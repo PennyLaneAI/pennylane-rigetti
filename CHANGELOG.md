@@ -1,18 +1,26 @@
-# Release 0.15.0-dev
-
-### New features since last release
+# Release 0.15.0
 
 ### Breaking changes
 
-### Improvements
+* For compatibility with PennyLane v0.15, the `analytic` keyword argument
+  has been removed from all devices. Analytic expectation values can
+  still be computed by setting `shots=None`.
+  [(#71)](https://github.com/PennyLaneAI/pennylane-forest/pull/71)
 
-### Documentation
+* For compatibility with PennyLane v0.15, parametric compilation now depends on
+  the `requires_grad` attribute of parameters instead of the deprecated
+  `Variable` class.
+  [(#71)](https://github.com/PennyLaneAI/pennylane-forest/pull/71)
 
-### Bug fixes
+* The circuit hashes used for parametric compilation are computed in
+  `QVMDevice` instead of in `QubitDevice` defined in Pennylane.
+  [(#71)](https://github.com/PennyLaneAI/pennylane-forest/pull/71)
 
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Antal Száva.
 
 ---
 
