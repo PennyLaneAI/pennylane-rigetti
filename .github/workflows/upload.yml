@@ -12,7 +12,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
+
+      - name: Run Forest Quilc
+        run: docker run --rm -d -p 5555:5555 rigetti/quilc:1.22.0 -R
+
+      - name: Run Forest QVM
+        run: docker run --rm -d -p 5000:5000 rigetti/qvm -S
 
       - name: Build and install Plugin
         run: |
