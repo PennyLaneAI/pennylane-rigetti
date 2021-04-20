@@ -7,7 +7,7 @@ with open("pennylane_forest/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 
-requirements = ["pyquil>=2.16", "pennylane @ git+https://github.com/PennyLaneAI/pennylane.git@master"]
+requirements = ["pyquil>=2.16", "pennylane>=0.15"]
 
 info = {
     "name": "PennyLane-Forest",
