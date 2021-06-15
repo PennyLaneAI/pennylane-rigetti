@@ -2,7 +2,8 @@
 
 ### Bug fixes
 
-* Fixed a bug caused by the ``expand_state`` method always assuming that
+* Fixed a bug caused by the `expand_state` method always assuming that
+
   inactive wires are the least significant bits.
   [(#73)](https://github.com/PennyLaneAI/pennylane-forest/pull/73)
 
