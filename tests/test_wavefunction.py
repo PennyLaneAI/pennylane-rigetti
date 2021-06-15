@@ -416,15 +416,18 @@ class TestExpandState(BaseTest):
         self.assertAllEqual(dev._state, np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2)
 
 
-    #@pytest.mark.parametrize("num_wires", )
-    def test_expanded_matches_default_qubit(self):
-        dev_default_qubit = qml.device('default.qubit', wires=3)
-        dev_wavefunction = qml.device('forest.wavefunction', wires=3)
+    @pytest.mark.parametrize("num_wires", [3,4] )
+    @pytest.mark.parametrize("wire_idx1, wire_idx2", [(0, 0), (1, 0), (1, 1)] )
+    def test_expanded_matches_default_qubit(self, wire_idx1, wire_idx2, num_wires):
+        dev_default_qubit = qml.device('default.qubit', wires=num_wires)
+        dev_wavefunction = qml.device('forest.wavefunction', wires=num_wires)
 
         def circuit():
-            qml.Hadamard(0)
-            qml.CNOT(wires=[0,1])
-            return qml.probs(wires=[0,1,2])
+            qml.RY(np.pi/2, wires=[wire_idx1 + 1])
+            qml.RY(np.pi, wires=[wire_idx2 + 0])
+            qml.CNOT(wires=[wire_idx1 + 1, wire_idx2 + 0])
+            qml.CNOT(wires=[wire_idx1 + 1, wire_idx2 + 0])
+            return qml.probs(wires=list(range(num_wires)))
 
         qnode1 = qml.QNode(circuit, dev_wavefunction)
         qnode2 = qml.QNode(circuit, dev_default_qubit)
