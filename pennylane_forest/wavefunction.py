@@ -91,10 +91,11 @@ class WavefunctionDevice(ForestDevice):
         self.expand_state()
 
     @staticmethod
-    def bool2int(x):
+    def bit2dec(x):
+        """Auxiliary function that converts a bitstring to a decimal integer."""
         y = 0
-        for i,j in enumerate(x):
-            y += j<<i
+        for i, j in enumerate(x):
+            y += j << i
         return y
 
     def expand_state(self):
@@ -105,8 +106,6 @@ class WavefunctionDevice(ForestDevice):
             # all wires in the device have been initialised
             return
 
-        # len(self.wires) - len(self._active_wires)
-
         # translate active wires to the device's labels
         device_active_wires = self.map_wires(self._active_wires)
 
@@ -115,23 +114,20 @@ class WavefunctionDevice(ForestDevice):
         # initialize the entire new expanded state to zeros
         expanded_state = np.zeros([2 ** len(self.wires)], dtype=np.complex128)
 
-        subsystem_bit_strings = self.states_to_binary(np.arange(2 ** len(self._active_wires)), len(self._active_wires))
+        # gather the bit strings for the subsystem made up of the active qubits
+        subsystem_bit_strings = self.states_to_binary(
+            np.arange(2 ** len(self._active_wires)), len(self._active_wires)
+        )
 
         for string, amplitude in zip(subsystem_bit_strings, self._state):
             for w in inactive_wires:
 
-                # expand the bitstring by inserting the inactive zero qubits
+                # expand the bitstring by inserting a zero bit for each inactive qubit
                 string = np.insert(string, w, 0)
 
-            decimal_val = self.bool2int(string[::-1])
+            # calculate the decimal value of the bit string, that gives the
+            # index of the amplitude in the state vector
+            decimal_val = self.bit2dec(string[::-1])
             expanded_state[decimal_val] = amplitude
 
-        # expand the state of the device into a length-num_wire state vector
-        # expanded_state = np.kron(self._state, other_subsystems).reshape([2] * self.num_wires)
-        # expanded_state = np.moveaxis(
-        #     expanded_state, range(len(device_active_wires)), device_active_wires.labels
-        # )
-        # expanded_state = expanded_state.flatten()
-
         self._state = expanded_state
-
