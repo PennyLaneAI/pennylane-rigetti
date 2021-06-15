@@ -1,18 +1,16 @@
-# Release 0.16.0-dev
-
-### New features
-
-### Improvements
+# Release 0.16.0
 
 ### Bug fixes
 
-### Breaking changes
-
-### Documentation
+* Fixed a bug caused by the ``expand_state`` method always assuming that
+  inactive wires are the least significant bits.
+  [(#73)](https://github.com/PennyLaneAI/pennylane-forest/pull/73)
 
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Antal Száva.
 
 ---
 
