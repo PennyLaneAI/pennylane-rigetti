@@ -417,8 +417,9 @@ class TestExpandState(BaseTest):
 
 
     @pytest.mark.parametrize("bitstring, dec", [([1], 1), ([0,0,1], 1), ([0,1,0], 2), ([1,1,1], 7)])
-    def test_expand_state(self, bitstring, dec):
-        """Test that a multi-qubit state is correctly expanded for a N-qubit device"""
+    def test_bit2dec(self, bitstring, dec):
+        """Test that the bit2dec method produces the correct decimal values for
+        bitstrings"""
         assert plf.WavefunctionDevice.bit2dec(bitstring) == dec
 
     @pytest.mark.parametrize("num_wires", [3,4] )
