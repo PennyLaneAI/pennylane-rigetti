@@ -120,7 +120,7 @@ class WavefunctionDevice(ForestDevice):
         inactive_wires = [x for x in range(len(self.wires)) if x not in device_active_wires]
 
         # initialize the entire new expanded state to zeros
-        expanded_state = np.zeros([2 ** len(self.wires)], dtype=np.complex128)
+        expanded_state = np.zeros([2 ** len(self.wires)], dtype=self.C_TYPE)
 
         # gather the bit strings for the subsystem made up of the active qubits
         subsystem_bit_strings = self.states_to_binary(
