@@ -90,6 +90,22 @@ class WavefunctionDevice(ForestDevice):
         self._state = self._state.reshape([2] * len(self._active_wires)).T.flatten()
         self.expand_state()
 
+    @staticmethod
+    def bit2dec(x):
+        """Auxiliary method that converts a bitstring to a decimal integer
+        using the PennyLane convention of bit ordering.
+
+        Args:
+            x (Iterable): bit string
+
+        Returns:
+            int: decimal value of the bitstring
+        """
+        y = 0
+        for i, j in enumerate(x[::-1]):
+            y += j << i
+        return y
+
     def expand_state(self):
         """The pyQuil wavefunction simulator initializes qubits dymnically as they are requested.
         This method expands the state to the full number of wires in the device."""
@@ -98,20 +114,28 @@ class WavefunctionDevice(ForestDevice):
             # all wires in the device have been initialised
             return
 
-        num_inactive_wires = len(self.wires) - len(self._active_wires)
-
         # translate active wires to the device's labels
         device_active_wires = self.map_wires(self._active_wires)
 
-        # place the inactive subsystems in the vacuum state
-        other_subsystems = np.zeros([2 ** num_inactive_wires])
-        other_subsystems[0] = 1
+        inactive_wires = [x for x in range(len(self.wires)) if x not in device_active_wires]
 
-        # expand the state of the device into a length-num_wire state vector
-        expanded_state = np.kron(self._state, other_subsystems).reshape([2] * self.num_wires)
-        expanded_state = np.moveaxis(
-            expanded_state, range(len(device_active_wires)), device_active_wires.labels
+        # initialize the entire new expanded state to zeros
+        expanded_state = np.zeros([2 ** len(self.wires)], dtype=self.C_DTYPE)
+
+        # gather the bit strings for the subsystem made up of the active qubits
+        subsystem_bit_strings = self.states_to_binary(
+            np.arange(2 ** len(self._active_wires)), len(self._active_wires)
         )
-        expanded_state = expanded_state.flatten()
+
+        for string, amplitude in zip(subsystem_bit_strings, self._state):
+            for w in inactive_wires:
+
+                # expand the bitstring by inserting a zero bit for each inactive qubit
+                string = np.insert(string, w, 0)
+
+            # calculate the decimal value of the bit string, that gives the
+            # index of the amplitude in the state vector
+            decimal_val = self.bit2dec(string)
+            expanded_state[decimal_val] = amplitude
 
         self._state = expanded_state
