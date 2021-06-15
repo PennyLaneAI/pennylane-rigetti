@@ -416,9 +416,16 @@ class TestExpandState(BaseTest):
         self.assertAllEqual(dev._state, np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2)
 
 
+    @pytest.mark.parametrize("bitstring, dec", [([1], 1), ([0,0,1], 1), ([0,1,0], 2), ([1,1,1], 7)])
+    def test_expand_state(self, bitstring, dec):
+        """Test that a multi-qubit state is correctly expanded for a N-qubit device"""
+        assert plf.WavefunctionDevice.bit2dec(bitstring) == dec
+
     @pytest.mark.parametrize("num_wires", [3,4] )
     @pytest.mark.parametrize("wire_idx1, wire_idx2", [(0, 0), (1, 0), (1, 1)] )
     def test_expanded_matches_default_qubit(self, wire_idx1, wire_idx2, num_wires):
+        """Test that the statevector is expanded correctly by checking the
+        output of a QNode with default.qubit."""
         dev_default_qubit = qml.device('default.qubit', wires=num_wires)
         dev_wavefunction = qml.device('forest.wavefunction', wires=num_wires)
 
@@ -427,7 +434,7 @@ class TestExpandState(BaseTest):
             qml.RY(np.pi, wires=[wire_idx2 + 0])
             qml.CNOT(wires=[wire_idx1 + 1, wire_idx2 + 0])
             qml.CNOT(wires=[wire_idx1 + 1, wire_idx2 + 0])
-            return qml.probs(wires=list(range(num_wires)))
+            return qml.probs(range(num_wires))
 
         qnode1 = qml.QNode(circuit, dev_wavefunction)
         qnode2 = qml.QNode(circuit, dev_default_qubit)

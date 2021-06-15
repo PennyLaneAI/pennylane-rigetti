@@ -92,9 +92,17 @@ class WavefunctionDevice(ForestDevice):
 
     @staticmethod
     def bit2dec(x):
-        """Auxiliary function that converts a bitstring to a decimal integer."""
+        """Auxiliary method that converts a bitstring to a decimal integer
+        using the PennyLane convention of bit ordering.
+
+        Args:
+            x (Iterable): bit string
+
+        Returns:
+            int: decimal value of the bitstring
+        """
         y = 0
-        for i, j in enumerate(x):
+        for i, j in enumerate(x[::-1]):
             y += j << i
         return y
 
@@ -127,7 +135,7 @@ class WavefunctionDevice(ForestDevice):
 
             # calculate the decimal value of the bit string, that gives the
             # index of the amplitude in the state vector
-            decimal_val = self.bit2dec(string[::-1])
+            decimal_val = self.bit2dec(string)
             expanded_state[decimal_val] = amplitude
 
         self._state = expanded_state
