@@ -1,5 +1,5 @@
 docutils==0.16
 pennylane
-pyquil
+pyquil>=2.16,<2.28.3
 sphinx-automodapi
 pygments-github-lexers
