@@ -32,12 +32,12 @@ Code details
 import uuid
 
 import numpy as np
+import os
 
 from collections import OrderedDict
 
 from pyquil import Program
-from pyquil.api._base_connection import ForestConnection
-from pyquil.api._config import PyquilConfig
+from pyquil.api import QCSClientConfiguration
 
 from pyquil.quil import DefGate
 from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT, S, T, CSWAP, I
@@ -50,8 +50,6 @@ from pennylane.wires import Wires
 
 from ._version import __version__
 
-
-pyquil_config = PyquilConfig()
 
 
 def basis_state(par, *wires):
@@ -186,14 +184,14 @@ class ForestDevice(QubitDevice):
 
     @staticmethod
     def _get_connection(**kwargs):
-        forest_url = kwargs.get("forest_url", pyquil_config.forest_url)
-        qvm_url = kwargs.get("qvm_url", pyquil_config.qvm_url)
-        compiler_url = kwargs.get("compiler_url", pyquil_config.quilc_url)
+        qvm_url_from_env = os.getenv('QCS_SETTINGS_APPLICATIONS_PYQUIL_QVM_URL')
+        compiler_url_from_env = os.getenv('QCS_SETTINGS_APPLICATIONS_PYQUIL_QUILC_URL')
+        qvm_url = kwargs.get("qvm_url", qvm_url_from_env)
+        compiler_url = kwargs.get("compiler_url", compiler_url_from_env)
 
-        connection = ForestConnection(
+        connection = QCSClientConfiguration(
             sync_endpoint=qvm_url,
             compiler_endpoint=compiler_url,
-            forest_cloud_endpoint=forest_url,
         )
 
         return connection

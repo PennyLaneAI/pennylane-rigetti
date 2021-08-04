@@ -10,8 +10,7 @@ from scipy.linalg import expm, block_diag
 
 from pyquil import get_qc, Program
 from pyquil.gates import I as Id
-from pyquil.api import QVMConnection, QVMCompiler, local_qvm
-from pyquil.api._config import PyquilConfig
+from pyquil.api import QVM, QVMCompiler, local_forest_runtime
 from pyquil.api._errors import UnknownApiError
 from pyquil.api._qvm import QVMNotRunning
 
@@ -142,7 +141,7 @@ def apply_unitary():
 @pytest.fixture(scope="session")
 def qvm():
     try:
-        qvm = QVMConnection(random_seed=52)
+        qvm = QVM(random_seed=52)
         qvm.run(Program(Id(0)), [])
         return qvm
     except (RequestException, UnknownApiError, QVMNotRunning, TypeError) as e:
@@ -152,9 +151,8 @@ def qvm():
 @pytest.fixture(scope="session")
 def compiler():
     try:
-        config = PyquilConfig()
         device = get_qc("3q-qvm").device
-        compiler = QVMCompiler(endpoint=config.quilc_url, device=device)
+        compiler = QVMCompiler(device=device)
         compiler.quil_to_native_quil(Program(Id(0)))
         return compiler
     except (RequestException, UnknownApiError, QVMNotRunning, TypeError) as e:
