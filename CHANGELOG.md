@@ -10,9 +10,15 @@
 
 ### Bug fixes
 
+* Pins the PyQuil version to use as `pyquil>=2.16,<2.28.3` due to API
+  deprecations in PyQuil version 3.0.
+  [(#73)](https://github.com/PennyLaneAI/pennylane-forest/pull/77)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Romain Moyard, Antal Száva.
 
 ---
 
