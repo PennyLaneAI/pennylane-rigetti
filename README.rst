@@ -91,7 +91,9 @@ PennyLane-Forest requires the following libraries be installed:
 as well as the following Python packages:
 
 * `PennyLane <http://pennylane.readthedocs.io/>`__
-* `pyQuil <https://pyquil-docs.rigetti.com/en/stable/>`__
+* `pyQuil <https://pyquil-docs.rigetti.com/en/stable/>`__ >=2.16, <2.28.3
+
+We do not support the latest PyQuil version 3.0 at the moment, but we are working on it.
 
 If you currently do not have Python 3 installed, we recommend
 `Anaconda for Python 3 <https://www.anaconda.com/download/>`__, a distributed version
