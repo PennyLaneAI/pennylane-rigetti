@@ -58,8 +58,8 @@ class TestQVMBasic(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RX(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.Identity(wires=[0])
-            O2 = qml.Identity(wires=[1])
+            O1 = qml.expval(qml.Identity(wires=[0]))
+            O2 = qml.expval(qml.Identity(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -81,8 +81,8 @@ class TestQVMBasic(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RX(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.PauliZ(wires=[0])
-            O2 = qml.PauliZ(wires=[1])
+            O1 = qml.expval(qml.PauliZ(wires=[0]))
+            O2 = qml.expval(qml.PauliZ(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
@@ -105,8 +105,8 @@ class TestQVMBasic(BaseTest):
             qml.RY(theta, wires=[0])
             qml.RY(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.PauliX(wires=[0])
-            O2 = qml.PauliX(wires=[1])
+            O1 = qml.expval(qml.PauliX(wires=[0]))
+            O2 = qml.expval(qml.PauliX(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
@@ -128,8 +128,8 @@ class TestQVMBasic(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RX(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.PauliY(wires=[0])
-            O2 = qml.PauliY(wires=[1])
+            O1 = qml.expval(qml.PauliY(wires=[0]))
+            O2 = qml.expval(qml.PauliY(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
@@ -152,8 +152,8 @@ class TestQVMBasic(BaseTest):
             qml.RY(theta, wires=[0])
             qml.RY(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.Hadamard(wires=[0])
-            O2 = qml.Hadamard(wires=[1])
+            O1 = qml.expval(qml.Hadamard(wires=[0]))
+            O2 = qml.expval(qml.Hadamard(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
@@ -182,8 +182,8 @@ class TestQVMBasic(BaseTest):
             qml.RY(theta, wires=[0])
             qml.RY(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.Hermitian(H, wires=[0])
-            O2 = qml.Hermitian(H, wires=[1])
+            O1 = qml.expval(qml.Hermitian(H, wires=[0]))
+            O2 = qml.expval(qml.Hermitian(H, wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
@@ -221,7 +221,7 @@ class TestQVMBasic(BaseTest):
             qml.RY(theta, wires=[0])
             qml.RY(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.Hermitian(A, wires=[0, 1])
+            O1 = qml.expval(qml.Hermitian(A, wires=[0, 1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
@@ -249,7 +249,7 @@ class TestQVMBasic(BaseTest):
         with qml.tape.QuantumTape() as tape:
             qml.RX(phi, wires=[0])
             qml.RY(theta, wires=[0])
-            O1 = qml.PauliZ(wires=[0])
+            O1 = qml.var(qml.PauliZ(wires=[0]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
@@ -271,7 +271,7 @@ class TestQVMBasic(BaseTest):
         with qml.tape.QuantumTape() as tape:
             qml.RX(phi, wires=[0])
             qml.RY(theta, wires=[0])
-            O1 = qml.Hermitian(A, wires=[0])
+            O1 = qml.var(qml.Hermitian(A, wires=[0]))
 
         # test correct variance for <A> of a rotated state
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
@@ -317,7 +317,7 @@ class TestQVMBasic(BaseTest):
 
             with qml.tape.QuantumTape() as tape:
                 op(p, wires=w)
-                obs = qml.PauliZ(0)
+                obs = qml.expval(qml.PauliZ(0))
         else:
             p = [0.432_423, 2, 0.324][: op.num_params]
             fn = test_operation_map[gate]
@@ -335,13 +335,13 @@ class TestQVMBasic(BaseTest):
             if p:
                 with qml.tape.QuantumTape() as tape:
                     op(*p, wires=w)
-                    obs = qml.PauliZ(0)
+                    obs = qml.expval(qml.PauliZ(0))
 
             # Creating the tape using an operation that take no parameters
             else:
                 with qml.tape.QuantumTape() as tape:
                     op(wires=w)
-                    obs = qml.PauliZ(0)
+                    obs = qml.expval(qml.PauliZ(0))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -363,7 +363,7 @@ class TestQVMBasic(BaseTest):
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(1.5708, wires=[0])
-            O1 = qml.PauliZ(wires=[0])
+            O1 = qml.expval(qml.PauliZ(wires=[0]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -387,7 +387,7 @@ class TestQVMBasic(BaseTest):
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
-            O1 = qml.Hermitian(A, wires=[0])
+            O1 = qml.sample(qml.Hermitian(A, wires=[0]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -432,7 +432,7 @@ class TestQVMBasic(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RY(2 * theta, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.Hermitian(A, wires=[0, 1])
+            O1 = qml.sample(qml.Hermitian(A, wires=[0, 1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -516,8 +516,8 @@ class TestQVMBasic(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RX(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.Identity(wires=[0])
-            O2 = qml.Identity(wires=[1])
+            O1 = qml.expval(qml.Identity(wires=[0]))
+            O2 = qml.expval(qml.Identity(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -536,7 +536,7 @@ class TestQVMBasic(BaseTest):
         with qml.tape.QuantumTape() as tape:
             qml.RZ(theta, wires=[0])
             qml.CZ(wires=[0, 1])
-            O1 = qml.PauliZ(wires=[0])
+            O1 = qml.expval(qml.PauliZ(wires=[0]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -558,8 +558,8 @@ class TestParametricCompilation(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RX(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.Identity(wires=[0])
-            O2 = qml.Identity(wires=[1])
+            O1 = qml.expval(qml.Identity(wires=[0]))
+            O2 = qml.expval(qml.Identity(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -599,8 +599,8 @@ class TestParametricCompilation(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RX(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.Identity(wires=[0])
-            O2 = qml.Identity(wires=[1])
+            O1 = qml.expval(qml.Identity(wires=[0]))
+            O2 = qml.expval(qml.Identity(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
