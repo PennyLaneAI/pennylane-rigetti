@@ -1,5 +1,11 @@
 # Release 0.17.0
 
+### Improvements
+
+* Removed a validation check for ``QubitUnitary`` that is now in PennyLane
+  core.
+  [(#74)](https://github.com/PennyLaneAI/pennylane-forest/pull/74)
+
 ### Bug fixes
 
 * Pins the PyQuil version to use as `pyquil>=2.16,<2.28.3` due to API
@@ -10,7 +16,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Romain Moyard, Antal Száva.
+Theodor Isacsson, Romain Moyard, Antal Száva.
 
 ---
 
