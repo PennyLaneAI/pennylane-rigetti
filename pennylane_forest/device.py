@@ -81,15 +81,6 @@ def qubit_unitary(par, *wires):
     Returns:
         list: list of PauliX matrix operators acting on each wire
     """
-    if par.shape[0] != par.shape[1]:
-        raise ValueError("Qubit unitary must be a square matrix.")
-
-    if not np.allclose(par @ par.conj().T, np.identity(par.shape[0])):
-        raise ValueError("Qubit unitary matrix must be unitary.")
-
-    if par.shape != tuple([2 ** len(wires)] * 2):
-        raise ValueError("Qubit unitary matrix must be 2^Nx2^N, where N is the number of wires.")
-
     # Get the Quil definition for the new gate
     gate_definition = DefGate("U_{}".format(str(uuid.uuid4())[:8]), par)
     # Get the gate constructor

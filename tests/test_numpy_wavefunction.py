@@ -149,7 +149,7 @@ class TestWavefunctionBasic(BaseTest):
 
         dev.apply(tape._ops, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
-        s1 = dev.sample(O)
+        s1 = dev.sample(O.obs)
 
         # s1 should only contain 1 and -1
         self.assertAllAlmostEqual(s1 ** 2, 1, delta=tol)
@@ -176,7 +176,7 @@ class TestWavefunctionBasic(BaseTest):
 
         dev._samples = dev.generate_samples()
 
-        s1 = dev.sample(O)
+        s1 = dev.sample(O.obs)
 
         # s1 should only contain the eigenvalues of
         # the hermitian matrix
@@ -221,7 +221,7 @@ class TestWavefunctionBasic(BaseTest):
 
         dev._samples = dev.generate_samples()
 
-        s1 = dev.sample(O)
+        s1 = dev.sample(O.obs)
 
         # s1 should only contain the eigenvalues of
         # the hermitian matrix
@@ -334,16 +334,8 @@ class TestWavefunctionIntegration(BaseTest):
             return qml.expval(qml.PauliZ(0))
 
         circuit1 = qml.QNode(circuit, dev)
-        with pytest.raises(ValueError, match="must be a square matrix"):
+        with pytest.raises(ValueError, match="Input unitary must be of shape"):
             circuit1(np.array([[0, 1]]))
-
-        circuit1 = qml.QNode(circuit, dev)
-        with pytest.raises(ValueError, match="must be unitary"):
-            circuit1(np.array([[1, 1], [1, 1]]))
-
-        circuit1 = qml.QNode(circuit, dev)
-        with pytest.raises(ValueError, match=r"must be 2\^Nx2\^N"):
-            circuit1(U)
 
     def test_one_qubit_wavefunction_circuit(self, tol):
         """Test that the wavefunction plugin provides correct result for simple circuit"""
@@ -361,7 +353,6 @@ class TestWavefunctionIntegration(BaseTest):
             qml.Rot(x, y, z, wires=0)
             return qml.expval(qml.PauliZ(0))
 
-        print(circuit(a, b, c))
         self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=tol)
 
     def test_two_qubit_wavefunction_circuit(self, tol):
