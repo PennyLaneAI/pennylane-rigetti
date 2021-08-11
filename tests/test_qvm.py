@@ -65,7 +65,7 @@ class TestQVMBasic(BaseTest):
 
         dev._samples = dev.generate_samples()
 
-        res = np.array([dev.expval(O1), dev.expval(O2)])
+        res = np.array([dev.expval(O1.obs), dev.expval(O2.obs)])
 
         # below are the analytic expectation values for this circuit (trace should always be 1)
         self.assertAllAlmostEqual(res, np.array([1, 1]), delta=3 / np.sqrt(shots))
@@ -87,7 +87,7 @@ class TestQVMBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
-        res = np.array([dev.expval(O1), dev.expval(O2)])
+        res = np.array([dev.expval(O1.obs), dev.expval(O2.obs)])
 
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(
@@ -111,7 +111,7 @@ class TestQVMBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
-        res = np.array([dev.expval(O1), dev.expval(O2)])
+        res = np.array([dev.expval(O1.obs), dev.expval(O2.obs)])
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(
             res, np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]), delta=3 / np.sqrt(shots)
@@ -134,7 +134,7 @@ class TestQVMBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
-        res = np.array([dev.expval(O1), dev.expval(O2)])
+        res = np.array([dev.expval(O1.obs), dev.expval(O2.obs)])
 
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(
@@ -158,7 +158,7 @@ class TestQVMBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
-        res = np.array([dev.expval(O1), dev.expval(O2)])
+        res = np.array([dev.expval(O1.obs), dev.expval(O2.obs)])
 
         # below are the analytic expectation values for this circuit
         expected = np.array(
@@ -188,7 +188,7 @@ class TestQVMBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
-        res = np.array([dev.expval(O1), dev.expval(O2)])
+        res = np.array([dev.expval(O1.obs), dev.expval(O2.obs)])
 
         # below are the analytic expectation values for this circuit with arbitrary
         # Hermitian observable H
@@ -226,7 +226,7 @@ class TestQVMBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
-        res = np.array([dev.expval(O1)])
+        res = np.array([dev.expval(O1.obs)])
         # below is the analytic expectation value for this circuit with arbitrary
         # Hermitian observable A
         expected = 0.5 * (
@@ -254,7 +254,7 @@ class TestQVMBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
-        var = np.array([dev.var(O1)])
+        var = np.array([dev.var(O1.obs)])
         expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
 
         self.assertAlmostEqual(var, expected, delta=3 / np.sqrt(shots))
@@ -277,7 +277,7 @@ class TestQVMBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
         dev._samples = dev.generate_samples()
 
-        var = np.array([dev.var(O1)])
+        var = np.array([dev.var(O1.obs)])
         expected = 0.5 * (
             2 * np.sin(2 * theta) * np.cos(phi) ** 2
             + 24 * np.sin(phi) * np.cos(phi) * (np.sin(theta) - np.cos(theta))
@@ -347,7 +347,7 @@ class TestQVMBasic(BaseTest):
 
         dev._samples = dev.generate_samples()
 
-        res = dev.expval(obs)
+        res = dev.expval(obs.obs)
         expected = np.vdot(state, np.kron(np.kron(Z, I), I) @ state)
 
         # verify the device is now in the expected state
@@ -369,7 +369,7 @@ class TestQVMBasic(BaseTest):
 
         dev._samples = dev.generate_samples()
 
-        s1 = dev.sample(O1)
+        s1 = dev.sample(O1.obs)
 
         # s1 should only contain 1 and -1
         self.assertAllAlmostEqual(s1 ** 2, 1, delta=tol)
@@ -393,7 +393,7 @@ class TestQVMBasic(BaseTest):
 
         dev._samples = dev.generate_samples()
 
-        s1 = dev.sample(O1)
+        s1 = dev.sample(O1.obs)
 
         # s1 should only contain the eigenvalues of
         # the hermitian matrix
@@ -438,7 +438,7 @@ class TestQVMBasic(BaseTest):
 
         dev._samples = dev.generate_samples()
 
-        s1 = dev.sample(O1)
+        s1 = dev.sample(O1.obs)
 
         # s1 should only contain the eigenvalues of
         # the hermitian matrix
