@@ -2,7 +2,7 @@
 
 ### Breaking changes
 
-* Deprecated Python 3.6. (#140)
+* Deprecated Python 3.6.
   [(#85)](https://github.com/PennyLaneAI/pennylane-forest/pull/85)
 
 ### Improvements
