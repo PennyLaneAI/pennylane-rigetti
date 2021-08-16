@@ -1,5 +1,10 @@
 # Release 0.17.0
 
+### Breaking changes
+
+* Deprecated Python 3.6. (#140)
+  [(#85)](https://github.com/PennyLaneAI/pennylane-forest/pull/85)
+
 ### Improvements
 
 * Removed a validation check for ``QubitUnitary`` that is now in PennyLane
