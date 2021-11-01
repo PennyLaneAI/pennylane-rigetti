@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 TEST_QPU_LATTICES = ["4q-qvm"]
 
 
-@pytest.mark.xfail
+@pytest.mark.skip(reason="accessing the QPU is not supported by PennyLane-Forest")
 class TestQPUIntegration(BaseTest):
     """Test the wavefunction simulator works correctly from the PennyLane frontend."""
 
@@ -163,7 +163,7 @@ class TestQPUIntegration(BaseTest):
         assert np.allclose(res, exp, atol=2e-2)
 
 
-@pytest.mark.xfail
+@pytest.mark.skip(reason="accessing the QPU is not supported by PennyLane-Forest")
 class TestQPUBasic(BaseTest):
     """Unit tests for the QPU (as a QVM)."""
 
