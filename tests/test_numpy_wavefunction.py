@@ -69,15 +69,11 @@ class TestWavefunctionBasic(BaseTest):
 
         self.assertAlmostEqual(var, expected, delta=tol)
 
-    def test_apply(self, apply_unitary, tol):
-        """Test the application of gates to a state"""
-        dev = plf.NumpyWavefunctionDevice(wires=3)
-
-        obs = qml.expval(qml.PauliZ(0))
-
-        ops = [
+    @pytest.mark.parametrize(
+        "op",
+        [
             qml.QubitUnitary(np.array(U), wires=0),
-            qml.BasisState(np.array([1, 1, 1]), wires=list(range(dev.num_wires))),
+            qml.BasisState(np.array([1, 1, 1]), wires=list(range(3))),
             qml.PauliX(wires=0),
             qml.PauliY(wires=0),
             qml.PauliZ(wires=0),
@@ -94,35 +90,39 @@ class TestWavefunctionBasic(BaseTest):
             qml.CZ(wires=[0, 1]),
             qml.CNOT(wires=[0, 1]),
             qml.PhaseShift(0.432, wires=0),
-            qml.CSWAP(wires=[0,1,2]),
+            qml.CSWAP(wires=[0, 1, 2]),
             plf.CPHASE(0.432, 2, wires=[0, 1]),
             plf.ISWAP(wires=[0, 1]),
-            plf.PSWAP(0.432, wires=[0, 1])
-        ]
+            plf.PSWAP(0.432, wires=[0, 1]),
+        ],
+    )
+    def test_apply(self, op, apply_unitary, tol):
+        """Test the application of gates to a state"""
+        dev = plf.NumpyWavefunctionDevice(wires=3)
 
-        for op in ops:
-            dev.reset()
-            if op.name == "QubitUnitary":
-                state = apply_unitary(U, 3)
-            elif op.name == "BasisState":
-                state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
-            elif op.name == "CPHASE":
-                state = apply_unitary(test_operation_map["CPHASE"](0.432, 2), 3)
-            elif op.name == "ISWAP":
-                state = apply_unitary(test_operation_map["ISWAP"], 3)
-            elif op.name == "PSWAP":
-                state = apply_unitary(test_operation_map["PSWAP"](0.432), 3)
-            else:
-                state = apply_unitary(op.matrix, 3)
+        obs = qml.expval(qml.PauliZ(0))
 
-            with qml.tape.QuantumTape() as tape:
-                qml.apply(op)
-                obs
+        if op.name == "QubitUnitary":
+            state = apply_unitary(U, 3)
+        elif op.name == "BasisState":
+            state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
+        elif op.name == "CPHASE":
+            state = apply_unitary(test_operation_map["CPHASE"](0.432, 2), 3)
+        elif op.name == "ISWAP":
+            state = apply_unitary(test_operation_map["ISWAP"], 3)
+        elif op.name == "PSWAP":
+            state = apply_unitary(test_operation_map["PSWAP"](0.432), 3)
+        else:
+            state = apply_unitary(op.matrix, 3)
 
-            dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
+        with qml.tape.QuantumTape() as tape:
+            qml.apply(op)
+            obs
 
-            # verify the device is now in the expected state
-            self.assertAllAlmostEqual(dev._state, state, delta=tol)
+        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
+
+        # verify the device is now in the expected state
+        self.assertAllAlmostEqual(dev._state, state, delta=tol)
 
     def test_sample_values(self, tol):
         """Tests if the samples returned by sample have
