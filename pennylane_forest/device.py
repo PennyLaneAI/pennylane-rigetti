@@ -216,9 +216,9 @@ class ForestDevice(QubitDevice):
             # map the ops' wires to the wire labels used by the device
             device_wires = self.map_wires(operation.wires)
             par = operation.parameters
-            print(par)
+
             if isinstance(par, list) and par:
-                if isinstance(par[0], np.ndarray) and len(par[0]) == 1:
+                if isinstance(par[0], np.ndarray) and par[0].shape == ():
                     # Array not supported
                     par = [float(i) for i in par]
 
