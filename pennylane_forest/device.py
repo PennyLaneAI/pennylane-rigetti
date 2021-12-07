@@ -217,7 +217,7 @@ class ForestDevice(QubitDevice):
             device_wires = self.map_wires(operation.wires)
             par = operation.parameters
 
-            if isinstance(par, list) and len(list) > 0:
+            if isinstance(par, list) and len(par) > 0:
                 if isinstance(par[0], np.ndarray) and len(par[0]) == 1:
                     # Array not supported
                     par = [float(i) for i in par]
