@@ -81,7 +81,8 @@ def qubit_unitary(par, *wires):
         list: list of PauliX matrix operators acting on each wire
     """
     # Get the Quil definition for the new gate
-    gate_definition = DefGate("U_{}".format(str(uuid.uuid4())[:8]), par)
+    u_str = str(uuid.uuid4())[:8]
+    gate_definition = DefGate(f"U_{u_str}", par)
     # Get the gate constructor
     gate_constructor = gate_definition.get_constructor()
     return [gate_definition, gate_constructor(*wires)]
@@ -215,13 +216,17 @@ class ForestDevice(QubitDevice):
             # map the ops' wires to the wire labels used by the device
             device_wires = self.map_wires(operation.wires)
             par = operation.parameters
-            # Array not supportedd
-            par = [float(i) for i in par]
+
+            if isinstance(par[0], array):
+                # Array not supported
+                par = [float(i) for i in par]
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
+                name = operation.name
+                short_name = self.short_name
                 raise DeviceError(
-                    "Operation {} cannot be used after other Operations have already "
-                    "been applied on a {} device.".format(operation.name, self.short_name)
+                    f"Operation {name} cannot be used after other Operations have already "
+                    f"been applied on a {short_name} device."
                 )
 
             self.prog += self._operation_map[operation.name](*par, *device_wires.labels)
