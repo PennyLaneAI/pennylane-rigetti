@@ -82,7 +82,7 @@ class WavefunctionDevice(ForestDevice):
 
     def apply(self, operations, **kwargs):
         super().apply(operations, **kwargs)
-
+        print("prog", self.prog)
         self._state = self.qc.wavefunction(self.prog).amplitudes
 
         # pyQuil uses the convention that the first qubit is the least significant

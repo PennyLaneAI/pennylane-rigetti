@@ -50,7 +50,6 @@ from pennylane.wires import Wires
 
 from ._version import __version__
 
-
 pyquil_config = PyquilConfig()
 
 
@@ -216,12 +215,15 @@ class ForestDevice(QubitDevice):
             # map the ops' wires to the wire labels used by the device
             device_wires = self.map_wires(operation.wires)
             par = operation.parameters
+            # Array not supportedd
+            par = [float(i) for i in par]
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
                 raise DeviceError(
                     "Operation {} cannot be used after other Operations have already "
                     "been applied on a {} device.".format(operation.name, self.short_name)
                 )
+
             self.prog += self._operation_map[operation.name](*par, *device_wires.labels)
 
         self.prog += self.apply_rotations(rotations)
@@ -271,7 +273,7 @@ class ForestDevice(QubitDevice):
 
         if mat.shape != (2 ** num_wires, 2 ** num_wires):
             raise ValueError(
-                f"Please specify a {2**num_wires} x {2**num_wires} matrix for {num_wires} wires."
+                f"Please specify a {2 ** num_wires} x {2 ** num_wires} matrix for {num_wires} wires."
             )
 
         # first, we need to reshape both the matrix and vector
