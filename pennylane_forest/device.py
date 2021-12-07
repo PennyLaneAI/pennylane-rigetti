@@ -217,9 +217,10 @@ class ForestDevice(QubitDevice):
             device_wires = self.map_wires(operation.wires)
             par = operation.parameters
 
-            if isinstance(par[0], np.ndarray):
-                # Array not supported
-                par = [float(i) for i in par]
+            if isinstance(par, list):
+                if isinstance(par[0], np.ndarray) and len(par[0])==1:
+                    # Array not supported
+                    par = [float(i) for i in par]
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
                 name = operation.name
