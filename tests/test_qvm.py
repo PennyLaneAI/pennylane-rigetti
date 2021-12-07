@@ -942,6 +942,9 @@ class TestQVMIntegration(BaseTest):
 
         results2 = qnodes2(params)
 
+        print("qvm", results)
+        print("default", results2)
+
         assert np.allclose(results, results2, atol=2e-02, rtol=0)
         assert dev.circuit_hash in dev._compiled_program_dict
         assert len(dev._compiled_program_dict.items()) == 1
