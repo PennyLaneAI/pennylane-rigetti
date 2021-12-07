@@ -896,7 +896,7 @@ class TestQVMIntegration(BaseTest):
         obs_list = obs * number_of_qnodes
 
         qnodes = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev)
-        params = qml.init.strong_ent_layers_normal(n_layers=4, n_wires=dev.num_wires)
+        params = qml.StronglyEntanglingLayers.shape(n_layers=4, n_wires=dev.num_wires)
 
         # For the first evaluation, use the real compile method
         qnodes[0](params)
@@ -928,7 +928,7 @@ class TestQVMIntegration(BaseTest):
         obs_list = obs * number_of_qnodes
 
         dev = qml.device("forest.qvm", device=device, timeout=100)
-        params = qml.init.strong_ent_layers_normal(n_layers=4, n_wires=dev.num_wires)
+        params = qml.StronglyEntanglingLayers.shape(n_layers=4, n_wires=dev.num_wires)
 
         qnodes = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev)
 
