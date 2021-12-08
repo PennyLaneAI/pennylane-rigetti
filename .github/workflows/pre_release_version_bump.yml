@@ -1,7 +1,9 @@
 name: Manually Triggered Version Bumps
 
 on:
-  pull request:
+  push:
+    branches:
+      - auto_vb
   workflow_dispatch:
 
 jobs:
