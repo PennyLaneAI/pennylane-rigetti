@@ -1,6 +1,7 @@
 name: Manually Triggered Version Bumps
 
 on:
+  pull request:
   workflow_dispatch:
 
 jobs:
