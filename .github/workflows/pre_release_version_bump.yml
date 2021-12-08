@@ -1,9 +1,6 @@
 name: Manually Triggered Version Bumps
 
 on:
-  push:
-    branches:
-      - auto_vb
   workflow_dispatch:
 
 jobs:
