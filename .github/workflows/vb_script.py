@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""This script contains the logic to perform automatic version bumping of the plugin via the GitHub workflow. """
 import argparse
 import pennylane as qml
 pl_version = '"' + qml.version() + '"'
