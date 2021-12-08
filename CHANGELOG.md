@@ -1,4 +1,4 @@
-# Release 0.18.0-dev
+# Release 0.20.0-dev
 
 ### New features since last release
 
@@ -10,9 +10,15 @@
 
 ### Bug fixes
 
+* Fix a bug where array parameters where not accepted when building circuits on
+  pyQuil side.
+  [(#90)](https://github.com/PennyLaneAI/pennylane-forest/pull/90)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Romain Moyard.
 
 ---
 

@@ -288,60 +288,54 @@ class TestQVMBasic(BaseTest):
         self.assertAlmostEqual(var, expected, delta=0.3)
 
     @pytest.mark.parametrize(
-        "gate", plf.QVMDevice._operation_map
-    )  # pylint: disable=protected-access
-    def test_apply(self, gate, apply_unitary, shots, qvm, compiler):
-        """Test the application of gates"""
+        "op",
+        [
+            qml.QubitUnitary(np.array(U), wires=0),
+            qml.BasisState(np.array([1, 1, 1]), wires=list(range(3))),
+            qml.PauliX(wires=0),
+            qml.PauliY(wires=0),
+            qml.PauliZ(wires=0),
+            qml.S(wires=0),
+            qml.T(wires=0),
+            qml.RX(0.432, wires=0),
+            qml.RY(0.432, wires=0),
+            qml.RZ(0.432, wires=0),
+            qml.Hadamard(wires=0),
+            qml.Rot(0.432, 2, 0.324, wires=0),
+            qml.Toffoli(wires=[0, 1, 2]),
+            qml.SWAP(wires=[0, 1]),
+            qml.CSWAP(wires=[0, 1, 2]),
+            qml.CZ(wires=[0, 1]),
+            qml.CNOT(wires=[0, 1]),
+            qml.PhaseShift(0.432, wires=0),
+            qml.CSWAP(wires=[0, 1, 2]),
+            plf.CPHASE(0.432, 2, wires=[0, 1]),
+            plf.ISWAP(wires=[0, 1]),
+            plf.PSWAP(0.432, wires=[0, 1]),
+        ],
+    )
+    def test_apply(self, op, apply_unitary, shots, qvm, compiler):
+        """Test the application of gates to a state"""
         dev = plf.QVMDevice(device="3q-qvm", shots=shots, parametric_compilation=False)
 
-        try:
-            # get the equivalent pennylane operation class
-            op = getattr(qml.ops, gate)
-        except AttributeError:
-            # get the equivalent pennylane-forest operation class
-            op = getattr(plf, gate)
+        obs = qml.expval(qml.PauliZ(0))
 
-        # the list of wires to apply the operation to
-        w = list(range(op.num_wires))
-
-        if op.par_domain == "A":
-            # the parameter is an array
-            if gate == "QubitUnitary":
-                p = np.array(U)
-                w = [0]
-                state = apply_unitary(U, 3)
-            elif gate == "BasisState":
-                p = np.array([1, 1, 1])
-                state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
-                w = list(range(dev.num_wires))
-
-            with qml.tape.QuantumTape() as tape:
-                op(p, wires=w)
-                obs = qml.expval(qml.PauliZ(0))
+        if op.name == "QubitUnitary":
+            state = apply_unitary(U, 3)
+        elif op.name == "BasisState":
+            state = np.array([0, 0, 0, 0, 0, 0, 0, 1])
+        elif op.name == "CPHASE":
+            state = apply_unitary(test_operation_map["CPHASE"](0.432, 2), 3)
+        elif op.name == "ISWAP":
+            state = apply_unitary(test_operation_map["ISWAP"], 3)
+        elif op.name == "PSWAP":
+            state = apply_unitary(test_operation_map["PSWAP"](0.432), 3)
         else:
-            p = [0.432_423, 2, 0.324][: op.num_params]
-            fn = test_operation_map[gate]
-            if callable(fn):
-                # if the default.qubit is an operation accepting parameters,
-                # initialise it using the parameters generated above.
-                O = fn(*p)
-            else:
-                # otherwise, the operation is simply an array.
-                O = fn
+            state = apply_unitary(op.matrix, 3)
 
-            # calculate the expected output
-            state = apply_unitary(O, 3)
-            # Creating the tape using a parametrized operation
-            if p:
-                with qml.tape.QuantumTape() as tape:
-                    op(*p, wires=w)
-                    obs = qml.expval(qml.PauliZ(0))
-
-            # Creating the tape using an operation that take no parameters
-            else:
-                with qml.tape.QuantumTape() as tape:
-                    op(wires=w)
-                    obs = qml.expval(qml.PauliZ(0))
+        with qml.tape.QuantumTape() as tape:
+            qml.apply(op)
+            obs
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -902,7 +896,8 @@ class TestQVMIntegration(BaseTest):
         obs_list = obs * number_of_qnodes
 
         qnodes = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev)
-        params = qml.init.strong_ent_layers_normal(n_layers=4, n_wires=dev.num_wires)
+        shape = qml.StronglyEntanglingLayers.shape(n_layers=4, n_wires=dev.num_wires)
+        params = np.random.random(size=shape)
 
         # For the first evaluation, use the real compile method
         qnodes[0](params)
@@ -934,7 +929,9 @@ class TestQVMIntegration(BaseTest):
         obs_list = obs * number_of_qnodes
 
         dev = qml.device("forest.qvm", device=device, timeout=100)
-        params = qml.init.strong_ent_layers_normal(n_layers=4, n_wires=dev.num_wires)
+
+        shape = qml.StronglyEntanglingLayers.shape(n_layers=4, n_wires=dev.num_wires)
+        params = np.random.random(size=shape)
 
         qnodes = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev)
 
@@ -945,7 +942,7 @@ class TestQVMIntegration(BaseTest):
 
         results2 = qnodes2(params)
 
-        assert np.allclose(results, results2, atol=2e-02, rtol=0)
+        assert np.allclose(results, results2, atol=6e-02, rtol=0)
         assert dev.circuit_hash in dev._compiled_program_dict
         assert len(dev._compiled_program_dict.items()) == 1
 
