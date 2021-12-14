@@ -6,6 +6,11 @@
   pyQuil side.
   [(#90)](https://github.com/PennyLaneAI/pennylane-forest/pull/90)
 
+### Improvements
+
+* Added support for Python 3.10.
+  [(#96)](https://github.com/PennyLaneAI/pennylane-forest/pull/96)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
