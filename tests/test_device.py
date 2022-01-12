@@ -92,9 +92,8 @@ class TestMatVecProduct:
         assert np.allclose(res, expected, atol=tol, rtol=0)
 
     def test_non_consecutive_subsystem(self, tol):
-        """Test that matrix-vector multiplication
-        over a non-consecutive subset of the system agrees with standard
-        dense matrix multiplication"""
+        """Test that matrix-vector multiplication over a non-consecutive subset
+        of the system agrees with standard dense matrix multiplication"""
         wires = 3
         dev = ForestDevice(wires=wires, shots=1)
 
