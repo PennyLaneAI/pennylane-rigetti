@@ -277,7 +277,7 @@ class ForestDevice(QubitDevice):
         """
         num_wires = len(device_wire_labels)
 
-        if mat.shape != (2 ** num_wires, 2 ** num_wires):
+        if mat.shape != (2**num_wires, 2**num_wires):
             raise ValueError(
                 f"Please specify a {2 ** num_wires} x {2 ** num_wires} matrix for {num_wires} wires."
             )
@@ -336,7 +336,7 @@ class ForestDevice(QubitDevice):
         inv_perm = np.argsort(perm)
         state_multi_index = np.transpose(tdot, inv_perm)
 
-        return np.reshape(state_multi_index, 2 ** self.num_wires)
+        return np.reshape(state_multi_index, 2**self.num_wires)
 
     def analytic_probability(self, wires=None):
         """Return the (marginal) probability of each computational basis
