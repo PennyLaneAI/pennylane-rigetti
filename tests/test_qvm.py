@@ -331,7 +331,7 @@ class TestQVMBasic(BaseTest):
         elif op.name == "PSWAP":
             state = apply_unitary(test_operation_map["PSWAP"](0.432), 3)
         else:
-            state = apply_unitary(op.matrix, 3)
+            state = apply_unitary(qml.matrix(op), 3)
 
         with qml.tape.QuantumTape() as tape:
             qml.apply(op)
