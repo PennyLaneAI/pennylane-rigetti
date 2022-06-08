@@ -105,6 +105,10 @@ class WavefunctionDevice(ForestDevice):
             y += j << i
         return y
 
+    @property
+    def state(self):
+        return self._state
+
     def expand_state(self):
         """The pyQuil wavefunction simulator initializes qubits dymnically as they are requested.
         This method expands the state to the full number of wires in the device."""
