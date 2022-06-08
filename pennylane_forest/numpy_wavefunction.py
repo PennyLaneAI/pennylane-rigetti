@@ -50,6 +50,18 @@ class NumpyWavefunctionDevice(ForestDevice):
         self.qc = PyQVM(n_qubits=len(self.wires), quantum_simulator_type=NumpyWavefunctionSimulator)
         self._state = None
 
+    @classmethod
+    def capabilities(cls):
+        capabilities = super().capabilities().copy()
+        capabilities.update(
+            returns_state=True,
+        )
+        return capabilities
+
+    @property
+    def state(self):
+        return self._state
+
     def apply(self, operations, **kwargs):
         self.reset()
         self.qc.wf_simulator.reset()

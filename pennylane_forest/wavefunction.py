@@ -105,6 +105,14 @@ class WavefunctionDevice(ForestDevice):
             y += j << i
         return y
 
+    @classmethod
+    def capabilities(cls):
+        capabilities = super().capabilities().copy()
+        capabilities.update(
+            returns_state=True,
+        )
+        return capabilities
+
     @property
     def state(self):
         return self._state
