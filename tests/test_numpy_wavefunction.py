@@ -122,7 +122,7 @@ class TestWavefunctionBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         # verify the device is now in the expected state
-        self.assertAllAlmostEqual(dev._state, state, delta=tol)
+        self.assertAllAlmostEqual(dev.state, state, delta=tol)
 
     def test_sample_values(self, tol):
         """Tests if the samples returned by sample have

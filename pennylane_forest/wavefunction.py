@@ -26,11 +26,7 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-import itertools
-
 import numpy as np
-from numpy.linalg import eigh
-from pennylane.wires import Wires
 
 from pyquil.api import WavefunctionSimulator
 
@@ -104,6 +100,18 @@ class WavefunctionDevice(ForestDevice):
         for i, j in enumerate(x[::-1]):
             y += j << i
         return y
+
+    @classmethod
+    def capabilities(cls):  # pylint: disable=missing-function-docstring
+        capabilities = super().capabilities().copy()
+        capabilities.update(
+            returns_state=True,
+        )
+        return capabilities
+
+    @property
+    def state(self):  # pylint: disable=missing-function-docstring
+        return self._state
 
     def expand_state(self):
         """The pyQuil wavefunction simulator initializes qubits dymnically as they are requested.

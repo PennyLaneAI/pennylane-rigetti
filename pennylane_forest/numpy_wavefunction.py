@@ -19,10 +19,6 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-import itertools
-
-import numpy as np
-
 from pyquil.pyqvm import PyQVM
 from pyquil.simulation import NumpyWavefunctionSimulator
 
@@ -49,6 +45,18 @@ class NumpyWavefunctionDevice(ForestDevice):
         super().__init__(wires, shots, **kwargs)
         self.qc = PyQVM(n_qubits=len(self.wires), quantum_simulator_type=NumpyWavefunctionSimulator)
         self._state = None
+
+    @classmethod
+    def capabilities(cls):  # pylint: disable=missing-function-docstring
+        capabilities = super().capabilities().copy()
+        capabilities.update(
+            returns_state=True,
+        )
+        return capabilities
+
+    @property
+    def state(self):  # pylint: disable=missing-function-docstring
+        return self._state
 
     def apply(self, operations, **kwargs):
         self.reset()

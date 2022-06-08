@@ -122,7 +122,7 @@ class TestWavefunctionBasic(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         # verify the device is now in the expected state
-        self.assertAllAlmostEqual(dev._state, state, delta=tol)
+        self.assertAllAlmostEqual(dev.state, state, delta=tol)
 
     def test_sample_values(self, tol):
         """Tests if the samples returned by sample have
@@ -390,13 +390,13 @@ class TestExpandState(BaseTest):
         dev._state = np.array([0, 1, 1, 0]) / np.sqrt(2)
         dev._active_wires = Wires([0, 2])
         dev.expand_state()
-        self.assertAllEqual(dev._state, np.array([0, 1, 0, 0, 1, 0, 0, 0]) / np.sqrt(2))
+        self.assertAllEqual(dev.state, np.array([0, 1, 0, 0, 1, 0, 0, 0]) / np.sqrt(2))
 
         # expand a three qubit state to the 3 qubit device
         dev._state = np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2
         dev._active_wires = Wires([0, 1, 2])
         dev.expand_state()
-        self.assertAllEqual(dev._state, np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2)
+        self.assertAllEqual(dev.state, np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2)
 
 
     @pytest.mark.parametrize("bitstring, dec", [([1], 1), ([0,0,1], 1), ([0,1,0], 2), ([1,1,1], 7)])
