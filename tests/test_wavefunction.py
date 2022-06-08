@@ -387,13 +387,13 @@ class TestExpandState(BaseTest):
         dev = plf.WavefunctionDevice(wires=3)
 
         # expand a two qubit state to the 3 qubit device
-        dev.state = np.array([0, 1, 1, 0]) / np.sqrt(2)
+        dev._state = np.array([0, 1, 1, 0]) / np.sqrt(2)
         dev._active_wires = Wires([0, 2])
         dev.expand_state()
         self.assertAllEqual(dev.state, np.array([0, 1, 0, 0, 1, 0, 0, 0]) / np.sqrt(2))
 
         # expand a three qubit state to the 3 qubit device
-        dev.state = np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2
+        dev._state = np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2
         dev._active_wires = Wires([0, 1, 2])
         dev.expand_state()
         self.assertAllEqual(dev.state, np.array([0, 1, 1, 0, 0, 1, 1, 0]) / 2)
