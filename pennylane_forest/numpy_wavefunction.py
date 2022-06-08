@@ -19,10 +19,6 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-import itertools
-
-import numpy as np
-
 from pyquil.pyqvm import PyQVM
 from pyquil.simulation import NumpyWavefunctionSimulator
 
@@ -51,7 +47,7 @@ class NumpyWavefunctionDevice(ForestDevice):
         self._state = None
 
     @classmethod
-    def capabilities(cls):
+    def capabilities(cls):  # pylint: disable=missing-function-docstring
         capabilities = super().capabilities().copy()
         capabilities.update(
             returns_state=True,
@@ -59,7 +55,7 @@ class NumpyWavefunctionDevice(ForestDevice):
         return capabilities
 
     @property
-    def state(self):
+    def state(self):  # pylint: disable=missing-function-docstring
         return self._state
 
     def apply(self, operations, **kwargs):
