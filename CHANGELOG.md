@@ -1,4 +1,4 @@
-# Release 0.21.0-dev
+# Release 0.24.0-dev
 
 ### New features since last release
 
@@ -10,9 +10,16 @@
 
 ### Bug fixes
 
+* Defines the missing `state` method and `returns_state` entry of the
+  `capabilities` dictionary for `forest.wavefunction` and
+  `forest.numpy_wavefunction`.
+  [(#36)](https://github.com/PennyLaneAI/pennylane-qulacs/pull/36)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Antal Száva.
 
 ---
 
