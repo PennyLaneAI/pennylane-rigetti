@@ -1,4 +1,4 @@
-# Release 0.24.1
+# Release 0.24.0
 
 ### Bug fixes
 
