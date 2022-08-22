@@ -15,7 +15,7 @@ PennyLane Forest Plugin
 
 .. image:: https://img.shields.io/readthedocs/pennylane-forest.svg?logo=read-the-docs&style=flat-square
     :alt: Read the Docs
-    :target: https://pennylaneforest.readthedocs.io
+    :target: https://docs.pennylane.ai/projects/forest
 
 .. image:: https://img.shields.io/pypi/v/pennylane-forest.svg?style=flat-square
     :alt: PyPI
@@ -41,7 +41,7 @@ learning, automatic differentiation, and optimization of hybrid quantum-classica
 
 .. header-end-inclusion-marker-do-not-remove
 
-The plugin documentation can be found here: `<https://pennylane-forest.readthedocs.io/en/latest/>`__.
+The plugin documentation can be found here: `<https://docs.pennylane.ai/projects/forest>`__.
 
 Features
 ========
