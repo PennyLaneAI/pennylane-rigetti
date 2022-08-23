@@ -13,9 +13,9 @@ PennyLane Forest Plugin
     :alt: CodeFactor Grade
     :target: https://www.codefactor.io/repository/github/pennylaneai/pennylane-forest
 
-.. image:: https://img.shields.io/readthedocs/pennylane-forest.svg?logo=read-the-docs&style=flat-square
+.. image:: https://readthedocs.com/projects/xanaduai-pennylane-forest/badge/?version=latest&style=flat-square
     :alt: Read the Docs
-    :target: https://pennylaneforest.readthedocs.io
+    :target: https://docs.pennylane.ai/projects/forest
 
 .. image:: https://img.shields.io/pypi/v/pennylane-forest.svg?style=flat-square
     :alt: PyPI
