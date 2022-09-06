@@ -41,7 +41,7 @@ learning, automatic differentiation, and optimization of hybrid quantum-classica
 
 .. header-end-inclusion-marker-do-not-remove
 
-The plugin documentation can be found here: `<https://pennylane-forest.readthedocs.io/en/latest/>`__.
+The plugin documentation can be found here: `<https://docs.pennylane.ai/projects/forest>`__.
 
 Features
 ========
