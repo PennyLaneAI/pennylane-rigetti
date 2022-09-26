@@ -14,17 +14,17 @@ Devices
 ~~~~~~~
 Currently, PennyLane-Forest provides these Forest devices for PennyLane:
 
-.. devicegalleryitem::
+.. title-card::
     :name: 'forest.numpy_wavefunction'
     :description: Forest's Numpy wavefunction simulator backend.
     :link: devices/numpy_wavefunction.html
 
-.. devicegalleryitem::
+.. title-card::
     :name: 'forest.wavefunction'
     :description: The Forest SDK wavefunction simulator backend.
     :link: devices/wavefunction.html
 
-.. devicegalleryitem::
+.. title-card::
     :name: 'forest.qvm'
     :description: Forest's QVM and pyQuil pyQVM simulator.
     :link: devices/qvm.html
@@ -44,17 +44,15 @@ Check out these demos to see the PennyLane-Forest plugin in action:
 
     <div class="row">
 
-.. demogalleryitem::
+.. title-card::
     :name: Ensemble classification with Forest and Qiskit devices
-    :figure: https://pennylane.ai/qml/_images/ensemble_diagram.png
+    :figure: <img src="https://pennylane.ai/qml/_images/ensemble_diagram.png" width="100%" />
     :link:  https://pennylane.ai/qml/demos/ensemble_multi_qpu.html
-    :tooltip: Use multiple QPUs to improve classification.
 
-.. demogalleryitem::
+.. title-card::
     :name: PyTorch and noisy devices
-    :figure: https://pennylane.ai/qml/_images/bloch.gif
+    :figure: <img src="https://pennylane.ai/qml/_images/bloch.gif" width="100%" />
     :link:  https://pennylane.ai/qml/demos/pytorch_noise.html
-    :tooltip: Extend PyTorch with real quantum computing power.
 
 .. raw:: html
 
