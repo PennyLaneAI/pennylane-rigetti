@@ -20,6 +20,7 @@ info = {
     "entry_points": {
         "pennylane.plugins": [
             "forest.qvm = pennylane_forest:QVMDevice",
+            "forest.qpu = pennylane_forest:QPUDevice",
             "forest.wavefunction = pennylane_forest:WavefunctionDevice",
             "forest.numpy_wavefunction = pennylane_forest:NumpyWavefunctionDevice",
         ],

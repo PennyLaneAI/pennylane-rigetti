@@ -250,7 +250,7 @@ class QVMDevice(ForestDevice):
         return self.extract_samples(self.qc.run(executable=self._compiled_program))
 
     def extract_samples(self, execution_results):
-        return execution_results.readout_data['ro']
+        return execution_results.readout_data["ro"]
 
     @property
     def circuit_hash(self):

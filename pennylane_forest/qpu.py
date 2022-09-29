@@ -88,6 +88,7 @@ class QPUDevice(QVMDevice):
     name = "Forest QPU Device"
     short_name = "forest.qpu"
     observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
+    pennylane_requires = ">=0.15.0"
 
     def __init__(
         self,
@@ -102,13 +103,6 @@ class QPUDevice(QVMDevice):
         calibrate_readout="plus-eig",
         **kwargs,
     ):
-        pl_version = pkg_resources.get_distribution("pennylane").version
-        if version.parse(pl_version) >= version.parse("0.14.0.dev"):
-            raise ValueError(
-                "Using the QPU via PennyLane-Forest is being deprecated \
-                    with PennyLane version 0.14.0 and higher."
-            )
-
         if readout_error is not None and load_qc:
             raise ValueError("Readout error cannot be set on the physical QPU")
 
@@ -148,21 +142,15 @@ class QPUDevice(QVMDevice):
             """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
                 parameters associated with their PyQuil memory references."""
 
-        timeout = kwargs.pop("timeout", None)
+        timeout = kwargs.pop("timeout", 10.0) # 10.0 is the pyquil default
 
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
 
-        self.connection = super()._get_connection(**kwargs)
-
         if load_qc:
-            self.qc = get_qc(device, as_qvm=False, connection=self.connection)
-            if timeout is not None:
-                self.qc.compiler.quilc_client.timeout = timeout
+            self.qc = get_qc(device, as_qvm=False, compiler_timeout=timeout)
         else:
-            self.qc = get_qc(device, as_qvm=True, connection=self.connection)
-            if timeout is not None:
-                self.qc.compiler.client.timeout = timeout
+            self.qc = get_qc(device, as_qvm=True, compiler_timeout=timeout)
 
         self.num_wires = len(self.qc.qubits())
 
@@ -190,7 +178,7 @@ class QPUDevice(QVMDevice):
         self.calibrate_readout = calibrate_readout
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
 
-    def expval(self, observable):
+    def expval(self, observable, shot_range, bin_size):
         # translate operator wires to wire labels on the device
         device_wires = self.map_wires(observable.wires)
 
@@ -265,4 +253,4 @@ class QPUDevice(QVMDevice):
             return np.sum([expt_result.expectation for expt_result in meas_obs])
 
         # Calculation of expectation value without using `measure_observables`
-        return super().expval(observable)
+        return super().expval(observable, shot_range, bin_size)
