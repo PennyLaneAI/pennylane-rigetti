@@ -36,11 +36,9 @@ import numpy as np
 from collections import OrderedDict
 
 from pyquil import Program
-from pyquil.api._base_connection import ForestConnection
-from pyquil.api._config import PyquilConfig
-
 from pyquil.quil import DefGate
 from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT, S, T, CSWAP, I
+from qcs_api_client.client import QCSClientConfiguration
 
 # following gates are not supported by PennyLane
 from pyquil.gates import CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, ISWAP, PSWAP
@@ -49,9 +47,6 @@ from pennylane import QubitDevice, DeviceError
 from pennylane.wires import Wires
 
 from ._version import __version__
-
-pyquil_config = PyquilConfig()
-
 
 def basis_state(par, *wires):
     """Decompose a basis state into a list of PauliX matrices.
@@ -176,18 +171,8 @@ class ForestDevice(QubitDevice):
         self.reset()
 
     @staticmethod
-    def _get_connection(**kwargs):
-        forest_url = kwargs.get("forest_url", pyquil_config.forest_url)
-        qvm_url = kwargs.get("qvm_url", pyquil_config.qvm_url)
-        compiler_url = kwargs.get("compiler_url", pyquil_config.quilc_url)
-
-        connection = ForestConnection(
-            sync_endpoint=qvm_url,
-            compiler_endpoint=compiler_url,
-            forest_cloud_endpoint=forest_url,
-        )
-
-        return connection
+    def _get_client_configuration():
+        return QCSClientConfiguration.load()
 
     @property
     def program(self):
