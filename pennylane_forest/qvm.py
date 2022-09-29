@@ -113,15 +113,15 @@ class QVMDevice(ForestDevice):
         if shots is None:
             raise ValueError("QVM device cannot be used for analytic computations.")
 
-        self.connection = super()._get_connection(**kwargs)
+        self.client_configuration = super()._get_client_configuration()
 
         # get the qc
         if isinstance(device, nx.Graph):
             self.qc = _get_qvm_with_topology(
-                "device", topology=device, noisy=noisy, connection=self.connection
+                name="device", topology=device, noisy=noisy, client_configuration=self.client_configuration, qvm_type="qvm", compiler_timeout=5.0, execution_timeout=5.0,
             )
         elif isinstance(device, str):
-            self.qc = get_qc(device, as_qvm=True, noisy=noisy, connection=self.connection)
+            self.qc = get_qc(device, as_qvm=True, noisy=noisy)
 
         self.num_wires = len(self.qc.qubits())
 
@@ -228,14 +228,17 @@ class QVMDevice(ForestDevice):
         self.prog += self.apply_rotations(rotations)
 
     def generate_samples(self):
+        for region, value in self._parameter_map.items():
+            self.prog.write_memory(region_name=region, value=value)
+
         if "pyqvm" in self.qc.name:
-            return self.qc.run(self.prog, memory_map=self._parameter_map)
+            return self.extract_samples(self.qc.run(self.prog))
 
         if self.circuit_hash is None:
             # Parametric compilation was set to False
             # Compile the program
             self._compiled_program = self.qc.compile(self.prog)
-            return self.qc.run(executable=self._compiled_program)
+            return self.extract_samples(self.qc.run(executable=self._compiled_program))
 
         if self.circuit_hash not in self._compiled_program_dict:
             # Compiling this specific program for the first time
@@ -244,8 +247,10 @@ class QVMDevice(ForestDevice):
 
         # The program has been compiled, store as the latest compiled program
         self._compiled_program = self._compiled_program_dict[self.circuit_hash]
-        samples = self.qc.run(executable=self._compiled_program, memory_map=self._parameter_map)
-        return samples
+        return self.extract_samples(self.qc.run(executable=self._compiled_program))
+
+    def extract_samples(self, execution_results):
+        return execution_results.readout_data['ro']
 
     @property
     def circuit_hash(self):
