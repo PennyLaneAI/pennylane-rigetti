@@ -84,7 +84,7 @@ class QVMDevice(ForestDevice):
         if shots is not None and shots <= 0:
             raise ValueError("Number of shots must be a positive integer or None.")
 
-        timeout = kwargs.pop("timeout", None)
+        timeout = kwargs.pop("timeout", 10.0) # 10.0 is the pyquil default
 
         self._compiled_program = None
         """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
@@ -118,10 +118,10 @@ class QVMDevice(ForestDevice):
         # get the qc
         if isinstance(device, nx.Graph):
             self.qc = _get_qvm_with_topology(
-                name="device", topology=device, noisy=noisy, client_configuration=self.client_configuration, qvm_type="qvm", compiler_timeout=5.0, execution_timeout=5.0,
+                name="device", topology=device, noisy=noisy, client_configuration=self.client_configuration, qvm_type="qvm", compiler_timeout=timeout, execution_timeout=timeout,
             )
         elif isinstance(device, str):
-            self.qc = get_qc(device, as_qvm=True, noisy=noisy)
+            self.qc = get_qc(device, as_qvm=True, noisy=noisy, compiler_timeout=timeout)
 
         self.num_wires = len(self.qc.qubits())
 
@@ -143,9 +143,6 @@ class QVMDevice(ForestDevice):
             )
 
         super().__init__(wires, shots, **kwargs)
-
-        if timeout is not None:
-            self.qc.compiler.client.timeout = timeout
 
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
