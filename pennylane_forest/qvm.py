@@ -62,16 +62,7 @@ class QVMDevice(ForestDevice):
         noisy (bool): set to ``True`` to add noise models to your QVM.
 
     Keyword args:
-        forest_url (str): the Forest URL server. Can also be set by
-            the environment variable ``FOREST_SERVER_URL``, or in the ``~/.qcs_config``
-            configuration file. Default value is ``"https://forest-server.qcs.rigetti.com"``.
-        qvm_url (str): the QVM server URL. Can also be set by the environment
-            variable ``QVM_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:5000"``.
-        compiler_url (str): the compiler server URL. Can also be set by the environment
-            variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:6000"``.
-        timeout (int): number of seconds to wait for a response from the client.
+        timeout (int): number of seconds to wait for a response from the client (default 10).
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
@@ -84,7 +75,7 @@ class QVMDevice(ForestDevice):
         if shots is not None and shots <= 0:
             raise ValueError("Number of shots must be a positive integer or None.")
 
-        timeout = kwargs.pop("timeout", 10.0) # 10.0 is the pyquil default
+        timeout = kwargs.pop("timeout", 10) # 10.0 is the pyquil default
 
         self._compiled_program = None
         """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric

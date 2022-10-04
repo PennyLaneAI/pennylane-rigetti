@@ -16,18 +16,23 @@ Currently, PennyLane-Forest provides these Forest devices for PennyLane:
 
 .. title-card::
     :name: 'forest.numpy_wavefunction'
-    :description: Forest's Numpy wavefunction simulator backend.
+    :description: pyQuil's Numpy wavefunction simulator backend.
     :link: devices/numpy_wavefunction.html
 
 .. title-card::
     :name: 'forest.wavefunction'
-    :description: The Forest SDK wavefunction simulator backend.
+    :description: The QCS wavefunction simulator backend.
     :link: devices/wavefunction.html
 
 .. title-card::
     :name: 'forest.qvm'
-    :description: Forest's QVM and pyQuil pyQVM simulator.
+    :description: QCS QVM and pyQuil pyQVM simulator.
     :link: devices/qvm.html
+
+.. title-card::
+    :name: 'forest.qpu'
+    :description: QCS QPU.
+    :link: devices/qpu.html
 
 .. raw:: html
 
@@ -45,7 +50,7 @@ Check out these demos to see the PennyLane-Forest plugin in action:
     <div class="row">
 
 .. title-card::
-    :name: Ensemble classification with Forest and Qiskit devices
+    :name: Ensemble classification with QCS and Qiskit devices
     :figure: <img src="https://pennylane.ai/qml/_images/ensemble_diagram.png" width="100%" />
     :link:  https://pennylane.ai/qml/demos/ensemble_multi_qpu.html
 
@@ -89,6 +94,7 @@ hardware access.
    devices/numpy_wavefunction
    devices/wavefunction
    devices/qvm
+   devices/qpu
 
 .. toctree::
    :maxdepth: 1

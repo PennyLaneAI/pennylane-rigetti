@@ -53,17 +53,6 @@ class WavefunctionDevice(ForestDevice):
             or strings (``['ancilla', 'q1', 'q2']``).
         shots (int): Number of circuit evaluations/random samples used
             to estimate expectation values of observables.
-
-    Keyword args:
-        forest_url (str): the Forest URL server. Can also be set by
-            the environment variable ``FOREST_SERVER_URL``, or in the ``~/.qcs_config``
-            configuration file. Default value is ``"https://forest-server.qcs.rigetti.com"``.
-        qvm_url (str): the QVM server URL. Can also be set by the environment
-            variable ``QVM_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:5000"``.
-        compiler_url (str): the compiler server URL. Can also be set by the environment
-            variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:6000"``.
     """
     name = "Forest Wavefunction Simulator Device"
     short_name = "forest.wavefunction"

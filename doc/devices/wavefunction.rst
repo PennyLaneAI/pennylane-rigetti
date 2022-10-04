@@ -50,37 +50,6 @@ You can then execute the circuit like any other function to get the quantum mech
 >>> circuit(0.2, 0.1, 0.3)
 array([0.97517033, 0.04904283])
 
-Device options
-~~~~~~~~~~~~~~
-
-On initialization, the PennyLane-Forest devices accept additional keyword
-arguments beyond the PennyLane default device arguments.
-
-``forest_url`` (*str*)
-    the Forest URL server. Can also be set by
-    the environment variable ``FOREST_SERVER_URL``, or in the ``~/.qcs_config``
-    configuration file. Default value is ``"https://forest-server.qcs.rigetti.com"``.
-
-``qvm_url`` (*str*)
-    the QVM server URL. Can also be set by the environment
-    variable ``QVM_URL``, or in the ``~/.forest_config`` configuration file.
-    Default value is ``"http://127.0.0.1:5000"``.
-
-``compiler_url`` (*str*)
-    the compiler server URL. Can also be set by the environment
-    variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
-    Default value is ``"http://127.0.0.1:6000"``.
-
-.. note::
-
-    If using the downloadable Forest SDK with the default server configurations
-    for the QVM and the Quil compiler (i.e., you launch them with the commands
-    ``qvm -S`` and ``quilc -R``), then you will not need to set these keyword arguments.
-
-    Likewise, if you are running PennyLane using the Rigetti Quantum Cloud Service (QCS)
-    on a provided QMI, these environment variables are set automatically and will also
-    not need to be passed in PennyLane.
-
 Supported operations
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -96,3 +65,19 @@ These operations include:
     pennylane_forest.ops.CPHASE
     pennylane_forest.ops.ISWAP
     pennylane_forest.ops.PSWAP
+
+QVM and quilc server configuration
+~~~~~~~~~~~~~~
+
+.. note::
+
+    If using the downloadable Forest SDK with the default server configurations
+    for the QVM and the Quil compiler (i.e., you launch them with the commands
+    ``qvm -S`` and ``quilc -R``), then you will not need to set these keyword arguments.
+
+    Likewise, if you are running PennyLane using the Rigetti Quantum Cloud Service (QCS)
+    and have logged in with the 
+    `QCS CLI <https://docs.rigetti.com/qcs/guides/using-the-qcs-cli#configuring-credentials>`__, 
+    these environment variables are set automatically and will also not need to be passed in PennyLane.
+
+See the `pyQuil configuration docs <https://pyquil-docs.rigetti.com/en/stable/advanced_usage.html#pyquil-configuration>`_ for details on how to override the default values.

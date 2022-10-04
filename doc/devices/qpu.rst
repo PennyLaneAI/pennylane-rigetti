@@ -1,5 +1,3 @@
-:orphan:
-
 The QPU device
 ==============
 
@@ -21,7 +19,7 @@ Usage
 A QPU device can be created via:
 
 >>> import pennylane as qml
->>> dev_qpu = qml.device('forest.qpu', device='Aspen-8', shots=1000)
+>>> dev_qpu = qml.device('forest.qpu', device='Aspen-M-2', shots=1000)
 
 Note that additional Quil gates not provided directly in PennyLane are importable from :mod:`~.ops`.
 An example that demonstrates the use of the native :class:`~.PSWAP` plugin gate is this:
@@ -64,26 +62,8 @@ These operations include:
     pennylane_forest.ops.ISWAP
     pennylane_forest.ops.PSWAP
 
-Device options
+QVM and quilc server configuration
 ~~~~~~~~~~~~~~
-
-On initialization, the PennyLane-Forest devices accept additional keyword 
-arguments beyond the PennyLane default device arguments.
-
-``forest_url`` (*str*)
-    the Forest URL server. Can also be set by
-    the environment variable ``FOREST_SERVER_URL``, or in the ``~/.qcs_config``
-    configuration file. Default value is ``"https://forest-server.qcs.rigetti.com"``.
-
-``qvm_url`` (*str*)
-    the QVM server URL. Can also be set by the environment
-    variable ``QVM_URL``, or in the ``~/.forest_config`` configuration file.
-    Default value is ``"http://127.0.0.1:5000"``.
-
-``compiler_url`` (*str*)
-    the compiler server URL. Can also be set by the environment
-    variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
-    Default value is ``"http://127.0.0.1:6000"``.
 
 .. note::
 
@@ -92,5 +72,8 @@ arguments beyond the PennyLane default device arguments.
     ``qvm -S`` and ``quilc -R``), then you will not need to set these keyword arguments.
 
     Likewise, if you are running PennyLane using the Rigetti Quantum Cloud Service (QCS)
-    on a provided QMI, these environment variables are set automatically and will also
-    not need to be passed in PennyLane.
+    and have logged in with the 
+    `QCS CLI <https://docs.rigetti.com/qcs/guides/using-the-qcs-cli#configuring-credentials>`__, 
+    these environment variables are set automatically and will also not need to be passed in PennyLane.
+
+See the `pyQuil configuration docs <https://pyquil-docs.rigetti.com/en/stable/advanced_usage.html#pyquil-configuration>`_ for details on how to override the default values.
