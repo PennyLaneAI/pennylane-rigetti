@@ -19,8 +19,6 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-import re
-
 import networkx as nx
 from pyquil import get_qc
 from pyquil.api._quantum_computer import _get_qvm_with_topology
@@ -29,7 +27,6 @@ from pyquil.quil import Pragma, Program
 
 from pennylane import DeviceError
 
-from ._version import __version__
 from .device import ForestDevice
 
 
@@ -62,7 +59,8 @@ class QVMDevice(ForestDevice):
         noisy (bool): set to ``True`` to add noise models to your QVM.
 
     Keyword args:
-        timeout (int): number of seconds to wait for a response from the client (default 10).
+        compiler_timeout (int): number of seconds to wait for a response from quilc (default 10).
+        execution_timeout (int): number of seconds to wait for a response from the QVM (default 10).
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
@@ -75,7 +73,8 @@ class QVMDevice(ForestDevice):
         if shots is not None and shots <= 0:
             raise ValueError("Number of shots must be a positive integer or None.")
 
-        timeout = kwargs.pop("timeout", 10) # 10.0 is the pyquil default
+        compiler_timeout = kwargs.pop("compiler_timeout", 10)  # 10.0 is the pyquil default
+        execution_timeout = kwargs.pop("execution_timeout", 10)  # 10.0 is the pyquil default
 
         self._compiled_program = None
         """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
@@ -109,10 +108,10 @@ class QVMDevice(ForestDevice):
         # get the qc
         if isinstance(device, nx.Graph):
             self.qc = _get_qvm_with_topology(
-                name="device", topology=device, noisy=noisy, client_configuration=self.client_configuration, qvm_type="qvm", compiler_timeout=timeout, execution_timeout=timeout,
+                name="device", topology=device, noisy=noisy, client_configuration=self.client_configuration, qvm_type="qvm", compiler_timeout=compiler_timeout, execution_timeout=execution_timeout,
             )
         elif isinstance(device, str):
-            self.qc = get_qc(device, as_qvm=True, noisy=noisy, compiler_timeout=timeout)
+            self.qc = get_qc(device, as_qvm=True, noisy=noisy, compiler_timeout=compiler_timeout, execution_timeout=execution_timeout)
 
         self.num_wires = len(self.qc.qubits())
 
@@ -216,8 +215,9 @@ class QVMDevice(ForestDevice):
         self.prog += self.apply_rotations(rotations)
 
     def generate_samples(self):
-        for region, value in self._parameter_map.items():
-            self.prog.write_memory(region_name=region, value=value)
+        if self.parametric_compilation:
+            for region, value in self._parameter_map.items():
+                self.prog.write_memory(region_name=region, value=value)
 
         if "pyqvm" in self.qc.name:
             return self.extract_samples(self.qc.run(self.prog))
@@ -226,7 +226,8 @@ class QVMDevice(ForestDevice):
             # Parametric compilation was set to False
             # Compile the program
             self._compiled_program = self.qc.compile(self.prog)
-            return self.extract_samples(self.qc.run(executable=self._compiled_program))
+            results = self.qc.run(executable=self._compiled_program)
+            return self.extract_samples(results)
 
         if self.circuit_hash not in self._compiled_program_dict:
             # Compiling this specific program for the first time
@@ -235,10 +236,12 @@ class QVMDevice(ForestDevice):
 
         # The program has been compiled, store as the latest compiled program
         self._compiled_program = self._compiled_program_dict[self.circuit_hash]
-        return self.extract_samples(self.qc.run(executable=self._compiled_program))
+        results = self.qc.run(executable=self._compiled_program)
+        return self.extract_samples(results)
 
     def extract_samples(self, execution_results):
-        return execution_results.readout_data["ro"]
+        print("extract_samples", execution_results)
+        return execution_results.readout_data.get("ro", {})
 
     @property
     def circuit_hash(self):
@@ -259,7 +262,7 @@ class QVMDevice(ForestDevice):
         Returns:
             Union[None, pyquil.ExecutableDesignator]: the latest compiled program
         """
-        return self._compiled_program
+        return str(self._compiled_program)
 
     def reset(self):
         """Resets the device after the previous run.
