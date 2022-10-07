@@ -240,7 +240,6 @@ class QVMDevice(ForestDevice):
         return self.extract_samples(results)
 
     def extract_samples(self, execution_results):
-        print("extract_samples", execution_results)
         return execution_results.readout_data.get("ro", {})
 
     @property

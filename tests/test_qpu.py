@@ -2,8 +2,7 @@
 Unit tests for the QPU device.
 """
 import logging
-import warnings
-import re
+from pyquil.experiment import SymmetrizationLevel
 
 import pytest
 import pyquil
@@ -21,7 +20,6 @@ log = logging.getLogger(__name__)
 TEST_QPU_LATTICES = ["4q-qvm"]
 
 
-@pytest.mark.xfail
 class TestQPUIntegration(BaseTest):
     """Test the wavefunction simulator works correctly from the PennyLane frontend."""
 
@@ -67,8 +65,7 @@ class TestQPUIntegration(BaseTest):
         with pytest.raises(ValueError, match="Device has a fixed number of"):
             qml.device("forest.qpu", device=device, shots=5, wires=range(100), load_qc=False)
 
-    # As tests are expected to fail, the flaky decorators were marked as comments
-    #@flaky(max_runs=10, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize(
         "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
     )
@@ -76,7 +73,7 @@ class TestQPUIntegration(BaseTest):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
         turned on.
 
-        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
         """
         device = np.random.choice(TEST_QPU_LATTICES)
         p = np.pi / 8
@@ -115,7 +112,7 @@ class TestQPUIntegration(BaseTest):
 
         assert np.allclose(res, exp, atol=2e-2)
 
-    #@flaky(max_runs=10, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize(
         "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
     )
@@ -123,7 +120,7 @@ class TestQPUIntegration(BaseTest):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
         turned off allowing operator estimation.
 
-        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
         """
         device = np.random.choice(TEST_QPU_LATTICES)
         p = np.pi / 7
@@ -132,14 +129,16 @@ class TestQPUIntegration(BaseTest):
             device=device,
             shots=2000,
             load_qc=False,
-            parametric_compilation=False,
+            # Disabling this for now, conflicts with warning on qpu device
+            # parametric_compilation=False,
         )
         dev_1 = qml.device(
             "forest.qpu",
             device=device,
             shots=2000,
             load_qc=False,
-            parametric_compilation=False,
+            # Disabling this for now, conflicts with warning on qpu device
+            # parametric_compilation=False,
         )
 
         def template(param):
@@ -163,7 +162,6 @@ class TestQPUIntegration(BaseTest):
         assert np.allclose(res, exp, atol=2e-2)
 
 
-@pytest.mark.xfail
 class TestQPUBasic(BaseTest):
     """Unit tests for the QPU (as a QVM)."""
 
@@ -189,7 +187,7 @@ class TestQPUBasic(BaseTest):
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
-            symmetrize_readout=None,
+            symmetrize_readout=SymmetrizationLevel.NONE,
             calibrate_readout=None,
             parametric_compilation=False,
         )
@@ -251,7 +249,7 @@ class TestQPUBasic(BaseTest):
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
-            symmetrize_readout="exhaustive",
+            symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
             timeout=100,
         )
@@ -305,7 +303,7 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(results[:3], 1.0, atol=2e-2)
         assert np.allclose(results[3:], -1.0, atol=2e-2)
 
-    #@flaky(max_runs=10, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     def test_multi_qub_no_readout_errors(self):
         """Test the QPU plugin with no readout errors or correction"""
         device = np.random.choice(TEST_QPU_LATTICES)
@@ -313,7 +311,7 @@ class TestQPUBasic(BaseTest):
             "forest.qpu",
             device=device,
             load_qc=False,
-            symmetrize_readout=None,
+            symmetrize_readout=SymmetrizationLevel.NONE,
             calibrate_readout=None,
         )
 
@@ -331,7 +329,7 @@ class TestQPUBasic(BaseTest):
 
         assert np.isclose(result, 0.5, atol=2e-2)
 
-    #@flaky(max_runs=10, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     def test_multi_qub_readout_errors(self):
         """Test the QPU plugin with readout errors"""
         device = np.random.choice(TEST_QPU_LATTICES)
@@ -341,7 +339,7 @@ class TestQPUBasic(BaseTest):
             load_qc=False,
             shots=10_000,
             readout_error=[0.9, 0.75],
-            symmetrize_readout=None,
+            symmetrize_readout=SymmetrizationLevel.NONE,
             calibrate_readout=None,
             parametric_compilation=False
         )
@@ -356,7 +354,7 @@ class TestQPUBasic(BaseTest):
 
         assert np.isclose(result, 0.38, atol=2e-2)
 
-    #@flaky(max_runs=10, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     def test_multi_qub_readout_correction(self):
         """Test the QPU plugin with readout errors and correction"""
         device = np.random.choice(TEST_QPU_LATTICES)
@@ -366,7 +364,7 @@ class TestQPUBasic(BaseTest):
             load_qc=False,
             shots=10_000,
             readout_error=[0.9, 0.75],
-            symmetrize_readout='exhaustive',
+            symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout='plus-eig',
             parametric_compilation=False
         )
@@ -381,11 +379,11 @@ class TestQPUBasic(BaseTest):
 
         assert np.isclose(result, 0.5, atol=3e-2)
 
-    #@flaky(max_runs=10, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     def test_2q_gate(self):
         """Test that the two qubit gate with the PauliZ observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
         """
 
         device = np.random.choice(TEST_QPU_LATTICES)
@@ -394,7 +392,7 @@ class TestQPUBasic(BaseTest):
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
-            symmetrize_readout="exhaustive",
+            symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
             shots=QVM_SHOTS,
         )
@@ -407,11 +405,11 @@ class TestQPUBasic(BaseTest):
 
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
-    #@flaky(max_runs=10, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     def test_2q_gate_pauliz_identity_tensor(self):
         """Test that the PauliZ tensor Identity observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
         """
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
@@ -419,7 +417,7 @@ class TestQPUBasic(BaseTest):
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
-            symmetrize_readout="exhaustive",
+            symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
             shots=QVM_SHOTS,
         )
@@ -432,12 +430,12 @@ class TestQPUBasic(BaseTest):
 
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
-    #@flaky(max_runs=10, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("a", np.linspace(-0.5, 2, 6))
     def test_2q_gate_pauliz_pauliz_tensor(self, a):
         """Test that the PauliZ tensor PauliZ observable works correctly.
 
-        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
         """
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
@@ -445,7 +443,7 @@ class TestQPUBasic(BaseTest):
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
-            symmetrize_readout="exhaustive",
+            symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
             shots=QVM_SHOTS,
         )
@@ -461,14 +459,14 @@ class TestQPUBasic(BaseTest):
         # Check that repeated calling of the QNode works correctly
         assert np.allclose(circuit(a), np.cos(a), atol=2e-2)
 
-    #@flaky(max_runs=10, min_passes=3)
+    @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("a", np.linspace(-np.pi / 2, 0, 3))
     @pytest.mark.parametrize("b", np.linspace(0, np.pi / 2, 3))
     def test_2q_circuit_pauliz_pauliz_tensor(self, a, b):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         is turned off.
 
-        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
         """
 
         device = np.random.choice(TEST_QPU_LATTICES)
@@ -477,7 +475,7 @@ class TestQPUBasic(BaseTest):
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
-            symmetrize_readout="exhaustive",
+            symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
             shots=QVM_SHOTS,
         )
@@ -500,13 +498,14 @@ class TestQPUBasic(BaseTest):
         # Check that repeated calling of the QNode works correctly
         assert np.allclose(circuit(a, b), analytic_value, atol=2e-2)
 
+    @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("a", np.linspace(-np.pi / 2, 0, 3))
     @pytest.mark.parametrize("b", np.linspace(0, np.pi / 2, 3))
     def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, a, b):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         is turned off.
 
-        As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
+        As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
         """
 
         device = np.random.choice(TEST_QPU_LATTICES)
@@ -515,7 +514,7 @@ class TestQPUBasic(BaseTest):
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
-            symmetrize_readout="exhaustive",
+            symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
             shots=QVM_SHOTS // 20,
             parametric_compilation=False,
@@ -544,8 +543,9 @@ class TestQPUBasic(BaseTest):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
         device = np.random.choice(TEST_QPU_LATTICES)
-        dev = plf.QVMDevice(device=device, shots=shots, timeout=100)
-        assert dev.qc.compiler.client.timeout == 100
+        dev = plf.QVMDevice(device=device, shots=shots, compiler_timeout=100, execution_timeout=101)
+        assert dev.qc.compiler._timeout == 100
+        assert dev.qc.qam._qvm_client.timeout == 101
 
     def test_timeout_default(self, shots):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
@@ -556,4 +556,5 @@ class TestQPUBasic(BaseTest):
 
         # Check that the timeouts are equal (it has not been changed as a side effect of
         # instantiation
-        assert dev.qc.compiler.client.timeout == qc.compiler.client.timeout
+        assert dev.qc.compiler._timeout == qc.compiler._timeout
+        assert dev.qc.qam._qvm_client.timeout == qc.qam._qvm_client.timeout
