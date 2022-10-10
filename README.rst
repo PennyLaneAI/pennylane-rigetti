@@ -59,7 +59,7 @@ Features
   ``ISWAP``, ``PSWAP``, and ``CPHASE``. Every custom operation supports analytic
   differentiation.
 
-* Combine Rigetti Quantum Cloud Services with PennyLane's automatic differentiation and
+* Combine Rigetti QCS with PennyLane's automatic differentiation and
   optimization.
 
 
@@ -104,9 +104,9 @@ Forest software development kit (SDK):
 * `Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`__
 
 Alternatively, you may sign up for Rigetti's Quantum Cloud Services (QCS)  which will allow you to compile your 
-quantum code and run on real quantum processing units (QPUs). Note that this requires a valid QCS account and the QCS CLI:
+quantum code and run on real QPUs. Note that this requires a valid QCS account and the QCS CLI:
 
-* `Quantum Cloud Services <https://docs.rigetti.com/en/>`__
+* `QCS <https://docs.rigetti.com/en/>`__
 * `QCS CLI <https://docs.rigetti.com/qcs/guides/using-the-qcs-cli>`__
 
 Tests
