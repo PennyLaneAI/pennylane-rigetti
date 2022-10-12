@@ -225,7 +225,9 @@ class QPUDevice(QVMDevice):
 
             # Measure out multi-qubit observable
             tomo_expt = Experiment(
-                settings=[ExperimentSetting(TensorProductState(), pauli_obs)], program=prep_prog, symmetrization=self.symmetrize_readout,
+                settings=[ExperimentSetting(TensorProductState(), pauli_obs)],
+                program=prep_prog,
+                symmetrization=self.symmetrize_readout,
             )
             grouped_tomo_expt = group_experiments(tomo_expt)
             meas_obs = list(
@@ -241,4 +243,3 @@ class QPUDevice(QVMDevice):
 
         # Calculation of expectation value without using `measure_observables`
         return super().expval(observable, shot_range, bin_size)
-

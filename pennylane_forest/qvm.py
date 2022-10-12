@@ -114,8 +114,12 @@ class QVMDevice(ForestDevice):
                 noisy=noisy,
                 client_configuration=self.client_configuration,
                 qvm_type="qvm",
-                compiler_timeout=timeout_args.get("compiler_timeout", 10.0),    # 10.0 is the pyQuil default
-                execution_timeout=timeout_args.get("execution_timeout", 10.0),  # 10.0 is the pyQuil default
+                compiler_timeout=timeout_args.get(
+                    "compiler_timeout", 10.0
+                ),  # 10.0 is the pyQuil default
+                execution_timeout=timeout_args.get(
+                    "execution_timeout", 10.0
+                ),  # 10.0 is the pyQuil default
             )
         elif isinstance(device, str):
             self.qc = get_qc(device, as_qvm=True, noisy=noisy, **timeout_args)
