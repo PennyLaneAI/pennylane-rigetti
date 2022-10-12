@@ -163,7 +163,7 @@ class QPUDevice(QVMDevice):
         self.calibrate_readout = calibrate_readout
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
 
-    def expval(self, observable, shot_range, bin_size):
+    def expval(self, observable, shot_range=None, bin_size=None):
         # translate operator wires to wire labels on the device
         device_wires = self.map_wires(observable.wires)
 
@@ -201,8 +201,7 @@ class QPUDevice(QVMDevice):
                     pauli_obs *= sZ(label)
 
             # Program preparing the state in which to measure observable
-            prep_prog = Program()
-            prep_prog += Program(prep_prog.reset())
+            prep_prog = Program("RESET 0")
             for instr in self.program.instructions:
                 if isinstance(instr, Gate):
                     # split gate and wires -- assumes 1q and 2q gates
