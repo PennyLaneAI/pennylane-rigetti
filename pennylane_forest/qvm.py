@@ -19,6 +19,8 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
+from typing import Dict
+
 import networkx as nx
 from pyquil import get_qc
 from pyquil.api._quantum_computer import _get_qvm_with_topology
@@ -73,9 +75,6 @@ class QVMDevice(ForestDevice):
         if shots is not None and shots <= 0:
             raise ValueError("Number of shots must be a positive integer or None.")
 
-        compiler_timeout = kwargs.pop("compiler_timeout", 10)  # 10.0 is the pyquil default
-        execution_timeout = kwargs.pop("execution_timeout", 10)  # 10.0 is the pyquil default
-
         self._compiled_program = None
         """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
         compilation is turned on, this will be a parametric program."""
@@ -103,15 +102,23 @@ class QVMDevice(ForestDevice):
         if shots is None:
             raise ValueError("QVM device cannot be used for analytic computations.")
 
+        timeout_args = self._get_timeout_args(**kwargs)
+
         self.client_configuration = super()._get_client_configuration()
 
         # get the qc
         if isinstance(device, nx.Graph):
             self.qc = _get_qvm_with_topology(
-                name="device", topology=device, noisy=noisy, client_configuration=self.client_configuration, qvm_type="qvm", compiler_timeout=compiler_timeout, execution_timeout=execution_timeout,
+                name="device",
+                topology=device,
+                noisy=noisy,
+                client_configuration=self.client_configuration,
+                qvm_type="qvm",
+                compiler_timeout=timeout_args.get("compiler_timeout", 10.0),    # 10.0 is the pyQuil default
+                execution_timeout=timeout_args.get("execution_timeout", 10.0),  # 10.0 is the pyQuil default
             )
         elif isinstance(device, str):
-            self.qc = get_qc(device, as_qvm=True, noisy=noisy, compiler_timeout=compiler_timeout, execution_timeout=execution_timeout)
+            self.qc = get_qc(device, as_qvm=True, noisy=noisy, **timeout_args)
 
         self.num_wires = len(self.qc.qubits())
 
@@ -136,6 +143,16 @@ class QVMDevice(ForestDevice):
 
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False
+
+    def _get_timeout_args(self, **kwargs) -> Dict[str, float]:
+        timeout_args = dict()
+        if "compiler_timeout" in kwargs:
+            timeout_args["compiler_timeout"] = kwargs["compiler_timeout"]
+
+        if "execution_timeout" in kwargs:
+            timeout_args["execution_timeout"] = kwargs["execution_timeout"]
+
+        return timeout_args
 
     def execute(self, circuit, **kwargs):
 
@@ -255,13 +272,13 @@ class QVMDevice(ForestDevice):
 
         If parametric compilation is turned on, this will be a parametric program.
 
-        The pyquil.ExecutableDesignator.program attribute stores the pyquil.Program
-        instance. If no program was compiled yet, this property returns None.
+        The program is returned as a string of the Quil code.
+        If no program was compiled yet, this property returns None.
 
         Returns:
-            Union[None, pyquil.ExecutableDesignator]: the latest compiled program
+            Union[None, str]: the latest compiled program
         """
-        return str(self._compiled_program)
+        return str(self._compiled_program) if self._compiled_program else None
 
     def reset(self):
         """Resets the device after the previous run.

@@ -127,15 +127,15 @@ class QPUDevice(QVMDevice):
             """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
                 parameters associated with their PyQuil memory references."""
 
-        timeout = kwargs.pop("timeout", 10.0) # 10.0 is the pyquil default
-
         if shots <= 0:
             raise ValueError("Number of shots must be a positive integer.")
 
+        timeout_args = self._get_timeout_args(**kwargs)
+
         if load_qc:
-            self.qc = get_qc(device, as_qvm=False, compiler_timeout=timeout)
+            self.qc = get_qc(device, as_qvm=False, **timeout_args)
         else:
-            self.qc = get_qc(device, as_qvm=True, compiler_timeout=timeout)
+            self.qc = get_qc(device, as_qvm=True, **timeout_args)
 
         self.num_wires = len(self.qc.qubits())
 

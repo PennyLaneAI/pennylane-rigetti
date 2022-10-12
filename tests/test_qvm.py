@@ -29,8 +29,8 @@ TEST_QPU_LATTICES = ["4q-qvm"]
 compiled_program = (
     "DECLARE ro BIT[2]\n"
     'PRAGMA INITIAL_REWIRING "PARTIAL"\n'
-    "CZ 1 0\n"
     "RZ(0.432) 1\n"
+    "CZ 1 0\n"
     "MEASURE 1 ro[0]\n"
     "MEASURE 0 ro[1]\n"
     "HALT\n"
@@ -497,11 +497,10 @@ class TestQVMBasic(BaseTest):
         """Test that QVM device stores the latest compiled program."""
         dev = qml.device("forest.qvm", device="2q-qvm")
 
-        dev.compiled_program is None
+        assert dev.compiled_program is None
 
         theta = 0.432
         phi = 0.123
-
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -514,13 +513,13 @@ class TestQVMBasic(BaseTest):
 
         dev.generate_samples()
 
-        dev.compiled_program is not None
+        assert dev.compiled_program is not None
 
     def test_stored_compiled_program_correct(self, qvm, monkeypatch):
         """Test that QVM device stores the latest compiled program."""
         dev = qml.device("forest.qvm", device="2q-qvm")
 
-        dev.compiled_program is None
+        assert dev.compiled_program is None
 
         theta = 0.432
 
@@ -533,7 +532,7 @@ class TestQVMBasic(BaseTest):
 
         dev.generate_samples()
 
-        dev.compiled_program == compiled_program
+        assert dev.compiled_program == compiled_program
 
 
 class TestParametricCompilation(BaseTest):
