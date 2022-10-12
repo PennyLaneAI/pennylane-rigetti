@@ -4,8 +4,6 @@ Default parameters, commandline arguments and common routines for the unit tests
 from unittest.mock import MagicMock, patch
 import pytest
 
-from requests import RequestException
-
 import numpy as np
 from scipy.linalg import expm, block_diag
 
@@ -159,7 +157,7 @@ def qvm():
         qvm = QVM(random_seed=52)
         qvm.run(Program(Id(0)))
         return qvm
-    except (RequestException, UnknownApiError, QVMNotRunning, TypeError) as e:
+    except (UnknownApiError, QVMNotRunning, TypeError) as e:
         return pytest.skip("This test requires QVM connection: {}".format(e))
 
 
