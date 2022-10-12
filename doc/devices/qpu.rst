@@ -63,7 +63,7 @@ These operations include:
     pennylane_forest.ops.PSWAP
 
 quilc server configuration
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
 
