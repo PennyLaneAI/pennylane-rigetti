@@ -150,7 +150,7 @@ class QVMDevice(ForestDevice):
         self.active_reset = False
 
     def _get_timeout_args(self, **kwargs) -> Dict[str, float]:
-        timeout_args = dict()
+        timeout_args = {}
         if "compiler_timeout" in kwargs:
             timeout_args["compiler_timeout"] = kwargs["compiler_timeout"]
 
