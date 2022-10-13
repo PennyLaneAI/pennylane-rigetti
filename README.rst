@@ -28,7 +28,7 @@ PennyLane Forest Plugin
 .. header-start-inclusion-marker-do-not-remove
 
 The PennyLane Forest plugin allows different Rigetti devices to work with
-PennyLane --- the wavefunction simulator, and the Quantum Virtual Machine (QVM), and Quantum Processing Units (QPUs).
+PennyLane --- the wavefunction simulator, the Quantum Virtual Machine (QVM), and Quantum Processing Units (QPUs).
 
 `pyQuil <https://pyquil.readthedocs.io>`__ is a Python library for quantum programming using the
 quantum instruction language (Quil) --- resulting quantum programs can be executed using the
