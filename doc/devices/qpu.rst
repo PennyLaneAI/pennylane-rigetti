@@ -2,8 +2,8 @@ The QPU device
 ==============
 
 The intention of the ``forest.qpu`` device is to construct a device that will allow for execution on an actual QPU.
-Constructing and using this device is very similar to very similar in design and implementation as the
-``forest.qvm`` device, with slight differences at initialization, such as not supporting the keyword argument ``noisy``.
+Constructing and using this device is very similar in design and implementation as the ``forest.qvm`` device, with 
+slight differences at initialization, such as not supporting the keyword argument ``noisy``.
 
 In addition, ``forest.qpu`` also accepts the optional ``active_reset`` keyword argument:
 
@@ -49,18 +49,7 @@ We can then integrate the quantum hardware and PennyLane's automatic differentia
 Supported operations
 ~~~~~~~~~~~~~~~~~~~~
 
-All devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with
-he exception of the PennyLane ``QubitStateVector`` state preparation operation.
-
-In addition, PennyLane-Forest provides the following PyQuil-specific operations for PennyLane.
-These are all importable from :mod:`pennylane_forest.ops <.ops>`.
-
-These operations include:
-
-.. autosummary::
-    pennylane_forest.ops.CPHASE
-    pennylane_forest.ops.ISWAP
-    pennylane_forest.ops.PSWAP
+All devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with the exception of the PennyLane ``QubitStateVector`` state preparation operation.
 
 quilc server configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,12 +57,7 @@ quilc server configuration
 .. note::
 
     If using the downloadable Forest SDK with the default server configurations
-    for the Quil compiler (i.e., ``quilc -R``), then you will not need to set these keyword arguments.
+    for the Quil compiler (i.e., ``quilc -R``), then no special configuration is needed.
     If using a non-default port or host for the server, see the 
     `pyQuil configuration documentation <https://pyquil-docs.rigetti.com/en/stable/advanced_usage.html#pyquil-configuration>`_
     for details on how to override the default values.
-
-    Likewise, if you are running PennyLane using the Rigetti Quantum Cloud Service (QCS)
-    and have logged in with the 
-    `QCS CLI <https://docs.rigetti.com/qcs/guides/using-the-qcs-cli#configuring-credentials>`__, 
-    these environment variables are set automatically and will also not need to be passed in PennyLane.
