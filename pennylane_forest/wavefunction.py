@@ -31,7 +31,6 @@ import numpy as np
 from pyquil.api import WavefunctionSimulator
 
 from .device import ForestDevice
-from ._version import __version__
 
 
 I = np.identity(2)
@@ -59,8 +58,8 @@ class WavefunctionDevice(ForestDevice):
 
     observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
 
-    def __init__(self, wires, *, shots=None, **kwargs):
-        super().__init__(wires, shots, **kwargs)
+    def __init__(self, wires, *, shots=None):
+        super().__init__(wires, shots)
         self.qc = WavefunctionSimulator()
         self._state = None
 

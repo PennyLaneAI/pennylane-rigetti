@@ -144,7 +144,7 @@ class QVMDevice(ForestDevice):
                 "cannot be created with {} wires.".format(self.num_wires, len(wires))
             )
 
-        super().__init__(wires, shots, **kwargs)
+        super().__init__(wires, shots)
 
         self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
         self.active_reset = False

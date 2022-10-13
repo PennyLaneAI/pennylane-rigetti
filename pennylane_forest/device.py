@@ -167,7 +167,7 @@ class ForestDevice(QubitDevice):
     _operation_map = pyquil_operation_map
     _capabilities = {"model": "qubit", "tensor_observables": True}
 
-    def __init__(self, wires, shots=1000, **kwargs):
+    def __init__(self, wires, shots=1000):
         super().__init__(wires, shots)
         self.reset()
 
