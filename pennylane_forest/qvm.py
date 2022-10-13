@@ -23,11 +23,12 @@ from typing import Dict
 
 import networkx as nx
 from pyquil import get_qc
+from pyquil.api import QAMExecutionResult
 from pyquil.api._quantum_computer import _get_qvm_with_topology
 from pyquil.gates import MEASURE, RESET
 from pyquil.quil import Pragma, Program
 
-from pennylane import DeviceError
+from pennylane import DeviceError, numpy as np
 
 from .device import ForestDevice
 
@@ -260,8 +261,14 @@ class QVMDevice(ForestDevice):
         results = self.qc.run(executable=self._compiled_program)
         return self.extract_samples(results)
 
-    def extract_samples(self, execution_results):
-        return execution_results.readout_data.get("ro", {})
+    def extract_samples(self, execution_results: QAMExecutionResult) -> np.ndarray:
+        """Returns samples from the readout register on the execution results received after
+        running a program on a pyQuil Quantum Abstract Machine.
+
+        Returns:
+            numpy.ndarray: Samples extracted from the readout register on the execution results.
+        """
+        return execution_results.readout_data.get("ro", [])
 
     @property
     def circuit_hash(self):
