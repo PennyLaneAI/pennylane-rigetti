@@ -46,7 +46,7 @@ The plugin documentation can be found here: `<https://docs.pennylane.ai/projects
 Features
 ========
 
-* Provides three devices to be used with PennyLane: ``forest.numpy_wavefunction``,
+* Provides four devices to be used with PennyLane: ``forest.numpy_wavefunction``,
   ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the pyQVM
   Numpy wavefunction simulator, pyQuil wavefunction simulator, and quantum
   virtual machine (QVM) respectively.
