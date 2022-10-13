@@ -221,8 +221,6 @@ class QPUDevice(QVMDevice):
                         label, p00=self.readout_error[0], p11=self.readout_error[1]
                     )
 
-            # TODO: This makes the QPU tests with parametric compilation disabled accurate
-            # enough to pass, but probably isn't the right thing to do
             prep_prog.wrap_in_numshots_loop(self.shots)
 
             # Measure out multi-qubit observable
