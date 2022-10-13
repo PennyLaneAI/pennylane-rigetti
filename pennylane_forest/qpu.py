@@ -67,6 +67,8 @@ class QPUDevice(QVMDevice):
             normalizing by the expectation value in the +1-eigenstate of the observable by default
 
     Keyword args:
+        compiler_timeout (int): number of seconds to wait for a response from quilc (default 10).
+        execution_timeout (int): number of seconds to wait for a response from the QVM (default 10).
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
