@@ -58,15 +58,4 @@ array([0.97517033, 0.04904283])
 Supported operations
 ~~~~~~~~~~~~~~~~~~~~
 
-All Forest devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with
-the exception of the PennyLane ``QubitStateVector`` state preparation operation.
-
-In addition, PennyLane-Forest provides the following PyQuil-specific operations for PennyLane.
-These are all importable from :mod:`pennylane_forest.ops <.ops>`.
-
-These operations include:
-
-.. autosummary::
-    pennylane_forest.ops.CPHASE
-    pennylane_forest.ops.ISWAP
-    pennylane_forest.ops.PSWAP
+All Forest devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with the exception of the PennyLane ``QubitStateVector`` state preparation operation.
