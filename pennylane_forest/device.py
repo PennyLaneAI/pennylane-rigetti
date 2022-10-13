@@ -37,11 +37,30 @@ from collections import OrderedDict
 
 from pyquil import Program
 from pyquil.quil import DefGate
-from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT, S, T, CSWAP, I
+from pyquil.gates import (
+    X,
+    Y,
+    Z,
+    H,
+    PHASE,
+    RX,
+    RY,
+    RZ,
+    CZ,
+    SWAP,
+    CNOT,
+    S,
+    T,
+    CSWAP,
+    I,
+    CPHASE00,
+    CPHASE01,
+    CPHASE10,
+    CCNOT,
+    ISWAP,
+    PSWAP,
+)
 from qcs_api_client.client import QCSClientConfiguration
-
-# following gates are not supported by PennyLane
-from pyquil.gates import CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, ISWAP, PSWAP
 
 from pennylane import QubitDevice, DeviceError
 from pennylane.wires import Wires
