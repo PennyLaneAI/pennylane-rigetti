@@ -48,8 +48,8 @@ Features
 
 * Provides four devices to be used with PennyLane: ``forest.numpy_wavefunction``,
   ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the pyQVM
-  Numpy wavefunction simulator, pyQuil wavefunction simulator, and quantum
-  virtual machine (QVM) respectively.
+  Numpy wavefunction simulator, pyQuil wavefunction simulator, quantum
+  virtual machine (QVM), and quantum processing units (QPUs) respectively.
 
 
 * All provided devices support all core qubit PennyLane operations and observables.
