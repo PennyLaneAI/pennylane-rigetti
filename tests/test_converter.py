@@ -10,7 +10,6 @@ from pennylane.tape import OperationRecorder
 from pennylane_forest.converter import *
 
 
-@pytest.mark.xfail
 class TestProgramConverter:
     """Test that PyQuil Program instances are properly converted."""
 
@@ -644,7 +643,6 @@ class TestProgramConverter:
             load_program(program)(wires=range(3))
 
 
-@pytest.mark.xfail
 class TestQuilConverter:
     """Test that quil instances passed as string are properly converted."""
 
@@ -923,7 +921,6 @@ class TestQuilConverter:
             assert np.array_equal(converted.data, expected.data)
 
 
-@pytest.mark.xfail
 class TestQuilFileConverter:
     """Test that quil files are properly converted."""
 
@@ -955,7 +952,6 @@ class TestQuilFileConverter:
             assert converted.data == expected.data
 
 
-@pytest.mark.xfail
 class TestInspectionProperties:
     """Test that the inspection properties of ProgramLoader return the expected values."""
 
@@ -1034,7 +1030,6 @@ class TestInspectionProperties:
         assert str(loader) == "PennyLane Program Loader for PyQuil Program:\n" + str(loader.program)
 
 
-@pytest.mark.xfail
 class TestIntegration:
     """Test that the program loader integrates properly with PennyLane."""
 
