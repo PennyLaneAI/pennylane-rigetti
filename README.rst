@@ -54,15 +54,6 @@ Features
 
 * All provided devices support all core qubit PennyLane operations and observables.
 
-
-* Provides custom PennyLane operations to cover additional pyQuil operations:
-  ``ISWAP``, ``PSWAP``, and ``CPHASE``. Every custom operation supports analytic
-  differentiation.
-
-* Combine Rigetti QCS with PennyLane's automatic differentiation and
-  optimization.
-
-
 .. installation-start-inclusion-marker-do-not-remove
 
 Installation
