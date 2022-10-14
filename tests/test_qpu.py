@@ -11,7 +11,7 @@ from pennylane import numpy as np
 from pennylane.operation import Tensor
 from pennylane.wires import Wires
 import pennylane_forest as plf
-from conftest import BaseTest, QVM_SHOTS
+from conftest import BaseTest
 
 from flaky import flaky
 
@@ -116,7 +116,7 @@ class TestQPUIntegration(BaseTest):
     @pytest.mark.parametrize(
         "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
     )
-    def test_tensor_expval_operator_estimation(self, obs):
+    def test_tensor_expval_operator_estimation(self, obs, shots):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
         turned off allowing operator estimation.
 
@@ -127,7 +127,7 @@ class TestQPUIntegration(BaseTest):
         dev = qml.device(
             "forest.qpu",
             device=device,
-            shots=2000,
+            shots=shots,
             load_qc=False,
             # Disabling this for now, conflicts with warning on qpu device
             # parametric_compilation=False,
@@ -135,7 +135,7 @@ class TestQPUIntegration(BaseTest):
         dev_1 = qml.device(
             "forest.qpu",
             device=device,
-            shots=2000,
+            shots=shots,
             load_qc=False,
             # Disabling this for now, conflicts with warning on qpu device
             # parametric_compilation=False,
@@ -380,7 +380,7 @@ class TestQPUBasic(BaseTest):
         assert np.isclose(result, 0.5, atol=3e-2)
 
     @flaky(max_runs=10, min_passes=3)
-    def test_2q_gate(self):
+    def test_2q_gate(self, shots):
         """Test that the two qubit gate with the PauliZ observable works correctly.
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
@@ -394,7 +394,7 @@ class TestQPUBasic(BaseTest):
             readout_error=[0.9, 0.75],
             symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
-            shots=QVM_SHOTS,
+            shots=shots,
         )
 
         @qml.qnode(dev_qpu)
@@ -406,7 +406,7 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
     @flaky(max_runs=10, min_passes=3)
-    def test_2q_gate_pauliz_identity_tensor(self):
+    def test_2q_gate_pauliz_identity_tensor(self, shots):
         """Test that the PauliZ tensor Identity observable works correctly.
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
@@ -419,7 +419,7 @@ class TestQPUBasic(BaseTest):
             readout_error=[0.9, 0.75],
             symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
-            shots=QVM_SHOTS,
+            shots=shots,
         )
 
         @qml.qnode(dev_qpu)
@@ -432,7 +432,7 @@ class TestQPUBasic(BaseTest):
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("a", np.linspace(-0.5, 2, 6))
-    def test_2q_gate_pauliz_pauliz_tensor(self, a):
+    def test_2q_gate_pauliz_pauliz_tensor(self, a, shots):
         """Test that the PauliZ tensor PauliZ observable works correctly.
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
@@ -445,7 +445,7 @@ class TestQPUBasic(BaseTest):
             readout_error=[0.9, 0.75],
             symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
-            shots=QVM_SHOTS,
+            shots=shots,
         )
 
         @qml.qnode(dev_qpu)
@@ -462,7 +462,7 @@ class TestQPUBasic(BaseTest):
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("a", np.linspace(-np.pi / 2, 0, 3))
     @pytest.mark.parametrize("b", np.linspace(0, np.pi / 2, 3))
-    def test_2q_circuit_pauliz_pauliz_tensor(self, a, b):
+    def test_2q_circuit_pauliz_pauliz_tensor(self, a, b, shots):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         is turned off.
 
@@ -477,7 +477,7 @@ class TestQPUBasic(BaseTest):
             readout_error=[0.9, 0.75],
             symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
-            shots=QVM_SHOTS,
+            shots=shots,
         )
 
         @qml.qnode(dev_qpu)
@@ -501,7 +501,7 @@ class TestQPUBasic(BaseTest):
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("a", np.linspace(-np.pi / 2, 0, 3))
     @pytest.mark.parametrize("b", np.linspace(0, np.pi / 2, 3))
-    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, a, b):
+    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, a, b, shots):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         is turned off.
 
@@ -516,7 +516,7 @@ class TestQPUBasic(BaseTest):
             readout_error=[0.9, 0.75],
             symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
-            shots=QVM_SHOTS // 20,
+            shots=shots,
             parametric_compilation=False,
         )
 
