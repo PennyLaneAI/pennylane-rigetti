@@ -158,7 +158,7 @@ class QPUDevice(QVMDevice):
                 "cannot be created with {} wires.".format(self.num_wires, len(wires))
             )
 
-        super(QVMDevice, self).__init__(wires, shots, **kwargs)
+        super(QVMDevice, self).__init__(wires, shots)
 
         self.active_reset = active_reset
         self.symmetrize_readout = symmetrize_readout
