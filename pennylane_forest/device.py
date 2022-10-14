@@ -53,6 +53,7 @@ from pyquil.gates import (
     T,
     CSWAP,
     I,
+    CPHASE,
     CPHASE00,
     CPHASE01,
     CPHASE10,
