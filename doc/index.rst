@@ -51,18 +51,17 @@ Check out these demos to see the PennyLane-Forest plugin in action:
 
 .. title-card::
     :name: Ensemble classification with QCS and Qiskit devices
-    :figure: <img src="https://pennylane.ai/qml/_images/ensemble_diagram.png" width="100%" />
+    :description: Use two QPUs in parallel to help solve a machine learning classification problem.
     :link:  https://pennylane.ai/qml/demos/ensemble_multi_qpu.html
 
 .. title-card::
     :name: PyTorch and noisy devices
-    :figure: <img src="https://pennylane.ai/qml/_images/bloch.gif" width="100%" />
+    :description: Use PyTorch and a noisy QVM to see how optimization responds to noisy qubits.
     :link:  https://pennylane.ai/qml/demos/pytorch_noise.html
 
 .. raw:: html
 
     </div></div><div style='clear:both'> <br/>
-
 
 You can also try it out using any of the qubit based `demos from the PennyLane documentation
 <https://pennylane.ai/qml/demonstrations.html>`_, for example the tutorial on
