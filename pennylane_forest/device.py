@@ -433,6 +433,11 @@ class ForestDevice(QubitDevice, ABC):
         self._active_wires = Wires([])
         self._state = None
 
+        if self.parametric_compilation:
+            self._circuit_hash = None
+            self._parameter_map = {}
+            self._parameter_reference_map = {}
+
     @property
     def operations(self):
         return set(self._operation_map.keys())

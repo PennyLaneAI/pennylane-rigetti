@@ -129,17 +129,3 @@ class QVMDevice(ForestDevice):
             numpy.ndarray: Samples extracted from the readout register on the execution results.
         """
         return execution_results.readout_data.get("ro", [])
-
-    def reset(self):
-        """Resets the device after the previous run.
-
-        Note:
-            The ``_compiled_program`` and the ``_compiled_program_dict`` attributes are
-            not reset such that these can be used upon multiple device execution.
-        """
-        super().reset()
-
-        if self.parametric_compilation:
-            self._circuit_hash = None
-            self._parameter_map = {}
-            self._parameter_reference_map = {}
