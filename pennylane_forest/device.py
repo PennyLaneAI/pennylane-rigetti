@@ -39,7 +39,7 @@ from collections import OrderedDict
 
 from pyquil import Program
 from pyquil.api import QuantumComputer
-from pyquil.quil import DefGate
+from pyquil.quil import DefGate, Pragma
 from pyquil.gates import (
     X,
     Y,
@@ -63,6 +63,8 @@ from pyquil.gates import (
     CCNOT,
     ISWAP,
     PSWAP,
+    RESET,
+    MEASURE
 )
 from qcs_api_client.client import QCSClientConfiguration
 
@@ -245,16 +247,6 @@ class ForestDevice(QubitDevice, ABC):
         super().__init__(wires, shots)
         self.reset()
 
-    def _get_timeout_args(self, **kwargs) -> Dict[str, float]:
-        timeout_args = {}
-        if "compiler_timeout" in kwargs:
-            timeout_args["compiler_timeout"] = kwargs["compiler_timeout"]
-
-        if "execution_timeout" in kwargs:
-            timeout_args["execution_timeout"] = kwargs["execution_timeout"]
-
-        return timeout_args
-
     @abstractmethod
     def get_qc(self, device, noisy, **kwargs) -> QuantumComputer:
         pass
@@ -269,7 +261,6 @@ class ForestDevice(QubitDevice, ABC):
         return self.prog
 
     def define_wire_map(self, wires):
-
         if hasattr(self, "wiring"):
             device_wires = Wires(self.wiring)
         else:
@@ -278,35 +269,45 @@ class ForestDevice(QubitDevice, ABC):
 
         return OrderedDict(zip(wires, device_wires))
 
+    def _get_timeout_args(self, **kwargs) -> Dict[str, float]:
+        timeout_args = {}
+        if "compiler_timeout" in kwargs:
+            timeout_args["compiler_timeout"] = kwargs["compiler_timeout"]
+
+        if "execution_timeout" in kwargs:
+            timeout_args["execution_timeout"] = kwargs["execution_timeout"]
+
+        return timeout_args
+
+    def execute(self, circuit, **kwargs):
+        if self.parametric_compilation:
+            self._circuit_hash = circuit.graph.hash
+        return super().execute(circuit, **kwargs)
+
     def apply(self, operations, **kwargs):
+        prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
+        if self.active_reset:
+            prag += RESET()
+        self.prog = prag + self.prog
+
+        if self.parametric_compilation and "pyqvm" not in self.qc.name:
+            self.prog += self.apply_parametric_operations(operations)
+        else:
+            self.prog += self.apply_circuit_operations(operations)
+
         # pylint: disable=attribute-defined-outside-init
         rotations = kwargs.get("rotations", [])
-
         # Storing the active wires
         self._active_wires = ForestDevice.active_wires(operations + rotations)
 
-        # Apply the circuit operations
-        for i, operation in enumerate(operations):
-            # map the ops' wires to the wire labels used by the device
-            device_wires = self.map_wires(operation.wires)
-            par = operation.parameters
-
-            if isinstance(par, list) and par:
-                if isinstance(par[0], np.ndarray) and par[0].shape == ():
-                    # Array not supported
-                    par = [float(i) for i in par]
-
-            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
-                name = operation.name
-                short_name = self.short_name
-                raise DeviceError(
-                    f"Operation {name} cannot be used after other Operations have already "
-                    f"been applied on a {short_name} device."
-                )
-
-            self.prog += self._operation_map[operation.name](*par, *device_wires.labels)
-
         self.prog += self.apply_rotations(rotations)
+
+        qubits = sorted(self.wiring.values())
+        ro = self.prog.declare("ro", "BIT", len(qubits))
+        for i, q in enumerate(qubits):
+            self.prog.inst(MEASURE(q, ro[i]))
+
+        self.prog.wrap_in_numshots_loop(self.shots)
 
     def apply_rotations(self, rotations):
         """Apply the circuit rotations.
@@ -328,6 +329,83 @@ class ForestDevice(QubitDevice, ABC):
             rotation_operations += self._operation_map[operation.name](*par, *device_wires.labels)
 
         return rotation_operations
+
+    def apply_circuit_operations(self, operations):
+        """Apply circuit operations
+
+        This method is an auxillary method to :meth:`~.ForestDevice.apply`
+
+        Args:
+            operations (List[pennylane.Operation]): quantum operations to apply to a program.
+
+        Returns:
+            pyquil.Program(): the pyQuil Program that has these operations applied
+        """
+        prog = Program()
+        for i, operation in enumerate(operations):
+            # map the ops' wires to the wire labels used by the device
+            device_wires = self.map_wires(operation.wires)
+            par = operation.parameters
+
+            if isinstance(par, list) and par:
+                if isinstance(par[0], np.ndarray) and par[0].shape == ():
+                    # Array not supported
+                    par = [float(i) for i in par]
+
+            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
+                name = operation.name
+                short_name = self.short_name
+                raise DeviceError(
+                    f"Operation {name} cannot be used after other Operations have already "
+                    f"been applied on a {short_name} device."
+                )
+
+            prog += self._operation_map[operation.name](*par, *device_wires.labels)
+
+        return prog
+
+    def apply_parametric_operations(self, operations):
+        """Applies a parametric program by applying parametric
+        operation with symbolic parameters.
+        """
+        prog = Program()
+        # Apply the circuit operations
+        for i, operation in enumerate(operations):
+            # map the operation wires to the physical device qubits
+            device_wires = self.map_wires(operation.wires)
+
+            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
+                raise DeviceError(
+                    "Operation {} cannot be used after other Operations have already been applied "
+                    "on a {} device.".format(operation.name, self.short_name)
+                )
+
+            # Prepare for parametric compilation
+            par = []
+            for param in operation.data:
+                if getattr(param, "requires_grad", False) and operation.name != "BasisState":
+                    # Using the idx for trainable parameter objects to specify the
+                    # corresponding symbolic parameter
+                    parameter_string = "theta" + str(id(param))
+
+                    if parameter_string not in self._parameter_reference_map:
+                        # Create a new PyQuil memory reference and store it in the
+                        # parameter reference map if it was not done so already
+                        current_ref = self.prog.declare(parameter_string, "REAL")
+                        self._parameter_reference_map[parameter_string] = current_ref
+
+                    # Store the numeric value bound to the symbolic parameter
+                    self._parameter_map[parameter_string] = [param.unwrap()]
+
+                    # Appending the parameter reference to the parameters
+                    # of the corresponding operation
+                    par.append(self._parameter_reference_map[parameter_string])
+                else:
+                    par.append(param)
+
+            prog += self._operation_map[operation.name](*par, *device_wires.labels)
+
+        return prog
 
     def reset(self):
         self.prog = Program()
