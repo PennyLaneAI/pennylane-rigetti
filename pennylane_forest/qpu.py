@@ -114,7 +114,7 @@ class QPUDevice(ForestDevice):
 
         super().__init__(device, wires=wires, shots=shots, active_reset=active_reset, **kwargs)
 
-    def get_qc(self, device, _, **kwargs) -> QuantumComputer:
+    def get_qc(self, device, **kwargs) -> QuantumComputer:
         return get_qc(device, as_qvm=self.as_qvm, **kwargs)
 
     def expval(self, observable, shot_range=None, bin_size=None):

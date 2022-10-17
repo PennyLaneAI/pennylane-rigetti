@@ -19,16 +19,11 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-from typing import Dict
-
 import networkx as nx
 from pyquil import get_qc
-from pyquil.api import QAMExecutionResult, QuantumComputer
+from pyquil.api import QuantumComputer
 from pyquil.api._quantum_computer import _get_qvm_with_topology
-from pyquil.gates import MEASURE, RESET
-from pyquil.quil import Pragma, Program
-
-from pennylane import DeviceError, numpy as np
+from qcs_api_client.client import QCSClientConfiguration
 
 from .device import ForestDevice
 
@@ -75,23 +70,22 @@ class QVMDevice(ForestDevice):
         if shots is None:
             raise ValueError("QVM device cannot be used for analytic computations.")
 
-        super().__init__(device, wires=wires, shots=shots, noisy=noisy, active_reset=False, **kwargs)
+        super().__init__(
+            device, wires=wires, shots=shots, noisy=noisy, active_reset=False, **kwargs
+        )
 
-    def get_qc(self, device, noisy, **kwargs) -> QuantumComputer:
+    def get_qc(self, device, *, noisy, **kwargs) -> QuantumComputer:
         if isinstance(device, nx.Graph):
-            client_configuration = super()._get_client_configuration()
+            client_configuration = QCSClientConfiguration.load()
             return _get_qvm_with_topology(
                 name="device",
                 topology=device,
                 noisy=noisy,
                 client_configuration=client_configuration,
                 qvm_type="qvm",
-                compiler_timeout=kwargs.get(
-                    "compiler_timeout", 10.0
-                ),  # 10.0 is the pyQuil default
+                compiler_timeout=kwargs.get("compiler_timeout", 10.0),  # 10.0 is the pyQuil default
                 execution_timeout=kwargs.get(
                     "execution_timeout", 10.0
                 ),  # 10.0 is the pyQuil default
             )
-        elif isinstance(device, str):
-            return get_qc(device, as_qvm=True, noisy=noisy, **kwargs)
+        return get_qc(device, as_qvm=True, noisy=noisy, **kwargs)
