@@ -260,6 +260,27 @@ class ForestDevice(QubitDevice, ABC):
         """View the last evaluated Quil program"""
         return self.prog
 
+    @property
+    def circuit_hash(self):
+        if self.parametric_compilation:
+            return self._circuit_hash
+
+        return None
+
+    @property
+    def compiled_program(self):
+        """Returns the latest program that was compiled for running.
+
+        If parametric compilation is turned on, this will be a parametric program.
+
+        The program is returned as a string of the Quil code.
+        If no program was compiled yet, this property returns None.
+
+        Returns:
+            Union[None, str]: the latest compiled program
+        """
+        return str(self._compiled_program) if self._compiled_program else None
+
     def define_wire_map(self, wires):
         if hasattr(self, "wiring"):
             device_wires = Wires(self.wiring)
