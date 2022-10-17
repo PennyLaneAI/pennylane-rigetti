@@ -38,10 +38,10 @@ from pyquil.quilbase import Gate
 
 from pennylane.operation import Tensor
 
-from .qvm import QVMDevice
+from .device import ForestDevice
 
 
-class QPUDevice(QVMDevice):
+class QPUDevice(ForestDevice):
     r"""Forest QPU device for PennyLane.
 
     Args:
@@ -112,7 +112,7 @@ class QPUDevice(QVMDevice):
         self.symmetrize_readout = symmetrize_readout
         self.calibrate_readout = calibrate_readout
 
-        super(QVMDevice, self).__init__(device, wires=wires, shots=shots, active_reset=active_reset, **kwargs)
+        super().__init__(device, wires=wires, shots=shots, active_reset=active_reset, **kwargs)
 
     def get_qc(self, device, _, **kwargs) -> QuantumComputer:
         return get_qc(device, as_qvm=self.as_qvm, **kwargs)
