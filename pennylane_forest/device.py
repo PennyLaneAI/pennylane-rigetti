@@ -38,7 +38,7 @@ import numpy as np
 from collections import OrderedDict
 
 from pyquil import Program
-from pyquil.api import QuantumComputer
+from pyquil.api import QAMExecutionResult, QuantumComputer
 from pyquil.quil import DefGate, Pragma
 from pyquil.gates import (
     X,
@@ -429,6 +429,12 @@ class ForestDevice(QubitDevice, ABC):
         return prog
 
     def reset(self):
+        """Resets the device after the previous run.
+
+        Note:
+            The ``_compiled_program`` and the ``_compiled_program_dict`` attributes are
+            not reset such that these can be used upon multiple device execution.
+        """
         self.prog = Program()
         self._active_wires = Wires([])
         self._state = None
@@ -441,6 +447,40 @@ class ForestDevice(QubitDevice, ABC):
     @property
     def operations(self):
         return set(self._operation_map.keys())
+
+    def generate_samples(self):
+        if self.parametric_compilation:
+            for region, value in self._parameter_map.items():
+                self.prog.write_memory(region_name=region, value=value)
+
+        if "pyqvm" in self.qc.name:
+            return self.extract_samples(self.qc.run(self.prog))
+
+        if self.circuit_hash is None:
+            # Parametric compilation was set to False
+            # Compile the program
+            self._compiled_program = self.qc.compile(self.prog)
+            results = self.qc.run(executable=self._compiled_program)
+            return self.extract_samples(results)
+
+        if self.circuit_hash not in self._compiled_program_dict:
+            # Compiling this specific program for the first time
+            # Store the compiled program with the corresponding hash
+            self._compiled_program_dict[self.circuit_hash] = self.qc.compile(self.prog)
+
+        # The program has been compiled, store as the latest compiled program
+        self._compiled_program = self._compiled_program_dict[self.circuit_hash]
+        results = self.qc.run(executable=self._compiled_program)
+        return self.extract_samples(results)
+
+    def extract_samples(self, execution_results: QAMExecutionResult) -> np.ndarray:
+        """Returns samples from the readout register on the execution results received after
+        running a program on a pyQuil Quantum Abstract Machine.
+
+        Returns:
+            numpy.ndarray: Samples extracted from the readout register on the execution results.
+        """
+        return execution_results.readout_data.get("ro", [])
 
     def mat_vec_product(self, mat, vec, device_wire_labels):
         r"""Apply multiplication of a matrix to subsystems of the quantum state.
