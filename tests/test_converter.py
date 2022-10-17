@@ -1220,7 +1220,7 @@ class TestIntegration:
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
-        assert np.array_equal(qml.jacobian([angle]), circuit_reg.jacobian([angle]))
+        assert np.array_equal(qml.jacobian(circuit)(angle), qml.jacobian(circuit_reg)(angle))
 
     THETA = np.linspace(0.11, 3, 5)
     PHI = np.linspace(0.32, 3, 5)
