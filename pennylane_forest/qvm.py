@@ -23,7 +23,7 @@ from typing import Dict
 
 import networkx as nx
 from pyquil import get_qc
-from pyquil.api import QAMExecutionResult
+from pyquil.api import QAMExecutionResult, QuantumComputer
 from pyquil.api._quantum_computer import _get_qvm_with_topology
 from pyquil.gates import MEASURE, RESET
 from pyquil.quil import Pragma, Program
@@ -72,95 +72,31 @@ class QVMDevice(ForestDevice):
     observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
     def __init__(self, device, *, wires=None, shots=1000, noisy=False, **kwargs):
-
-        if shots is not None and shots <= 0:
-            raise ValueError("Number of shots must be a positive integer or None.")
-
-        self._compiled_program = None
-        """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
-        compilation is turned on, this will be a parametric program."""
-
-        self.parametric_compilation = kwargs.get("parametric_compilation", True)
-
-        if self.parametric_compilation:
-            self._circuit_hash = None
-            """None or int: stores the hash of the circuit from the last execution which
-            can be used for parametric compilation."""
-
-            self._compiled_program_dict = {}
-            """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
-                with the corresponding compiled programs."""
-
-            self._parameter_map = {}
-            """dict[str, float]: stores the string of symbolic parameters associated with
-                their numeric values. This map will be used to bind parameters in a parametric
-                program using PyQuil."""
-
-            self._parameter_reference_map = {}
-            """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
-                parameters associated with their PyQuil memory references."""
-
         if shots is None:
             raise ValueError("QVM device cannot be used for analytic computations.")
 
-        timeout_args = self._get_timeout_args(**kwargs)
+        super().__init__(device, wires=wires, shots=shots, noisy=noisy, active_reset=False, **kwargs)
 
-        self.client_configuration = super()._get_client_configuration()
-
-        # get the qc
+    def get_qc(self, device, noisy, **kwargs) -> QuantumComputer:
         if isinstance(device, nx.Graph):
-            self.qc = _get_qvm_with_topology(
+            client_configuration = super()._get_client_configuration()
+            return _get_qvm_with_topology(
                 name="device",
                 topology=device,
                 noisy=noisy,
-                client_configuration=self.client_configuration,
+                client_configuration=client_configuration,
                 qvm_type="qvm",
-                compiler_timeout=timeout_args.get(
+                compiler_timeout=kwargs.get(
                     "compiler_timeout", 10.0
                 ),  # 10.0 is the pyQuil default
-                execution_timeout=timeout_args.get(
+                execution_timeout=kwargs.get(
                     "execution_timeout", 10.0
                 ),  # 10.0 is the pyQuil default
             )
         elif isinstance(device, str):
-            self.qc = get_qc(device, as_qvm=True, noisy=noisy, **timeout_args)
-
-        self.num_wires = len(self.qc.qubits())
-
-        if wires is None:
-            # infer the number of modes from the device specs
-            # and use consecutive integer wire labels
-            wires = range(self.num_wires)
-
-        if isinstance(wires, int):
-            raise ValueError(
-                "Device has a fixed number of {} qubits. The wires argument can only be used "
-                "to specify an iterable of wire labels.".format(self.num_wires)
-            )
-
-        if self.num_wires != len(wires):
-            raise ValueError(
-                "Device has a fixed number of {} qubits and "
-                "cannot be created with {} wires.".format(self.num_wires, len(wires))
-            )
-
-        super().__init__(wires, shots)
-
-        self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
-        self.active_reset = False
-
-    def _get_timeout_args(self, **kwargs) -> Dict[str, float]:
-        timeout_args = {}
-        if "compiler_timeout" in kwargs:
-            timeout_args["compiler_timeout"] = kwargs["compiler_timeout"]
-
-        if "execution_timeout" in kwargs:
-            timeout_args["execution_timeout"] = kwargs["execution_timeout"]
-
-        return timeout_args
+            return get_qc(device, as_qvm=True, noisy=noisy, **kwargs)
 
     def execute(self, circuit, **kwargs):
-
         if self.parametric_compilation:
             self._circuit_hash = circuit.graph.hash
 

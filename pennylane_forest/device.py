@@ -29,6 +29,8 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
+from abc import ABC, abstractmethod
+from typing import Dict
 import uuid
 
 import numpy as np
@@ -36,6 +38,7 @@ import numpy as np
 from collections import OrderedDict
 
 from pyquil import Program
+from pyquil.api import QuantumComputer
 from pyquil.quil import DefGate
 from pyquil.gates import (
     X,
@@ -169,7 +172,7 @@ pyquil_operation_map = {
 }
 
 
-class ForestDevice(QubitDevice):
+class ForestDevice(QubitDevice, ABC):
     r"""Abstract Forest device for PennyLane.
 
     Args:
@@ -187,9 +190,74 @@ class ForestDevice(QubitDevice):
     _operation_map = pyquil_operation_map
     _capabilities = {"model": "qubit", "tensor_observables": True}
 
-    def __init__(self, wires, shots=1000):
+    def __init__(self, device, *, wires=None, shots=1000, noisy=False, active_reset=False, **kwargs):
+        if shots is not None and shots <= 0:
+            raise ValueError("Number of shots must be a positive integer or None.")
+
+        self._compiled_program = None
+
+        self.parametric_compilation = kwargs.get("parametric_compilation", True)
+
+        if self.parametric_compilation:
+            self._circuit_hash = None
+            """None or int: stores the hash of the circuit from the last execution which
+            can be used for parametric compilation."""
+
+            self._compiled_program_dict = {}
+            """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
+                with the corresponding compiled programs."""
+
+            self._parameter_map = {}
+            """dict[str, float]: stores the string of symbolic parameters associated with
+                their numeric values. This map will be used to bind parameters in a parametric
+                program using PyQuil."""
+
+            self._parameter_reference_map = {}
+            """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
+                parameters associated with their PyQuil memory references."""
+
+        timeout_args = self._get_timeout_args(**kwargs)
+
+        self.qc = self.get_qc(device, noisy, **timeout_args)
+
+        self.num_wires = len(self.qc.qubits())
+
+        if wires is None:
+            # infer the number of modes from the device specs
+            # and use consecutive integer wire labels
+            wires = range(self.num_wires)
+
+        if isinstance(wires, int):
+            raise ValueError(
+                "Device has a fixed number of {} qubits. The wires argument can only be used "
+                "to specify an iterable of wire labels.".format(self.num_wires)
+            )
+
+        if self.num_wires != len(wires):
+            raise ValueError(
+                "Device has a fixed number of {} qubits and "
+                "cannot be created with {} wires.".format(self.num_wires, len(wires))
+            )
+
+        self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
+        self.active_reset = active_reset
+
         super().__init__(wires, shots)
         self.reset()
+
+    def _get_timeout_args(self, **kwargs) -> Dict[str, float]:
+        timeout_args = {}
+        if "compiler_timeout" in kwargs:
+            timeout_args["compiler_timeout"] = kwargs["compiler_timeout"]
+
+        if "execution_timeout" in kwargs:
+            timeout_args["execution_timeout"] = kwargs["execution_timeout"]
+
+        return timeout_args
+
+    @abstractmethod
+    def get_qc(self, device, noisy, **kwargs) -> QuantumComputer:
+        pass
 
     @staticmethod
     def _get_client_configuration():

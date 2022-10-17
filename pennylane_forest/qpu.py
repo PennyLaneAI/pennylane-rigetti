@@ -23,6 +23,7 @@ import warnings
 
 import numpy as np
 from pyquil import get_qc
+from pyquil.api import QuantumComputer
 from pyquil.experiment import SymmetrizationLevel
 from pyquil.operator_estimation import (
     Experiment,
@@ -95,12 +96,6 @@ class QPUDevice(QVMDevice):
 
         self.readout_error = readout_error
 
-        self._eigs = {}
-
-        self._compiled_program = None
-        """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
-        compilation is turned on, this will be a parametric program."""
-
         if kwargs.get("parametric_compilation", False):
             # Raise a warning if parametric compilation was explicitly turned on by the user
             # about turning the operator estimation off
@@ -113,57 +108,14 @@ class QPUDevice(QVMDevice):
                 "estimation. Operator estimation is being turned off."
             )
 
-        self.parametric_compilation = kwargs.get("parametric_compilation", True)
-
-        if self.parametric_compilation:
-            self._compiled_program_dict = {}
-            """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
-                with the corresponding compiled programs."""
-
-            self._parameter_map = {}
-            """dict[str, float]: stores the string of symbolic parameters associated with
-                their numeric values. This map will be used to bind parameters in a parametric
-                program using PyQuil."""
-
-            self._parameter_reference_map = {}
-            """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
-                parameters associated with their PyQuil memory references."""
-
-        if shots <= 0:
-            raise ValueError("Number of shots must be a positive integer.")
-
-        timeout_args = self._get_timeout_args(**kwargs)
-
-        if load_qc:
-            self.qc = get_qc(device, as_qvm=False, **timeout_args)
-        else:
-            self.qc = get_qc(device, as_qvm=True, **timeout_args)
-
-        self.num_wires = len(self.qc.qubits())
-
-        if wires is None:
-            # infer the number of modes from the device specs
-            # and use consecutive integer wire labels
-            wires = range(self.num_wires)
-
-        if isinstance(wires, int):
-            raise ValueError(
-                "Device has a fixed number of {} qubits. The wires argument can only be used "
-                "to specify an iterable of wire labels.".format(self.num_wires)
-            )
-
-        if self.num_wires != len(wires):
-            raise ValueError(
-                "Device has a fixed number of {} qubits and "
-                "cannot be created with {} wires.".format(self.num_wires, len(wires))
-            )
-
-        super(QVMDevice, self).__init__(wires, shots)
-
-        self.active_reset = active_reset
+        self.as_qvm = not load_qc
         self.symmetrize_readout = symmetrize_readout
         self.calibrate_readout = calibrate_readout
-        self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
+
+        super(QVMDevice, self).__init__(device, wires=wires, shots=shots, active_reset=active_reset, **kwargs)
+
+    def get_qc(self, device, _, **kwargs) -> QuantumComputer:
+        return get_qc(device, as_qvm=self.as_qvm, **kwargs)
 
     def expval(self, observable, shot_range=None, bin_size=None):
         # translate operator wires to wire labels on the device
