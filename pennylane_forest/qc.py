@@ -6,21 +6,14 @@ Base Quantum Computer device class
 
 .. currentmodule:: pennylane_forest.qc
 
-This module contains a base class for constructing pyQuil Quantum Computer devices for PennyLane.
-
-Auxiliary functions
--------------------
-
-.. autosummary::
-    basis_state
-    rotation
-    controlled_phase
+This module contains the :class:`~.QuantumComputerDevice` base class that can be
+used to build PennyLane devices from pyQuil QuantumComputers (such as a Rigetti Quantum Processor Unit).
 
 Classes
 -------
 
 .. autosummary::
-   ForestDevice
+   QuantumComputerDevice
 
 Code details
 ~~~~~~~~~~~~
@@ -28,9 +21,6 @@ Code details
 
 from abc import ABC, abstractmethod
 from typing import Dict
-
-import numpy as np
-
 from collections import OrderedDict
 
 from pyquil import Program
@@ -38,7 +28,7 @@ from pyquil.api import QAMExecutionResult, QuantumComputer
 from pyquil.gates import RESET, MEASURE
 from pyquil.quil import Pragma
 
-from pennylane import DeviceError
+from pennylane import DeviceError, numpy as np
 from pennylane.wires import Wires
 
 from .device import ForestDevice
@@ -48,8 +38,8 @@ from ._version import __version__
 class QuantumComputerDevice(ForestDevice, ABC):
     r"""Abstract Quantum Computer device for PennyLane.
 
-    This is a base class for common logic shared by pyQuil ``QuantumComputer``s (i.e. QVMs and real QPUs).
-    Children classes at minimum need to define a `get_qc` method that returns a pyQuil ``QuantumComputer``.
+    This is a base class for common logic shared by pyQuil ``QuantumComputer``s (i.e. QVMs, QPUs).
+    Children classes need to define a `get_qc` method that returns a pyQuil ``QuantumComputer``.
 
     Args:
         device (str): the name of the device to initialise.
@@ -75,9 +65,7 @@ class QuantumComputerDevice(ForestDevice, ABC):
     version = __version__
     author = "Rigetti Computing Inc."
 
-    def __init__(
-        self, device, *, shots=1000, wires=None, active_reset=False, **kwargs
-    ):
+    def __init__(self, device, *, shots=1000, wires=None, active_reset=False, **kwargs):
         if shots is not None and shots <= 0:
             raise ValueError("Number of shots must be a positive integer or None.")
 
@@ -135,7 +123,6 @@ class QuantumComputerDevice(ForestDevice, ABC):
     @abstractmethod
     def get_qc(self, device, *, noisy, **kwargs) -> QuantumComputer:
         """Initializes and returns a pyQuil QuantumComputer that can run quantum programs"""
-        pass
 
     @property
     def circuit_hash(self):
@@ -307,101 +294,3 @@ class QuantumComputerDevice(ForestDevice, ABC):
             self._circuit_hash = None
             self._parameter_map = {}
             self._parameter_reference_map = {}
-
-    def mat_vec_product(self, mat, vec, device_wire_labels):
-        r"""Apply multiplication of a matrix to subsystems of the quantum state.
-
-        Args:
-            mat (array): matrix to multiply
-            vec (array): state vector to multiply
-            device_wire_labels (Sequence[int]): labels of device subsystems
-
-        Returns:
-            array: output vector after applying ``mat`` to input ``vec`` on specified subsystems
-        """
-        num_wires = len(device_wire_labels)
-
-        if mat.shape != (2**num_wires, 2**num_wires):
-            raise ValueError(
-                f"Please specify a {2 ** num_wires} x {2 ** num_wires} matrix for {num_wires} wires."
-            )
-
-        # first, we need to reshape both the matrix and vector
-        # into blocks of 2x2 matrices, in order to do the higher
-        # order matrix multiplication
-
-        # Reshape the matrix to ``size=[2, 2, 2, ..., 2]``,
-        # where ``len(size) == 2*len(wires)``
-        #
-        # The first half of the dimensions correspond to a
-        # 'ket' acting on each wire/qubit, while the second
-        # half of the dimensions correspond to a 'bra' acting
-        # on each wire/qubit.
-        #
-        # E.g., if mat = \sum_{ijkl} (c_{ijkl} |ij><kl|),
-        # and wires=[0, 1], then
-        # the reshaped dimensions of mat are such that
-        # mat[i, j, k, l] == c_{ijkl}.
-        mat = np.reshape(mat, [2] * len(device_wire_labels) * 2)
-
-        # Reshape the state vector to ``size=[2, 2, ..., 2]``,
-        # where ``len(size) == num_wires``.
-        # Each wire corresponds to a subsystem.
-        #
-        # E.g., if vec = \sum_{ijk}c_{ijk}|ijk>,
-        # the reshaped dimensions of vec are such that
-        # vec[i, j, k] == c_{ijk}.
-        vec = np.reshape(vec, [2] * self.num_wires)
-
-        # Calculate the axes on which the matrix multiplication
-        # takes place. For the state vector, this simply
-        # corresponds to the requested wires. For the matrix,
-        # it is the latter half of the dimensions (the 'bra' dimensions).
-        #
-        # For example, if num_wires=3 and wires=[2, 0], then
-        # axes=((2, 3), (2, 0)). This is equivalent to doing
-        # np.einsum("ijkl,lnk", mat, vec).
-        axes = (np.arange(len(device_wire_labels), 2 * len(device_wire_labels)), device_wire_labels)
-
-        # After the tensor dot operation, the resulting array
-        # will have shape ``size=[2, 2, ..., 2]``,
-        # where ``len(size) == num_wires``, corresponding
-        # to a valid state of the system.
-        tdot = np.tensordot(mat, vec, axes=axes)
-
-        # Tensordot causes the axes given in `wires` to end up in the first positions
-        # of the resulting tensor. This corresponds to a (partial) transpose of
-        # the correct output state
-        # We'll need to invert this permutation to put the indices in the correct place
-        unused_idxs = [idx for idx in range(self.num_wires) if idx not in device_wire_labels]
-        perm = device_wire_labels + unused_idxs
-
-        # argsort gives the inverse permutation
-        inv_perm = np.argsort(perm)
-        state_multi_index = np.transpose(tdot, inv_perm)
-
-        return np.reshape(state_multi_index, 2**self.num_wires)
-
-    def analytic_probability(self, wires=None):
-        """Return the (marginal) probability of each computational basis
-        state from the last run of the device.
-
-        If no wires are specified, then all the basis states representable by
-        the device are considered and no marginalization takes place.
-
-        .. warning:: This method will have to be redefined for hardware devices, since it uses
-            the ``device._state`` attribute. This attribute might not be available for such devices.
-
-        Args:
-            wires (Iterable[Number, str], Number, str, Wires): wires to return
-                marginal probabilities for. Wires not provided
-                are traced out of the system.
-
-        Returns:
-            List[float]: list of the probabilities
-        """
-        if self._state is None:
-            return None
-
-        prob = self.marginal_prob(np.abs(self._state) ** 2, wires)
-        return prob

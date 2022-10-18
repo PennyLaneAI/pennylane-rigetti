@@ -29,7 +29,6 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-from abc import ABC
 import uuid
 
 import numpy as np
@@ -168,7 +167,7 @@ pyquil_operation_map = {
 }
 
 
-class ForestDevice(QubitDevice, ABC):
+class ForestDevice(QubitDevice):
     r"""Abstract Forest device for PennyLane.
 
     Args:
@@ -186,9 +185,7 @@ class ForestDevice(QubitDevice, ABC):
     _operation_map = pyquil_operation_map
     _capabilities = {"model": "qubit", "tensor_observables": True}
 
-    def __init__(
-        self, wires, shots=1000
-    ):
+    def __init__(self, wires, shots=1000):
         super().__init__(wires, shots)
         self.reset()
 
@@ -268,12 +265,7 @@ class ForestDevice(QubitDevice, ABC):
         return prog
 
     def reset(self):
-        """Resets the device after the previous run.
-
-        Note:
-            The ``_compiled_program`` and the ``_compiled_program_dict`` attributes are
-            not reset such that these can be used upon multiple device execution.
-        """
+        """Resets the device after the previous run."""
         self.prog = Program()
         self._state = None
 
