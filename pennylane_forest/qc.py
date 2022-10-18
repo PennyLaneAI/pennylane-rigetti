@@ -104,24 +104,24 @@ class QuantumComputerDevice(ForestDevice, ABC):
 
         if isinstance(wires, int):
             raise ValueError(
-                "Device has a fixed number of {} qubits. The wires argument can only be used "
-                "to specify an iterable of wire labels.".format(self.num_wires)
+                f"Device has a fixed number of {self.num_wires} qubits. The wires argument can only be used "
+                "to specify an iterable of wire labels."
             )
 
         if self.num_wires != len(wires):
             raise ValueError(
-                "Device has a fixed number of {} qubits and "
-                "cannot be created with {} wires.".format(self.num_wires, len(wires))
+                f"Device has a fixed number of {self.num_wires} qubits and "
+                f"cannot be created with {len(wires)} wires."
             )
 
-        self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
+        self.wiring = dict(enumerate(self.qc.qubits()))
         self.active_reset = active_reset
 
         super().__init__(wires, shots)
         self.reset()
 
     @abstractmethod
-    def get_qc(self, device, *, noisy, **kwargs) -> QuantumComputer:
+    def get_qc(self, device, **kwargs) -> QuantumComputer:
         """Initializes and returns a pyQuil QuantumComputer that can run quantum programs"""
 
     @property
@@ -211,8 +211,8 @@ class QuantumComputerDevice(ForestDevice, ABC):
 
             if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
                 raise DeviceError(
-                    "Operation {} cannot be used after other Operations have already been applied "
-                    "on a {} device.".format(operation.name, self.short_name)
+                    f"Operation {operation.name} cannot be used after other Operations have already been applied "
+                    f"on a {self.short_name} device."
                 )
 
             # Prepare for parametric compilation
