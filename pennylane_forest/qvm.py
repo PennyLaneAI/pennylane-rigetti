@@ -25,10 +25,10 @@ from pyquil.api import QuantumComputer
 from pyquil.api._quantum_computer import _get_qvm_with_topology
 from qcs_api_client.client import QCSClientConfiguration
 
-from .device import ForestDevice
+from .qc import QuantumComputerDevice
 
 
-class QVMDevice(ForestDevice):
+class QVMDevice(QuantumComputerDevice):
     r"""Forest QVM device for PennyLane.
 
     This device supports both the Rigetti Lisp QVM, as well as the built-in pyQuil pyQVM.
@@ -64,7 +64,6 @@ class QVMDevice(ForestDevice):
     """
     name = "Forest QVM Device"
     short_name = "forest.qvm"
-    observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
     def __init__(self, device, *, wires=None, shots=1000, noisy=False, **kwargs):
         if shots is None:

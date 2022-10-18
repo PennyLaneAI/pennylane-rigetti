@@ -38,10 +38,10 @@ from pyquil.quilbase import Gate
 
 from pennylane.operation import Tensor
 
-from .device import ForestDevice
+from .qc import QuantumComputerDevice
 
 
-class QPUDevice(ForestDevice):
+class QPUDevice(QuantumComputerDevice):
     r"""Forest QPU device for PennyLane.
 
     Args:
@@ -75,8 +75,6 @@ class QPUDevice(ForestDevice):
     """
     name = "Forest QPU Device"
     short_name = "forest.qpu"
-    observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
-    pennylane_requires = ">=0.15.0"
 
     def __init__(
         self,

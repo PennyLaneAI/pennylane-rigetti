@@ -29,8 +29,7 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-from abc import ABC, abstractmethod
-from typing import Dict
+from abc import ABC
 import uuid
 
 import numpy as np
@@ -38,8 +37,7 @@ import numpy as np
 from collections import OrderedDict
 
 from pyquil import Program
-from pyquil.api import QAMExecutionResult, QuantumComputer
-from pyquil.quil import DefGate, Pragma
+from pyquil.quil import DefGate
 from pyquil.gates import (
     X,
     Y,
@@ -63,8 +61,6 @@ from pyquil.gates import (
     CCNOT,
     ISWAP,
     PSWAP,
-    RESET,
-    MEASURE,
 )
 
 from pennylane import QubitDevice, DeviceError
@@ -162,7 +158,6 @@ pyquil_operation_map = {
     "RY": RY,
     "RZ": RZ,
     "Rot": rotation,
-    # the following gates are provided by the PL-Forest plugin
     "S": S,
     "T": T,
     "Toffoli": CCNOT,
@@ -192,87 +187,10 @@ class ForestDevice(QubitDevice, ABC):
     _capabilities = {"model": "qubit", "tensor_observables": True}
 
     def __init__(
-        self, device, *, wires=None, shots=1000, noisy=False, active_reset=False, **kwargs
+        self, wires, shots=1000
     ):
-        if shots is not None and shots <= 0:
-            raise ValueError("Number of shots must be a positive integer or None.")
-
-        self._compiled_program = None
-
-        self.parametric_compilation = kwargs.get("parametric_compilation", True)
-
-        if self.parametric_compilation:
-            self._circuit_hash = None
-            """None or int: stores the hash of the circuit from the last execution which
-            can be used for parametric compilation."""
-
-            self._compiled_program_dict = {}
-            """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
-                with the corresponding compiled programs."""
-
-            self._parameter_map = {}
-            """dict[str, float]: stores the string of symbolic parameters associated with
-                their numeric values. This map will be used to bind parameters in a parametric
-                program using PyQuil."""
-
-            self._parameter_reference_map = {}
-            """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
-                parameters associated with their PyQuil memory references."""
-
-        timeout_args = self._get_timeout_args(**kwargs)
-
-        self.qc = self.get_qc(device, noisy=noisy, **timeout_args)
-
-        self.num_wires = len(self.qc.qubits())
-
-        if wires is None:
-            # infer the number of modes from the device specs
-            # and use consecutive integer wire labels
-            wires = range(self.num_wires)
-
-        if isinstance(wires, int):
-            raise ValueError(
-                "Device has a fixed number of {} qubits. The wires argument can only be used "
-                "to specify an iterable of wire labels.".format(self.num_wires)
-            )
-
-        if self.num_wires != len(wires):
-            raise ValueError(
-                "Device has a fixed number of {} qubits and "
-                "cannot be created with {} wires.".format(self.num_wires, len(wires))
-            )
-
-        self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
-        self.active_reset = active_reset
-
         super().__init__(wires, shots)
         self.reset()
-
-    @abstractmethod
-    def get_qc(self, device, *, noisy, **kwargs) -> QuantumComputer:
-        """Initializes and returns a pyQuil QuantumComputer that can run quantum programs"""
-        pass
-
-    @property
-    def circuit_hash(self):
-        if self.parametric_compilation:
-            return self._circuit_hash
-
-        return None
-
-    @property
-    def compiled_program(self):
-        """Returns the latest program that was compiled for running.
-
-        If parametric compilation is turned on, this will be a parametric program.
-
-        The program is returned as a string of the Quil code.
-        If no program was compiled yet, this property returns None.
-
-        Returns:
-            Union[None, str]: the latest compiled program
-        """
-        return str(self._compiled_program) if self._compiled_program else None
 
     @property
     def operations(self):
@@ -282,16 +200,6 @@ class ForestDevice(QubitDevice, ABC):
     def program(self):
         """View the last evaluated Quil program"""
         return self.prog
-
-    def _get_timeout_args(self, **kwargs) -> Dict[str, float]:
-        timeout_args = {}
-        if "compiler_timeout" in kwargs:
-            timeout_args["compiler_timeout"] = kwargs["compiler_timeout"]
-
-        if "execution_timeout" in kwargs:
-            timeout_args["execution_timeout"] = kwargs["execution_timeout"]
-
-        return timeout_args
 
     def define_wire_map(self, wires):
         if hasattr(self, "wiring"):
@@ -303,29 +211,8 @@ class ForestDevice(QubitDevice, ABC):
         return OrderedDict(zip(wires, device_wires))
 
     def apply(self, operations, **kwargs):
-        prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
-        if self.active_reset:
-            prag += RESET()
-        self.prog = prag + self.prog
-
-        if self.parametric_compilation and "pyqvm" not in self.qc.name:
-            self.prog += self.apply_parametric_operations(operations)
-        else:
-            self.prog += self.apply_circuit_operations(operations)
-
-        # pylint: disable=attribute-defined-outside-init
-        rotations = kwargs.get("rotations", [])
-        # Storing the active wires
-        self._active_wires = ForestDevice.active_wires(operations + rotations)
-
-        self.prog += self.apply_rotations(rotations)
-
-        qubits = sorted(self.wiring.values())
-        ro = self.prog.declare("ro", "BIT", len(qubits))
-        for i, q in enumerate(qubits):
-            self.prog.inst(MEASURE(q, ro[i]))
-
-        self.prog.wrap_in_numshots_loop(self.shots)
+        self.prog += self.apply_circuit_operations(operations)
+        self.prog += self.apply_rotations(kwargs.get("rotations", []))
 
     def apply_rotations(self, rotations):
         """Apply the circuit rotations.
@@ -380,93 +267,6 @@ class ForestDevice(QubitDevice, ABC):
 
         return prog
 
-    def apply_parametric_operations(self, operations):
-        """Applies a parametric program by applying parametric operation with symbolic parameters.
-
-        Args:
-            operations (List[pennylane.Operation]): quantum operations that need to be applied
-
-        Returns:
-            pyquil.Prgram(): a pyQuil Program with the given operations
-        """
-        prog = Program()
-        # Apply the circuit operations
-        for i, operation in enumerate(operations):
-            # map the operation wires to the physical device qubits
-            device_wires = self.map_wires(operation.wires)
-
-            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
-                raise DeviceError(
-                    "Operation {} cannot be used after other Operations have already been applied "
-                    "on a {} device.".format(operation.name, self.short_name)
-                )
-
-            # Prepare for parametric compilation
-            par = []
-            for param in operation.data:
-                if getattr(param, "requires_grad", False) and operation.name != "BasisState":
-                    # Using the idx for trainable parameter objects to specify the
-                    # corresponding symbolic parameter
-                    parameter_string = "theta" + str(id(param))
-
-                    if parameter_string not in self._parameter_reference_map:
-                        # Create a new PyQuil memory reference and store it in the
-                        # parameter reference map if it was not done so already
-                        current_ref = self.prog.declare(parameter_string, "REAL")
-                        self._parameter_reference_map[parameter_string] = current_ref
-
-                    # Store the numeric value bound to the symbolic parameter
-                    self._parameter_map[parameter_string] = [param.unwrap()]
-
-                    # Appending the parameter reference to the parameters
-                    # of the corresponding operation
-                    par.append(self._parameter_reference_map[parameter_string])
-                else:
-                    par.append(param)
-
-            prog += self._operation_map[operation.name](*par, *device_wires.labels)
-
-        return prog
-
-    def execute(self, circuit, **kwargs):
-        if self.parametric_compilation:
-            self._circuit_hash = circuit.graph.hash
-        return super().execute(circuit, **kwargs)
-
-    def generate_samples(self):
-        if self.parametric_compilation:
-            for region, value in self._parameter_map.items():
-                self.prog.write_memory(region_name=region, value=value)
-
-        if "pyqvm" in self.qc.name:
-            return self.extract_samples(self.qc.run(self.prog))
-
-        if self.circuit_hash is None:
-            # Parametric compilation was set to False
-            # Compile the program
-            self._compiled_program = self.qc.compile(self.prog)
-            results = self.qc.run(executable=self._compiled_program)
-            return self.extract_samples(results)
-
-        if self.circuit_hash not in self._compiled_program_dict:
-            # Compiling this specific program for the first time
-            # Store the compiled program with the corresponding hash
-            self._compiled_program_dict[self.circuit_hash] = self.qc.compile(self.prog)
-
-        # The program has been compiled, store as the latest compiled program
-        self._compiled_program = self._compiled_program_dict[self.circuit_hash]
-        results = self.qc.run(executable=self._compiled_program)
-        return self.extract_samples(results)
-
-    def extract_samples(self, execution_results: QAMExecutionResult) -> np.ndarray:
-        """Returns samples from the readout register on the execution results received after
-        running a program on a pyQuil Quantum Abstract Machine.
-
-        Returns:
-            numpy.ndarray: Samples extracted from the readout register on the execution results.
-        """
-        return execution_results.readout_data.get("ro", [])
-
     def reset(self):
         """Resets the device after the previous run.
 
@@ -475,13 +275,7 @@ class ForestDevice(QubitDevice, ABC):
             not reset such that these can be used upon multiple device execution.
         """
         self.prog = Program()
-        self._active_wires = Wires([])
         self._state = None
-
-        if self.parametric_compilation:
-            self._circuit_hash = None
-            self._parameter_map = {}
-            self._parameter_reference_map = {}
 
     def mat_vec_product(self, mat, vec, device_wire_labels):
         r"""Apply multiplication of a matrix to subsystems of the quantum state.

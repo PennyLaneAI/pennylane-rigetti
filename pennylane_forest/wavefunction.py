@@ -30,6 +30,8 @@ import numpy as np
 
 from pyquil.api import WavefunctionSimulator
 
+from pennylane.wires import Wires
+
 from .device import ForestDevice
 
 
@@ -64,6 +66,9 @@ class WavefunctionDevice(ForestDevice):
         self._state = None
 
     def apply(self, operations, **kwargs):
+        rotations = kwargs.get("rotations", [])
+        self._active_wires = ForestDevice.active_wires(operations + rotations)
+
         super().apply(operations, **kwargs)
         self._state = self.qc.wavefunction(self.prog).amplitudes
 
@@ -133,3 +138,7 @@ class WavefunctionDevice(ForestDevice):
             expanded_state[decimal_val] = amplitude
 
         self._state = expanded_state
+
+    def reset(self):
+        super().reset()
+        self._active_wires = Wires([])

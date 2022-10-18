@@ -179,7 +179,7 @@ class TestQPUBasic(BaseTest):
                 parametric_compilation=True,
             )
 
-    def test_no_readout_correction(self):
+    def test_no_readout_correction(self, shots):
         """Test the QPU plugin with no readout correction"""
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
@@ -190,6 +190,7 @@ class TestQPUBasic(BaseTest):
             symmetrize_readout=SymmetrizationLevel.NONE,
             calibrate_readout=None,
             parametric_compilation=False,
+            shots=shots
         )
         qubit = 0  # just run program on the first qubit
 
