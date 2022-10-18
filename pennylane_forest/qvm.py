@@ -65,21 +65,23 @@ class QVMDevice(QuantumComputerDevice):
     name = "Forest QVM Device"
     short_name = "forest.qvm"
 
-    def __init__(self, device, *, wires=None, shots=1000, noisy=False, **kwargs):
+    def __init__(self, device, *, shots=1000, wires=None, noisy=False, **kwargs):
         if shots is None:
             raise ValueError("QVM device cannot be used for analytic computations.")
+
+        self.noisy = noisy
 
         super().__init__(
             device, wires=wires, shots=shots, noisy=noisy, active_reset=False, **kwargs
         )
 
-    def get_qc(self, device, *, noisy, **kwargs) -> QuantumComputer:
+    def get_qc(self, device, **kwargs) -> QuantumComputer:
         if isinstance(device, nx.Graph):
             client_configuration = QCSClientConfiguration.load()
             return _get_qvm_with_topology(
                 name="device",
                 topology=device,
-                noisy=noisy,
+                noisy=self.noisy,
                 client_configuration=client_configuration,
                 qvm_type="qvm",
                 compiler_timeout=kwargs.get("compiler_timeout", 10.0),  # 10.0 is the pyQuil default
@@ -87,4 +89,4 @@ class QVMDevice(QuantumComputerDevice):
                     "execution_timeout", 10.0
                 ),  # 10.0 is the pyQuil default
             )
-        return get_qc(device, as_qvm=True, noisy=noisy, **kwargs)
+        return get_qc(device, as_qvm=True, noisy=self.noisy, **kwargs)

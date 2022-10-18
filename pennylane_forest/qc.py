@@ -48,20 +48,35 @@ from ._version import __version__
 class QuantumComputerDevice(ForestDevice, ABC):
     r"""Abstract Quantum Computer device for PennyLane.
 
+    This is a base class for common logic shared by pyQuil ``QuantumComputer``s (i.e. QVMs and real QPUs).
+    Children classes at minimum need to define a `get_qc` method that returns a pyQuil ``QuantumComputer``.
+
     Args:
-        wires (int or Iterable[Number, str]]): Number of subsystems represented by the device,
-            or iterable that contains unique labels for the subsystems as numbers (i.e., ``[-1, 0, 2]``)
-            or strings (``['ancilla', 'q1', 'q2']``).
-        shots (int): Number of circuit evaluations/random samples used
+        device (str): the name of the device to initialise.
+        shots (int): number of circuit evaluations/random samples used
             to estimate expectation values of observables.
-            For simulator devices, 0 means the exact EV is returned.
+         wires (Iterable[Number, str]): Iterable that contains unique labels for the
+            qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``).
+            The number of labels must match the number of qubits accessible on the backend.
+            If not provided, qubits are addressed as consecutive integers ``[0, 1, ...]``, and their number
+            is inferred from the backend.
+        active_reset (bool): whether to actively reset qubits instead of waiting for
+            for qubits to decay to the ground state naturally.
+            Setting this to ``True`` results in a significantly faster expectation value
+            evaluation when the number of shots is larger than ~1000.
+
+    Keyword args:
+        compiler_timeout (int): number of seconds to wait for a response from quilc (default 10).
+        execution_timeout (int): number of seconds to wait for a response from the QVM (default 10).
+        parametric_compilation (bool): a boolean value of whether or not to use parametric
+            compilation.
     """
     pennylane_requires = ">=0.17"
     version = __version__
     author = "Rigetti Computing Inc."
 
     def __init__(
-        self, device, *, wires=None, shots=1000, noisy=False, active_reset=False, **kwargs
+        self, device, *, shots=1000, wires=None, active_reset=False, **kwargs
     ):
         if shots is not None and shots <= 0:
             raise ValueError("Number of shots must be a positive integer or None.")
@@ -90,7 +105,7 @@ class QuantumComputerDevice(ForestDevice, ABC):
 
         timeout_args = self._get_timeout_args(**kwargs)
 
-        self.qc = self.get_qc(device, noisy=noisy, **timeout_args)
+        self.qc = self.get_qc(device, **timeout_args)
 
         self.num_wires = len(self.qc.qubits())
 
