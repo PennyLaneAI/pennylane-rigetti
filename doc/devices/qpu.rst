@@ -21,20 +21,19 @@ A QPU device can be created via:
 >>> import pennylane as qml
 >>> dev_qpu = qml.device('forest.qpu', device='Aspen-M-2', shots=1000)
 
-Note that additional Quil gates not provided directly in PennyLane are importable from :mod:`~.ops`.
-An example that demonstrates the use of the native :class:`~.PSWAP` plugin gate is this:
+The QPU can then be used like this:
 
 .. code-block:: python
 
+    import pennylane as qml
     from pennylane import numpy as np
-    from pennylane_forest.ops import PSWAP
 
     @qml.qnode(dev_qpu)
     def func(x, y):
         qml.BasisState(np.array([1, 1]), wires=0)
         qml.RY(x, wires=0)
         qml.RX(y, wires=1)
-        PSWAP(0.432, wires=[0, 1])
+        qml.PSWAP(0.432, wires=[0, 1])
         qml.CNOT(wires=[0, 1])
         return expval(qml.PauliZ(1))
 

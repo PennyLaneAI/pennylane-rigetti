@@ -23,16 +23,16 @@ pyquil_inv_operation_map = {
     "CRX": qml.CRX,
     "CRY": qml.CRY,
     "CRZ": qml.CRZ,
-    "S": plf.ops.S,
-    "T": plf.ops.T,
-    "CCNOT": plf.ops.CCNOT,
+    "S": qml.S,
+    "T": qml.T,
+    "CCNOT": qml.Toffoli,
     "CPHASE": lambda *params, wires: plf.ops.CPHASE(*params, 3, wires=wires),
     "CPHASE00": lambda *params, wires: plf.ops.CPHASE(*params, 0, wires=wires),
     "CPHASE01": lambda *params, wires: plf.ops.CPHASE(*params, 1, wires=wires),
     "CPHASE10": lambda *params, wires: plf.ops.CPHASE(*params, 2, wires=wires),
-    "CSWAP": plf.ops.CSWAP,
-    "ISWAP": plf.ops.ISWAP,
-    "PSWAP": plf.ops.PSWAP,
+    "CSWAP": qml.CSWAP,
+    "ISWAP": qml.ISWAP,
+    "PSWAP": qml.PSWAP,
 }
 
 _control_map = {
