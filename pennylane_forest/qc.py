@@ -61,7 +61,6 @@ class QuantumComputerDevice(ForestDevice, ABC):
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
-    pennylane_requires = ">=0.17"
     version = __version__
     author = "Rigetti Computing Inc."
 
