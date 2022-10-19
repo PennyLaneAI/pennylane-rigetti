@@ -117,7 +117,6 @@ class QuantumComputerDevice(ForestDevice, ABC):
         self.active_reset = active_reset
 
         super().__init__(wires, shots)
-        self.reset()
 
     @abstractmethod
     def get_qc(self, device, **kwargs) -> QuantumComputer:
@@ -125,6 +124,13 @@ class QuantumComputerDevice(ForestDevice, ABC):
 
     @property
     def circuit_hash(self):
+        """Returns the hash of the most recently executed circuit.
+
+        If no circuit has been executed yet, or parametric compilation is disabled then None is returned.
+
+        Returns:
+            Union[str, None]: The circuit hash of the current
+        """
         if self.parametric_compilation:
             return self._circuit_hash
 
@@ -173,6 +179,7 @@ class QuantumComputerDevice(ForestDevice, ABC):
         return OrderedDict(zip(wires, device_wires))
 
     def apply(self, operations, **kwargs):
+        """Applies the given quantum operations."""
         prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
         if self.active_reset:
             prag += RESET()
@@ -242,11 +249,14 @@ class QuantumComputerDevice(ForestDevice, ABC):
         return prog
 
     def execute(self, circuit, **kwargs):
+        """Executes the given circuit"""
         if self.parametric_compilation:
             self._circuit_hash = circuit.graph.hash
         return super().execute(circuit, **kwargs)
 
     def generate_samples(self):
+        """Executes the program on the QuantumComputer and uses the results to return the
+        computational basis samples of all wires"""
         if self.parametric_compilation:
             for region, value in self._parameter_map.items():
                 self.prog.write_memory(region_name=region, value=value)

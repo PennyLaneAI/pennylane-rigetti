@@ -266,6 +266,7 @@ class ForestDevice(QubitDevice):
 
     def reset(self):
         """Resets the device after the previous run."""
+        # pylint:disable=attribute-defined-outside-init
         self.prog = Program()
         self._state = None
 
