@@ -95,4 +95,4 @@ class QVMDevice(QuantumComputerDevice):
         """Skips compilation for pyqvm devices as it isn't required."""
         if "pyqvm" in self.qc.name:
             return self.prog
-        return super().compile_program()
+        return super().compile()
