@@ -21,7 +21,7 @@ Code details
 """
 import networkx as nx
 from pyquil import get_qc
-from pyquil.api import QuantumComputer
+from pyquil.api import QuantumComputer, QuantumExecutable
 from pyquil.api._quantum_computer import _get_qvm_with_topology
 from qcs_api_client.client import QCSClientConfiguration
 
@@ -90,3 +90,9 @@ class QVMDevice(QuantumComputerDevice):
                 ),  # 10.0 is the pyQuil default
             )
         return get_qc(device, as_qvm=True, noisy=self.noisy, **kwargs)
+
+    def compile(self) -> QuantumExecutable:
+        """Skips compilation for pyqvm devices as it isn't required."""
+        if "pyqvm" in self.qc.name:
+            return self.prog
+        return super().compile_program()

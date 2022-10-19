@@ -24,7 +24,7 @@ from typing import Dict
 from collections import OrderedDict
 
 from pyquil import Program
-from pyquil.api import QAMExecutionResult, QuantumComputer
+from pyquil.api import QAMExecutionResult, QuantumComputer, QuantumExecutable
 from pyquil.gates import RESET, MEASURE
 from pyquil.quil import Pragma
 
@@ -185,7 +185,7 @@ class QuantumComputerDevice(ForestDevice, ABC):
             prag += RESET()
         self.prog = prag + self.prog
 
-        if self.parametric_compilation and "pyqvm" not in self.qc.name:
+        if self.parametric_compilation:
             self.prog += self.apply_parametric_operations(operations)
         else:
             self.prog += self.apply_circuit_operations(operations)
@@ -248,6 +248,10 @@ class QuantumComputerDevice(ForestDevice, ABC):
 
         return prog
 
+    def compile(self) -> QuantumExecutable:
+        """Compiles the program for the target device"""
+        return self.qc.compile(self.prog)
+
     def execute(self, circuit, **kwargs):
         """Executes the given circuit"""
         if self.parametric_compilation:
@@ -256,29 +260,20 @@ class QuantumComputerDevice(ForestDevice, ABC):
 
     def generate_samples(self):
         """Executes the program on the QuantumComputer and uses the results to return the
-        computational basis samples of all wires"""
+        computational basis samples of all wires."""
         if self.parametric_compilation:
+            # Set the parameter values in executable memory
             for region, value in self._parameter_map.items():
                 self.prog.write_memory(region_name=region, value=value)
+            # Fetch the compiled program, or compile and store it if it doesn't exist
+            self._compiled_program = self._compiled_program_dict.setdefault(
+                self.circuit_hash, self.compile()
+            )
+        else:
+            # Parametric compilation is disabled, just compile the program
+            self._compiled_program = self.compile()
 
-        if "pyqvm" in self.qc.name:
-            return self.extract_samples(self.qc.run(self.prog))
-
-        if self.circuit_hash is None:
-            # Parametric compilation was set to False
-            # Compile the program
-            self._compiled_program = self.qc.compile(self.prog)
-            results = self.qc.run(executable=self._compiled_program)
-            return self.extract_samples(results)
-
-        if self.circuit_hash not in self._compiled_program_dict:
-            # Compiling this specific program for the first time
-            # Store the compiled program with the corresponding hash
-            self._compiled_program_dict[self.circuit_hash] = self.qc.compile(self.prog)
-
-        # The program has been compiled, store as the latest compiled program
-        self._compiled_program = self._compiled_program_dict[self.circuit_hash]
-        results = self.qc.run(executable=self._compiled_program)
+        results = self.qc.run(self._compiled_program)
         return self.extract_samples(results)
 
     def extract_samples(self, execution_results: QAMExecutionResult) -> np.ndarray:
