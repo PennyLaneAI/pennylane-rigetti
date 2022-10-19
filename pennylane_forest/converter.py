@@ -5,7 +5,7 @@ import numpy as np
 import pennylane as qml
 import pennylane_forest as plf
 import pyquil
-import pyquil.simulation as simulation
+from pyquil import simulation
 from pyquil.gates import Gate
 
 pyquil_inv_operation_map = {

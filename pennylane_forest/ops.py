@@ -102,4 +102,3 @@ class CPHASE(Operation):
                 qml.PhaseShift(-phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
             ]
-
