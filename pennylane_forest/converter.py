@@ -5,6 +5,7 @@ import numpy as np
 import pennylane as qml
 import pennylane_forest as plf
 import pyquil
+import pyquil.simulation as simulation
 from pyquil.gates import Gate
 
 pyquil_inv_operation_map = {
@@ -324,7 +325,7 @@ class ProgramLoader:
         program (pyquil.quil.Program): The pyquil Program instance that should be loaded
     """
 
-    _matrix_dictionary = pyquil.simulation.matrices.QUANTUM_GATES
+    _matrix_dictionary = simulation.matrices.QUANTUM_GATES
 
     def __init__(self, program):
         self.program = program
