@@ -266,9 +266,10 @@ class QuantumComputerDevice(ForestDevice, ABC):
             for region, value in self._parameter_map.items():
                 self.prog.write_memory(region_name=region, value=value)
             # Fetch the compiled program, or compile and store it if it doesn't exist
-            self._compiled_program = self._compiled_program_dict.setdefault(
-                self.circuit_hash, self.compile()
-            )
+            self._compiled_program = self._compiled_program_dict.get(self.circuit_hash, None)
+            if self._compiled_program is None:
+                self._compiled_program = self.compile()
+                self._compiled_program_dict[self.circuit_hash] = self._compiled_program
         else:
             # Parametric compilation is disabled, just compile the program
             self._compiled_program = self.compile()
