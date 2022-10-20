@@ -569,30 +569,6 @@ class TestParametricCompilation(BaseTest):
             assert len(dev._compiled_program_dict.items()) == 1
             assert mock_qvm.compile.call_count == 1
 
-    def test_circuit_hash_none_no_compiled_program_was_stored_in_dict(self, qvm, mock_qvm, monkeypatch):
-        """Test that QVM device does not store the compiled program in a dictionary if the
-        _circuit_hash attribute is None"""
-        dev = qml.device("forest.qvm", device="2q-qvm")
-        theta = 0.432
-        phi = 0.123
-
-        with qml.tape.QuantumTape() as tape:
-            qml.RX(theta, wires=[0])
-            qml.RX(phi, wires=[1])
-            qml.CNOT(wires=[0, 1])
-            O1 = qml.expval(qml.Identity(wires=[0]))
-            O2 = qml.expval(qml.Identity(wires=[1]))
-
-        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
-
-        dev._circuit_hash = None
-
-        dev.generate_samples()
-
-        assert dev.circuit_hash is None
-        assert len(dev._compiled_program_dict.items()) == 0
-        assert mock_qvm.compile.call_count == 1
-
     def test_parametric_compilation_with_numeric_and_symbolic_queue(self, mock_qvm, execution_timeout):
         """Tests that a program containing numeric and symbolic variables as
         well is only compiled once."""
