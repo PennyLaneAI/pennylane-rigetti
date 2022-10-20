@@ -64,6 +64,7 @@ class WavefunctionDevice(ForestDevice):
         super().__init__(wires, shots)
         self.qc = WavefunctionSimulator()
         self._state = None
+        self._active_wires = None
 
     def apply(self, operations, **kwargs):
         rotations = kwargs.get("rotations", [])

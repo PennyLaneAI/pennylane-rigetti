@@ -187,7 +187,8 @@ class ForestDevice(QubitDevice):
 
     def __init__(self, wires, shots=1000):
         super().__init__(wires, shots)
-        self.reset()
+        self.prog = Program()
+        self._state = None
 
     @property
     def operations(self):
@@ -266,7 +267,6 @@ class ForestDevice(QubitDevice):
 
     def reset(self):
         """Resets the device after the previous run."""
-        # pylint:disable=attribute-defined-outside-init
         self.prog = Program()
         self._state = None
 
