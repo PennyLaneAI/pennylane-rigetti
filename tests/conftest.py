@@ -18,7 +18,7 @@ from pyquil.api._qvm import QVMNotRunning
 TOLERANCE = 1e-5
 QVM_SHOTS = 10000
 COMPILER_TIMEOUT = 100
-EXECUTION_TIMEOUT = 300
+EXECUTION_TIMEOUT = 500
 
 
 # pyquil specific global variables and functions
@@ -168,7 +168,7 @@ def compiler():
         compiler = QVMCompiler(quantum_processor=quantum_processor)
         compiler.quil_to_native_quil(Program(Id(0)))
         return compiler
-    except (RequestException, UnknownApiError, QVMNotRunning, TypeError) as e:
+    except (UnknownApiError, QVMNotRunning, TypeError) as e:
         return pytest.skip("This test requires compiler connection: {}".format(e))
 
 
