@@ -2,19 +2,14 @@
 Unit tests for the QVM simulator device.
 """
 import logging
-import re
 
 import networkx as nx
 import pytest
-import re
 
 import pennylane as qml
 from pennylane import numpy as np
-from pennylane.operation import Tensor
-from pennylane.circuit_graph import CircuitGraph
 from pennylane.wires import Wires
 
-from pyquil.quil import Pragma, Program
 from pyquil.api._quantum_computer import QuantumComputer
 
 from conftest import BaseTest
@@ -34,8 +29,8 @@ TEST_QPU_LATTICES = ["4q-qvm"]
 compiled_program = (
     "DECLARE ro BIT[2]\n"
     'PRAGMA INITIAL_REWIRING "PARTIAL"\n'
-    "CZ 1 0\n"
     "RZ(0.432) 1\n"
+    "CZ 1 0\n"
     "MEASURE 1 ro[0]\n"
     "MEASURE 0 ro[1]\n"
     "HALT\n"
@@ -201,7 +196,7 @@ class TestQVMBasic(BaseTest):
 
         self.assertAllAlmostEqual(res, expected, delta=4 / np.sqrt(shots))
 
-    def test_multi_qubit_hermitian_expectation(self, shots, qvm, compiler):
+    def test_multi_qubit_hermitian_expectation(self, shots, execution_timeout, qvm, compiler):
         """Test that arbitrary multi-qubit Hermitian expectation values are correct"""
         theta = 0.432
         phi = 0.123
@@ -215,7 +210,7 @@ class TestQVMBasic(BaseTest):
             ]
         )
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=10 * shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=10 * shots, execution_timeout=execution_timeout)
 
         with qml.tape.QuantumTape() as tape:
             qml.RY(theta, wires=[0])
@@ -259,9 +254,9 @@ class TestQVMBasic(BaseTest):
 
         self.assertAlmostEqual(var, expected, delta=3 / np.sqrt(shots))
 
-    def test_var_hermitian(self, shots, qvm, compiler):
+    def test_var_hermitian(self, shots, execution_timeout, qvm, compiler):
         """Tests for variance calculation using an arbitrary Hermitian observable"""
-        dev = plf.QVMDevice(device="2q-qvm", shots=100 * shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=100 * shots, execution_timeout=execution_timeout)
 
         phi = 0.543
         theta = 0.6543
@@ -310,8 +305,8 @@ class TestQVMBasic(BaseTest):
             qml.PhaseShift(0.432, wires=0),
             qml.CSWAP(wires=[0, 1, 2]),
             plf.CPHASE(0.432, 2, wires=[0, 1]),
-            plf.ISWAP(wires=[0, 1]),
-            plf.PSWAP(0.432, wires=[0, 1]),
+            qml.ISWAP(wires=[0, 1]),
+            qml.PSWAP(0.432, wires=[0, 1]),
         ],
     )
     def test_apply(self, op, apply_unitary, shots, qvm, compiler):
@@ -369,7 +364,7 @@ class TestQVMBasic(BaseTest):
         self.assertAllAlmostEqual(s1 ** 2, 1, delta=tol)
         self.assertAllAlmostEqual(s1, 1 - 2 * dev._samples[:, 0], delta=tol)
 
-    def test_sample_values_hermitian(self, qvm, tol):
+    def test_sample_values_hermitian(self, qvm, execution_timeout, tol):
         """Tests if the samples of a Hermitian observable returned by sample have
         the correct values
         """
@@ -377,7 +372,7 @@ class TestQVMBasic(BaseTest):
         shots = 1_000_000
         A = np.array([[1, 2j], [-2j, 0]])
 
-        dev = plf.QVMDevice(device="1q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="1q-qvm", shots=shots, execution_timeout=execution_timeout)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -404,7 +399,7 @@ class TestQVMBasic(BaseTest):
             np.var(s1), 0.25 * (np.sin(theta) - 4 * np.cos(theta)) ** 2, atol=0.1, rtol=0
         )
 
-    def test_sample_values_hermitian_multi_qubit(self, qvm, tol):
+    def test_sample_values_hermitian_multi_qubit(self, qvm, execution_timeout, tol):
         """Tests if the samples of a multi-qubit Hermitian observable returned by sample have
         the correct values
         """
@@ -420,7 +415,7 @@ class TestQVMBasic(BaseTest):
             ]
         )
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots, execution_timeout=execution_timeout)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -482,8 +477,9 @@ class TestQVMBasic(BaseTest):
     def test_timeout_set_correctly(self, shots, device):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
-        dev = plf.QVMDevice(device=device, shots=shots, timeout=100)
-        assert dev.qc.compiler.client.timeout == 100
+        dev = plf.QVMDevice(device=device, shots=shots, compiler_timeout=100, execution_timeout=101)
+        assert dev.qc.compiler._timeout == 100
+        assert dev.qc.qam._qvm_client.timeout == 101
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_timeout_default(self, shots, device):
@@ -494,17 +490,17 @@ class TestQVMBasic(BaseTest):
 
         # Check that the timeouts are equal (it has not been changed as a side effect of
         # instantiation
-        assert dev.qc.compiler.client.timeout == qc.compiler.client.timeout
+        assert dev.qc.compiler._timeout == qc.compiler._timeout
+        assert dev.qc.qam._qvm_client.timeout == qc.qam._qvm_client.timeout
 
     def test_compiled_program_stored(self, qvm, monkeypatch):
         """Test that QVM device stores the latest compiled program."""
         dev = qml.device("forest.qvm", device="2q-qvm")
 
-        dev.compiled_program is None
+        assert dev.compiled_program is None
 
         theta = 0.432
         phi = 0.123
-
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -517,13 +513,13 @@ class TestQVMBasic(BaseTest):
 
         dev.generate_samples()
 
-        dev.compiled_program is not None
+        assert dev.compiled_program is not None
 
     def test_stored_compiled_program_correct(self, qvm, monkeypatch):
         """Test that QVM device stores the latest compiled program."""
         dev = qml.device("forest.qvm", device="2q-qvm")
 
-        dev.compiled_program is None
+        assert dev.compiled_program is None
 
         theta = 0.432
 
@@ -536,13 +532,13 @@ class TestQVMBasic(BaseTest):
 
         dev.generate_samples()
 
-        dev.compiled_program.program == compiled_program
+        assert dev.compiled_program == compiled_program
 
 
 class TestParametricCompilation(BaseTest):
     """Test that parametric compilation works fine and the same program only compiles once."""
 
-    def test_compiled_program_was_stored_in_dict(self, qvm, monkeypatch):
+    def test_compiled_program_was_stored_in_dict(self, qvm, mock_qvm, monkeypatch):
         """Test that QVM device stores the compiled program correctly in a dictionary"""
         dev = qml.device("forest.qvm", device="2q-qvm")
         theta = 0.432
@@ -558,63 +554,25 @@ class TestParametricCompilation(BaseTest):
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
         dev._circuit_hash = tape.graph.hash
-
-        call_history = []
-
-        with monkeypatch.context() as m:
-            m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
-            m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
-            dev.generate_samples()
+        dev.generate_samples()
 
         assert dev.circuit_hash in dev._compiled_program_dict
         assert len(dev._compiled_program_dict.items()) == 1
-        assert len(call_history) == 1
+        assert mock_qvm.compile.call_count == 1
 
         # Testing that the compile() method was not called
         # Calling generate_samples with unchanged hash
-        for i in range(6):
-            with monkeypatch.context() as m:
-                m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
-                m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
-                dev.generate_samples()
+        for _ in range(6):
+            dev.generate_samples()
 
             assert dev.circuit_hash in dev._compiled_program_dict
             assert len(dev._compiled_program_dict.items()) == 1
-            assert len(call_history) == 1
+            assert mock_qvm.compile.call_count == 1
 
-    def test_circuit_hash_none_no_compiled_program_was_stored_in_dict(self, qvm, monkeypatch):
-        """Test that QVM device does not store the compiled program in a dictionary if the
-        _circuit_hash attribute is None"""
-        dev = qml.device("forest.qvm", device="2q-qvm")
-        theta = 0.432
-        phi = 0.123
-
-        with qml.tape.QuantumTape() as tape:
-            qml.RX(theta, wires=[0])
-            qml.RX(phi, wires=[1])
-            qml.CNOT(wires=[0, 1])
-            O1 = qml.expval(qml.Identity(wires=[0]))
-            O2 = qml.expval(qml.Identity(wires=[1]))
-
-        dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
-
-        dev._circuit_hash = None
-
-        call_history = []
-
-        with monkeypatch.context() as m:
-            m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
-            m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
-            dev.generate_samples()
-
-        assert dev.circuit_hash is None
-        assert len(dev._compiled_program_dict.items()) == 0
-        assert len(call_history) == 1
-
-    def test_parametric_compilation_with_numeric_and_symbolic_queue(self, monkeypatch):
+    def test_parametric_compilation_with_numeric_and_symbolic_queue(self, mock_qvm, execution_timeout):
         """Tests that a program containing numeric and symbolic variables as
         well is only compiled once."""
-        dev = qml.device("forest.qvm", device="2q-qvm", timeout=100)
+        dev = qml.device("forest.qvm", device="2q-qvm", execution_timeout=execution_timeout)
 
         param1 = np.array(1, requires_grad=False)
         param2 = np.array(2, requires_grad=True)
@@ -624,8 +582,6 @@ class TestParametricCompilation(BaseTest):
         number_of_runs = 10
 
         first = True
-
-        call_history = []
 
         for run_idx in range(number_of_runs):
 
@@ -642,13 +598,10 @@ class TestParametricCompilation(BaseTest):
                 # Check that we are still producing the same circuit hash
                 assert dev._circuit_hash == tape.graph.hash
 
-            with monkeypatch.context() as m:
-                m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
-                m.setattr(QuantumComputer, "run", lambda self, **kwargs: None)
-                dev.generate_samples()
+            dev.generate_samples()
 
         assert len(dev._compiled_program_dict.items()) == 1
-        assert len(call_history) == 1
+        assert mock_qvm.compile.call_count == 1
 
     def test_apply_qubitstatesvector_raises_an_error_if_not_first(self):
         """Test that there is an error raised when the QubitStateVector is not
@@ -698,11 +651,10 @@ class TestQVMIntegration(BaseTest):
         with pytest.raises(ValueError, match="Number of shots must be a positive integer"):
             qml.device("forest.qvm", "2q-qvm", shots=0)
 
-    def test_qubit_unitary(self, shots, qvm, compiler):
+    def test_qubit_unitary(self, shots, compiler_timeout, execution_timeout, qvm, compiler):
         """Test that an arbitrary unitary operation works"""
-        dev1 = qml.device("forest.qvm", device="3q-qvm", shots=shots, parametric_compilation=False)
-        dev2 = qml.device("forest.qvm", device="9q-square-qvm", shots=shots, parametric_compilation=False)
-        print(shots)
+        dev1 = qml.device("forest.qvm", device="3q-qvm", shots=shots, compiler_timeout=compiler_timeout, execution_timeout=execution_timeout, parametric_compilation=False)
+        dev2 = qml.device("forest.qvm", device="9q-square-qvm", shots=shots, compiler_timeout=compiler_timeout, execution_timeout=execution_timeout, parametric_compilation=False)
 
         def circuit():
             """Reference QNode"""

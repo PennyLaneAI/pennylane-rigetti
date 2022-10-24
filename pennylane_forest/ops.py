@@ -25,14 +25,6 @@ import pennylane as qml
 from pennylane.operation import Operation
 
 
-# We keep the following definitions for compatibility
-# as they are now part of PennyLane core
-S = qml.S
-T = qml.T
-CSWAP = qml.CSWAP
-CCNOT = qml.Toffoli
-
-
 class CPHASE(Operation):
     r"""CHPASE(phi, q, wires)
     Controlled-phase gate.
@@ -110,71 +102,3 @@ class CPHASE(Operation):
                 qml.PhaseShift(-phi / 2, wires=[wires[1]]),
                 qml.CNOT(wires=wires),
             ]
-
-
-class ISWAP(Operation):
-    r"""ISWAP(wires)
-    iSWAP gate.
-
-    .. math:: ISWAP = \begin{bmatrix}
-            1 & 0 & 0 & 0 \\
-            0 & 0 & i & 0\\
-            0 & i & 0 & 0\\
-            0 & 0 & 0 & 1
-        \end{bmatrix}.
-
-    **Details:**
-
-    * Number of wires: 3
-    * Number of parameters: 0
-
-    Args:
-        wires (int): the subsystem the gate acts on
-    """
-    num_params = 0
-    num_wires = 2
-    par_domain = None
-
-    def decomposition(wires):
-        return [
-            qml.SWAP(wires=wires),
-            qml.S(wires=[wires[0]]),
-            qml.S(wires=[wires[1]]),
-            qml.CZ(wires=wires),
-        ]
-
-
-class PSWAP(Operation):
-    r"""PSWAP(wires)
-    Phase-SWAP gate.
-
-    .. math:: PSWAP(\phi) = \begin{bmatrix}
-            1 & 0 & 0 & 0 \\
-            0 & 0 & e^{i\phi} & 0\\
-            0 & e^{i\phi} & 0 & 0\\
-            0 & 0 & 0 & 1
-        \end{bmatrix}.
-
-    **Details:**
-
-    * Number of wires: 3
-    * Number of parameters: 1
-    * Gradient recipe: :math:`\frac{d}{d\phi}PSWAP(\phi) = \frac{1}{2}\left[PSWAP(\phi+\pi/2)+PSWAP(\phi-\pi/2)\right]`
-
-
-    Args:
-        wires (int): the subsystem the gate acts on
-        phi (float): the phase angle
-    """
-    num_params = 1
-    num_wires = 2
-    par_domain = "R"
-    grad_method = "A"
-
-    def decomposition(phi, wires):
-        return [
-            qml.SWAP(wires=wires),
-            qml.CNOT(wires=wires),
-            qml.PhaseShift(phi, wires=[wires[1]]),
-            qml.CNOT(wires=wires),
-        ]

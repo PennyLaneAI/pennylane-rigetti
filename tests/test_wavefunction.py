@@ -92,8 +92,8 @@ class TestWavefunctionBasic(BaseTest):
             qml.PhaseShift(0.432, wires=0),
             qml.CSWAP(wires=[0, 1, 2]),
             plf.CPHASE(0.432, 2, wires=[0, 1]),
-            plf.ISWAP(wires=[0, 1]),
-            plf.PSWAP(0.432, wires=[0, 1]),
+            qml.ISWAP(wires=[0, 1]),
+            qml.PSWAP(0.432, wires=[0, 1]),
         ],
     )
     def test_apply(self, op, apply_unitary, tol):

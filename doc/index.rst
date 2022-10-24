@@ -16,18 +16,23 @@ Currently, PennyLane-Forest provides these Forest devices for PennyLane:
 
 .. title-card::
     :name: 'forest.numpy_wavefunction'
-    :description: Forest's Numpy wavefunction simulator backend.
+    :description: pyQuil's Numpy wavefunction simulator backend.
     :link: devices/numpy_wavefunction.html
 
 .. title-card::
     :name: 'forest.wavefunction'
-    :description: The Forest SDK wavefunction simulator backend.
+    :description: The QCS wavefunction simulator backend.
     :link: devices/wavefunction.html
 
 .. title-card::
     :name: 'forest.qvm'
-    :description: Forest's QVM and pyQuil pyQVM simulator.
+    :description: QCS QVM and pyQuil pyQVM simulator.
     :link: devices/qvm.html
+
+.. title-card::
+    :name: 'forest.qpu'
+    :description: QCS QPU.
+    :link: devices/qpu.html
 
 .. raw:: html
 
@@ -45,19 +50,18 @@ Check out these demos to see the PennyLane-Forest plugin in action:
     <div class="row">
 
 .. title-card::
-    :name: Ensemble classification with Forest and Qiskit devices
-    :figure: <img src="https://pennylane.ai/qml/_images/ensemble_diagram.png" width="100%" />
+    :name: Ensemble classification with QCS and Qiskit devices
+    :description: Use two QPUs in parallel to help solve a machine learning classification problem.
     :link:  https://pennylane.ai/qml/demos/ensemble_multi_qpu.html
 
 .. title-card::
     :name: PyTorch and noisy devices
-    :figure: <img src="https://pennylane.ai/qml/_images/bloch.gif" width="100%" />
+    :description: Use PyTorch and a noisy QVM to see how optimization responds to noisy qubits.
     :link:  https://pennylane.ai/qml/demos/pytorch_noise.html
 
 .. raw:: html
 
     </div></div><div style='clear:both'> <br/>
-
 
 You can also try it out using any of the qubit based `demos from the PennyLane documentation
 <https://pennylane.ai/qml/demonstrations.html>`_, for example the tutorial on
@@ -89,6 +93,7 @@ hardware access.
    devices/numpy_wavefunction
    devices/wavefunction
    devices/qvm
+   devices/qpu
 
 .. toctree::
    :maxdepth: 1

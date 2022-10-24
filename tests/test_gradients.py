@@ -4,9 +4,6 @@ Integration tests for quantum gradient computations.
 import pennylane as qml
 from pennylane import numpy as np
 
-from pennylane_forest.ops import PSWAP
-
-
 def test_simulator_qvm_default_agree(tol, qvm, compiler):
     """Test that forest.wavefunction, forest.qvm, and default.qubit agree
     on the calculation of quantum gradients."""
@@ -65,7 +62,7 @@ def test_gradient_with_custom_operator(qvm, compiler):
         qml.BasisState(np.array([1, 1], requires_grad=False), wires=0)
         qml.RY(x, wires=0)
         qml.RX(y, wires=1)
-        PSWAP(np.array(0.432, requires_grad=False), wires=[0, 1])
+        qml.PSWAP(np.array(0.432, requires_grad=False), wires=[0, 1])
         qml.CNOT(wires=[0, 1])
         return qml.expval(qml.PauliZ(1))
 

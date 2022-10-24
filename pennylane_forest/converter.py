@@ -1,12 +1,11 @@
 import warnings
 from collections.abc import Sequence
-import pkg_resources
-from packaging import version
 
 import numpy as np
 import pennylane as qml
 import pennylane_forest as plf
 import pyquil
+from pyquil import simulation
 from pyquil.gates import Gate
 
 pyquil_inv_operation_map = {
@@ -25,16 +24,16 @@ pyquil_inv_operation_map = {
     "CRX": qml.CRX,
     "CRY": qml.CRY,
     "CRZ": qml.CRZ,
-    "S": plf.ops.S,
-    "T": plf.ops.T,
-    "CCNOT": plf.ops.CCNOT,
+    "S": qml.S,
+    "T": qml.T,
+    "CCNOT": qml.Toffoli,
     "CPHASE": lambda *params, wires: plf.ops.CPHASE(*params, 3, wires=wires),
     "CPHASE00": lambda *params, wires: plf.ops.CPHASE(*params, 0, wires=wires),
     "CPHASE01": lambda *params, wires: plf.ops.CPHASE(*params, 1, wires=wires),
     "CPHASE10": lambda *params, wires: plf.ops.CPHASE(*params, 2, wires=wires),
-    "CSWAP": plf.ops.CSWAP,
-    "ISWAP": plf.ops.ISWAP,
-    "PSWAP": plf.ops.PSWAP,
+    "CSWAP": qml.CSWAP,
+    "ISWAP": qml.ISWAP,
+    "PSWAP": qml.PSWAP,
 }
 
 _control_map = {
@@ -326,16 +325,9 @@ class ProgramLoader:
         program (pyquil.quil.Program): The pyquil Program instance that should be loaded
     """
 
-    _matrix_dictionary = pyquil.simulation.matrices.QUANTUM_GATES
+    _matrix_dictionary = simulation.matrices.QUANTUM_GATES
 
     def __init__(self, program):
-        pl_version = pkg_resources.get_distribution("pennylane").version
-        if version.parse(pl_version) >= version.parse("0.14.0.dev"):
-            raise ValueError(
-                "The PyQuil program conversion feature is not \
-                supported with PennyLane version 0.14.0 and higher."
-            )
-
         self.program = program
         self.qubits = program.get_qubits()
 
@@ -594,12 +586,6 @@ def load_program(program: pyquil.Program):
     Every variable that is present in the Program and that is not used as the target
     register of a measurement has to be provided in the ``parameter_map`` of the template.
 
-    .. warning::
-
-        Starting from version 0.14.0 of PennyLane and PennyLane-Forest,
-        converting from Forest is not supported.
-
-
     Args:
         program (pyquil.Program): The program that should be loaded
 
@@ -621,11 +607,6 @@ def load_quil(quil_str: str):
     Every variable that is present in the Program and that is not used as the target
     register of a measurement has to be provided in the ``parameter_map`` of the template.
 
-    .. warning::
-
-        Starting from version 0.14.0 of PennyLane and PennyLane-Forest,
-        converting from Forest is not supported.
-
     Args:
         quil_str (str): The program that should be loaded
 
@@ -646,11 +627,6 @@ def load_quil_from_file(file_path: str):
 
     Every variable that is present in the Program and that is not used as the target
     register of a measurement has to be provided in the ``parameter_map`` of the template.
-
-    .. warning::
-
-        Starting from version 0.14.0 of PennyLane and PennyLane-Forest,
-        converting from Forest is not supported.
 
     Args:
         file_path (str): The path to the quil file that should be loaded

@@ -19,13 +19,12 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
-import re
 import warnings
-import pkg_resources
-from packaging import version
 
 import numpy as np
 from pyquil import get_qc
+from pyquil.api import QuantumComputer
+from pyquil.experiment import SymmetrizationLevel
 from pyquil.operator_estimation import (
     Experiment,
     ExperimentSetting,
@@ -33,19 +32,16 @@ from pyquil.operator_estimation import (
     group_experiments,
     measure_observables,
 )
-from pyquil.paulis import sI, sX, sY, sZ
+from pyquil.paulis import sI, sZ
 from pyquil.quil import Program
 from pyquil.quilbase import Gate
 
 from pennylane.operation import Tensor
 
-from typing import List
-
-from ._version import __version__
-from .qvm import QVMDevice
+from .qc import QuantumComputerDevice
 
 
-class QPUDevice(QVMDevice):
+class QPUDevice(QuantumComputerDevice):
     r"""Forest QPU device for PennyLane.
 
     Args:
@@ -66,28 +62,19 @@ class QPUDevice(QVMDevice):
         readout_error (list): specifies the conditional probabilities [p(0|0), p(1|1)], where
             p(i|j) denotes the prob of reading out i having sampled j; can be set to `None` if no
             readout errors need to be simulated; can only be set for the QPU-as-a-QVM
-        symmetrize_readout (str): method to perform readout symmetrization, using exhaustive
+        symmetrize_readout (pyquil.experiment.SymmetrizationLevel): method to perform readout symmetrization, using exhaustive
             symmetrization by default
         calibrate_readout (str): method to perform calibration for readout error mitigation,
             normalizing by the expectation value in the +1-eigenstate of the observable by default
 
     Keyword args:
-        forest_url (str): the Forest URL server. Can also be set by
-            the environment variable ``FOREST_SERVER_URL``, or in the ``~/.qcs_config``
-            configuration file. Default value is ``"https://forest-server.qcs.rigetti.com"``.
-        qvm_url (str): the QVM server URL. Can also be set by the environment
-            variable ``QVM_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:5000"``.
-        compiler_url (str): the compiler server URL. Can also be set by the environment
-            variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:6000"``.
-        timeout (int): number of seconds to wait for a response from the client.
+        compiler_timeout (int): number of seconds to wait for a response from quilc (default 10).
+        execution_timeout (int): number of seconds to wait for a response from the QVM (default 10).
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
     name = "Forest QPU Device"
     short_name = "forest.qpu"
-    observables = {"PauliX", "PauliY", "PauliZ", "Identity", "Hadamard", "Hermitian"}
 
     def __init__(
         self,
@@ -98,27 +85,14 @@ class QPUDevice(QVMDevice):
         active_reset=True,
         load_qc=True,
         readout_error=None,
-        symmetrize_readout="exhaustive",
+        symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
         calibrate_readout="plus-eig",
         **kwargs,
     ):
-        pl_version = pkg_resources.get_distribution("pennylane").version
-        if version.parse(pl_version) >= version.parse("0.14.0.dev"):
-            raise ValueError(
-                "Using the QPU via PennyLane-Forest is being deprecated \
-                    with PennyLane version 0.14.0 and higher."
-            )
-
         if readout_error is not None and load_qc:
             raise ValueError("Readout error cannot be set on the physical QPU")
 
         self.readout_error = readout_error
-
-        self._eigs = {}
-
-        self._compiled_program = None
-        """Union[None, pyquil.ExecutableDesignator]: the latest compiled program. If parametric
-        compilation is turned on, this will be a parametric program."""
 
         if kwargs.get("parametric_compilation", False):
             # Raise a warning if parametric compilation was explicitly turned on by the user
@@ -132,65 +106,16 @@ class QPUDevice(QVMDevice):
                 "estimation. Operator estimation is being turned off."
             )
 
-        self.parametric_compilation = kwargs.get("parametric_compilation", True)
-
-        if self.parametric_compilation:
-            self._compiled_program_dict = {}
-            """dict[int, pyquil.ExecutableDesignator]: stores circuit hashes associated
-                with the corresponding compiled programs."""
-
-            self._parameter_map = {}
-            """dict[str, float]: stores the string of symbolic parameters associated with
-                their numeric values. This map will be used to bind parameters in a parametric
-                program using PyQuil."""
-
-            self._parameter_reference_map = {}
-            """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
-                parameters associated with their PyQuil memory references."""
-
-        timeout = kwargs.pop("timeout", None)
-
-        if shots <= 0:
-            raise ValueError("Number of shots must be a positive integer.")
-
-        self.connection = super()._get_connection(**kwargs)
-
-        if load_qc:
-            self.qc = get_qc(device, as_qvm=False, connection=self.connection)
-            if timeout is not None:
-                self.qc.compiler.quilc_client.timeout = timeout
-        else:
-            self.qc = get_qc(device, as_qvm=True, connection=self.connection)
-            if timeout is not None:
-                self.qc.compiler.client.timeout = timeout
-
-        self.num_wires = len(self.qc.qubits())
-
-        if wires is None:
-            # infer the number of modes from the device specs
-            # and use consecutive integer wire labels
-            wires = range(self.num_wires)
-
-        if isinstance(wires, int):
-            raise ValueError(
-                "Device has a fixed number of {} qubits. The wires argument can only be used "
-                "to specify an iterable of wire labels.".format(self.num_wires)
-            )
-
-        if self.num_wires != len(wires):
-            raise ValueError(
-                "Device has a fixed number of {} qubits and "
-                "cannot be created with {} wires.".format(self.num_wires, len(wires))
-            )
-
-        super(QVMDevice, self).__init__(wires, shots, **kwargs)
-
-        self.active_reset = active_reset
+        self.as_qvm = not load_qc
         self.symmetrize_readout = symmetrize_readout
         self.calibrate_readout = calibrate_readout
-        self.wiring = {i: q for i, q in enumerate(self.qc.qubits())}
 
-    def expval(self, observable):
+        super().__init__(device, wires=wires, shots=shots, active_reset=active_reset, **kwargs)
+
+    def get_qc(self, device, **kwargs) -> QuantumComputer:
+        return get_qc(device, as_qvm=self.as_qvm, **kwargs)
+
+    def expval(self, observable, shot_range=None, bin_size=None):
         # translate operator wires to wire labels on the device
         device_wires = self.map_wires(observable.wires)
 
@@ -228,7 +153,7 @@ class QPUDevice(QVMDevice):
                     pauli_obs *= sZ(label)
 
             # Program preparing the state in which to measure observable
-            prep_prog = Program()
+            prep_prog = Program("RESET 0")
             for instr in self.program.instructions:
                 if isinstance(instr, Gate):
                     # split gate and wires -- assumes 1q and 2q gates
@@ -246,17 +171,19 @@ class QPUDevice(QVMDevice):
                         label, p00=self.readout_error[0], p11=self.readout_error[1]
                     )
 
+            prep_prog.wrap_in_numshots_loop(self.shots)
+
             # Measure out multi-qubit observable
             tomo_expt = Experiment(
-                settings=[ExperimentSetting(TensorProductState(), pauli_obs)], program=prep_prog
+                settings=[ExperimentSetting(TensorProductState(), pauli_obs)],
+                program=prep_prog,
+                symmetrization=self.symmetrize_readout,
             )
             grouped_tomo_expt = group_experiments(tomo_expt)
             meas_obs = list(
                 measure_observables(
                     self.qc,
                     grouped_tomo_expt,
-                    active_reset=self.active_reset,
-                    symmetrize_readout=self.symmetrize_readout,
                     calibrate_readout=self.calibrate_readout,
                 )
             )
@@ -265,4 +192,4 @@ class QPUDevice(QVMDevice):
             return np.sum([expt_result.expectation for expt_result in meas_obs])
 
         # Calculation of expectation value without using `measure_observables`
-        return super().expval(observable)
+        return super().expval(observable, shot_range, bin_size)

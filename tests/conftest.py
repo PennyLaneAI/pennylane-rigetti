@@ -1,17 +1,15 @@
 """
 Default parameters, commandline arguments and common routines for the unit tests.
 """
+from unittest.mock import MagicMock, patch
 import pytest
-
-from requests import RequestException
 
 import numpy as np
 from scipy.linalg import expm, block_diag
 
 from pyquil import get_qc, Program
 from pyquil.gates import I as Id
-from pyquil.api import QVMConnection, QVMCompiler, local_qvm
-from pyquil.api._config import PyquilConfig
+from pyquil.api import QAMExecutionResult, QVMCompiler, QVM
 from pyquil.api._errors import UnknownApiError
 from pyquil.api._qvm import QVMNotRunning
 
@@ -19,6 +17,8 @@ from pyquil.api._qvm import QVMNotRunning
 # defaults
 TOLERANCE = 1e-5
 QVM_SHOTS = 10000
+COMPILER_TIMEOUT = 100
+EXECUTION_TIMEOUT = 500
 
 
 # pyquil specific global variables and functions
@@ -115,6 +115,18 @@ def shots():
 
 
 @pytest.fixture
+def execution_timeout():
+    """extended execution timeout"""
+    return EXECUTION_TIMEOUT
+
+
+@pytest.fixture
+def compiler_timeout():
+    """extended compiler timeout"""
+    return COMPILER_TIMEOUT
+
+
+@pytest.fixture
 def apply_unitary():
     """Apply a unitary operation to the ground state."""
 
@@ -142,23 +154,31 @@ def apply_unitary():
 @pytest.fixture(scope="session")
 def qvm():
     try:
-        qvm = QVMConnection(random_seed=52)
-        qvm.run(Program(Id(0)), [])
+        qvm = QVM(random_seed=52)
+        qvm.run(Program(Id(0)))
         return qvm
-    except (RequestException, UnknownApiError, QVMNotRunning, TypeError) as e:
+    except (UnknownApiError, QVMNotRunning, TypeError) as e:
         return pytest.skip("This test requires QVM connection: {}".format(e))
 
 
 @pytest.fixture(scope="session")
 def compiler():
     try:
-        config = PyquilConfig()
-        device = get_qc("3q-qvm").device
-        compiler = QVMCompiler(endpoint=config.quilc_url, device=device)
+        quantum_processor = get_qc("3q-qvm").quantum_processor
+        compiler = QVMCompiler(quantum_processor=quantum_processor)
         compiler.quil_to_native_quil(Program(Id(0)))
         return compiler
-    except (RequestException, UnknownApiError, QVMNotRunning, TypeError) as e:
+    except (UnknownApiError, QVMNotRunning, TypeError) as e:
         return pytest.skip("This test requires compiler connection: {}".format(e))
+
+
+@pytest.fixture()
+def mock_qvm():
+    mock_qc = get_qc("2q-qvm", as_qvm=True)
+    mock_qc.compile = MagicMock(return_value=Program())
+    mock_qc.run = MagicMock(return_value=QAMExecutionResult(executable=Program()))
+    with patch('pennylane_forest.qvm.get_qc', return_value=mock_qc):
+        yield mock_qc
 
 
 class BaseTest:

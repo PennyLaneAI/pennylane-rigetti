@@ -30,8 +30,9 @@ import numpy as np
 
 from pyquil.api import WavefunctionSimulator
 
+from pennylane.wires import Wires
+
 from .device import ForestDevice
-from ._version import __version__
 
 
 I = np.identity(2)
@@ -53,30 +54,22 @@ class WavefunctionDevice(ForestDevice):
             or strings (``['ancilla', 'q1', 'q2']``).
         shots (int): Number of circuit evaluations/random samples used
             to estimate expectation values of observables.
-
-    Keyword args:
-        forest_url (str): the Forest URL server. Can also be set by
-            the environment variable ``FOREST_SERVER_URL``, or in the ``~/.qcs_config``
-            configuration file. Default value is ``"https://forest-server.qcs.rigetti.com"``.
-        qvm_url (str): the QVM server URL. Can also be set by the environment
-            variable ``QVM_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:5000"``.
-        compiler_url (str): the compiler server URL. Can also be set by the environment
-            variable ``COMPILER_URL``, or in the ``~/.forest_config`` configuration file.
-            Default value is ``"http://127.0.0.1:6000"``.
     """
     name = "Forest Wavefunction Simulator Device"
     short_name = "forest.wavefunction"
 
     observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
 
-    def __init__(self, wires, *, shots=None, **kwargs):
-        super().__init__(wires, shots, **kwargs)
-        self.connection = super()._get_connection(**kwargs)
-        self.qc = WavefunctionSimulator(connection=self.connection)
+    def __init__(self, wires, *, shots=None):
+        super().__init__(wires, shots)
+        self.qc = WavefunctionSimulator()
         self._state = None
+        self._active_wires = None
 
     def apply(self, operations, **kwargs):
+        rotations = kwargs.get("rotations", [])
+        self._active_wires = ForestDevice.active_wires(operations + rotations)
+
         super().apply(operations, **kwargs)
         self._state = self.qc.wavefunction(self.prog).amplitudes
 
@@ -146,3 +139,7 @@ class WavefunctionDevice(ForestDevice):
             expanded_state[decimal_val] = amplitude
 
         self._state = expanded_state
+
+    def reset(self):
+        super().reset()
+        self._active_wires = Wires([])

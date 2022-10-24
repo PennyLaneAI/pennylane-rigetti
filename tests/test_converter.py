@@ -10,7 +10,6 @@ from pennylane.tape import OperationRecorder
 from pennylane_forest.converter import *
 
 
-@pytest.mark.xfail
 class TestProgramConverter:
     """Test that PyQuil Program instances are properly converted."""
 
@@ -33,11 +32,11 @@ class TestProgramConverter:
             (g.X(0).controlled(1), qml.CNOT(wires=[1, 0])),
             (g.X(0).controlled(1).dagger(), qml.CNOT(wires=[1, 0]).inv()),
             (g.X(0).controlled(1).dagger().dagger(), qml.CNOT(wires=[1, 0]).inv().inv()),
-            (g.X(0).controlled(1).controlled(2), plf.ops.CCNOT(wires=[2, 1, 0])),
-            (g.X(0).controlled(1).controlled(2).dagger(), plf.ops.CCNOT(wires=[2, 1, 0]).inv()),
+            (g.X(0).controlled(1).controlled(2), qml.Toffoli(wires=[2, 1, 0])),
+            (g.X(0).controlled(1).controlled(2).dagger(), qml.Toffoli(wires=[2, 1, 0]).inv()),
             (
                 g.X(0).controlled(1).controlled(2).dagger().dagger(),
-                plf.ops.CCNOT(wires=[2, 1, 0]).inv().inv(),
+                qml.Toffoli(wires=[2, 1, 0]).inv().inv(),
             ),
             (g.Y(0), qml.PauliY(0)),
             (g.Y(0).dagger(), qml.PauliY(0).inv()),
@@ -51,11 +50,11 @@ class TestProgramConverter:
             (g.CNOT(0, 1), qml.CNOT(wires=[0, 1])),
             (g.CNOT(0, 1).dagger(), qml.CNOT(wires=[0, 1]).inv()),
             (g.CNOT(0, 1).dagger().dagger(), qml.CNOT(wires=[0, 1]).inv().inv()),
-            (g.CNOT(0, 1).controlled(2), plf.ops.CCNOT(wires=[2, 0, 1])),
-            (g.CNOT(0, 1).controlled(2).dagger(), plf.ops.CCNOT(wires=[2, 0, 1]).inv()),
+            (g.CNOT(0, 1).controlled(2), qml.Toffoli(wires=[2, 0, 1])),
+            (g.CNOT(0, 1).controlled(2).dagger(), qml.Toffoli(wires=[2, 0, 1]).inv()),
             (
                 g.CNOT(0, 1).controlled(2).dagger().dagger(),
-                plf.ops.CCNOT(wires=[2, 0, 1]).inv().inv(),
+                qml.Toffoli(wires=[2, 0, 1]).inv().inv(),
             ),
             (g.SWAP(0, 1), qml.SWAP(wires=[0, 1])),
             (g.SWAP(0, 1).dagger(), qml.SWAP(wires=[0, 1]).inv()),
@@ -63,12 +62,12 @@ class TestProgramConverter:
             (g.SWAP(0, 1).controlled(2), qml.CSWAP(wires=[2, 0, 1])),
             (g.SWAP(0, 1).controlled(2).dagger(), qml.CSWAP(wires=[2, 0, 1]).inv()),
             (g.SWAP(0, 1).controlled(2).dagger().dagger(), qml.CSWAP(wires=[2, 0, 1]).inv().inv()),
-            (g.ISWAP(0, 1), plf.ops.ISWAP(wires=[0, 1])),
-            (g.ISWAP(0, 1).dagger(), plf.ops.ISWAP(wires=[0, 1]).inv()),
-            (g.ISWAP(0, 1).dagger().dagger(), plf.ops.ISWAP(wires=[0, 1]).inv().inv()),
-            (g.PSWAP(0.3, 0, 1), plf.ops.PSWAP(0.3, wires=[0, 1])),
-            (g.PSWAP(0.3, 0, 1).dagger(), plf.ops.PSWAP(0.3, wires=[0, 1]).inv()),
-            (g.PSWAP(0.3, 0, 1).dagger().dagger(), plf.ops.PSWAP(0.3, wires=[0, 1]).inv().inv()),
+            (g.ISWAP(0, 1), qml.ISWAP(wires=[0, 1])),
+            (g.ISWAP(0, 1).dagger(), qml.ISWAP(wires=[0, 1]).inv()),
+            (g.ISWAP(0, 1).dagger().dagger(), qml.ISWAP(wires=[0, 1]).inv().inv()),
+            (g.PSWAP(0.3, 0, 1), qml.PSWAP(0.3, wires=[0, 1])),
+            (g.PSWAP(0.3, 0, 1).dagger(), qml.PSWAP(0.3, wires=[0, 1]).inv()),
+            (g.PSWAP(0.3, 0, 1).dagger().dagger(), qml.PSWAP(0.3, wires=[0, 1]).inv().inv()),
             (g.CZ(0, 1), qml.CZ(wires=[0, 1])),
             (g.CZ(0, 1).dagger(), qml.CZ(wires=[0, 1]).inv()),
             (g.CZ(0, 1).dagger().dagger(), qml.CZ(wires=[0, 1]).inv().inv()),
@@ -126,9 +125,9 @@ class TestProgramConverter:
             (g.CSWAP(0, 1, 2), qml.CSWAP(wires=[0, 1, 2])),
             (g.CSWAP(0, 1, 2).dagger(), qml.CSWAP(wires=[0, 1, 2]).inv()),
             (g.CSWAP(0, 1, 2).dagger().dagger(), qml.CSWAP(wires=[0, 1, 2]).inv().inv()),
-            (g.CCNOT(0, 1, 2), plf.ops.CCNOT(wires=[0, 1, 2])),
-            (g.CCNOT(0, 1, 2).dagger(), plf.ops.CCNOT(wires=[0, 1, 2]).inv()),
-            (g.CCNOT(0, 1, 2).dagger().dagger(), plf.ops.CCNOT(wires=[0, 1, 2]).inv().inv()),
+            (g.CCNOT(0, 1, 2), qml.Toffoli(wires=[0, 1, 2])),
+            (g.CCNOT(0, 1, 2).dagger(), qml.Toffoli(wires=[0, 1, 2]).inv()),
+            (g.CCNOT(0, 1, 2).dagger().dagger(), qml.Toffoli(wires=[0, 1, 2]).inv().inv()),
         ],
     )
     def test_convert_operation(self, pyquil_operation, expected_pl_operation):
@@ -388,8 +387,8 @@ class TestProgramConverter:
             qml.CRY(0.2, wires=[2, 3]),
             qml.CRX(0.4, wires=[0, 2]),
             qml.CNOT(wires=[1, 4]),
-            plf.ops.CCNOT(wires=[3, 1, 5]),
-            plf.ops.CCNOT(wires=[1, 4, 3]),
+            qml.Toffoli(wires=[3, 1, 5]),
+            qml.Toffoli(wires=[1, 4, 3]),
         ]
 
         for converted, expected in zip(rec.queue, expected_queue):
@@ -453,17 +452,17 @@ class TestProgramConverter:
             load_program(program)(wires=range(5))
 
         expected_queue = [
-            plf.ops.CCNOT(wires=[2, 0, 1]),
-            plf.ops.CCNOT(wires=[2, 0, 1]).inv(),
-            plf.ops.CCNOT(wires=[2, 0, 1]).inv(),
-            plf.ops.CCNOT(wires=[2, 0, 1]),
+            qml.Toffoli(wires=[2, 0, 1]),
+            qml.Toffoli(wires=[2, 0, 1]).inv(),
+            qml.Toffoli(wires=[2, 0, 1]).inv(),
+            qml.Toffoli(wires=[2, 0, 1]),
             qml.CRX(0.3, wires=[4, 3]),
             qml.CRX(0.2, wires=[4, 3]).inv(),
             qml.CRX(0.3, wires=[4, 3]).inv(),
             qml.CRX(0.2, wires=[4, 3]),
-            plf.ops.CCNOT(wires=[1, 4, 2]),
-            plf.ops.CCNOT(wires=[1, 4, 0]).inv(),
-            plf.ops.CCNOT(wires=[1, 4, 0]),
+            qml.Toffoli(wires=[1, 4, 2]),
+            qml.Toffoli(wires=[1, 4, 0]).inv(),
+            qml.Toffoli(wires=[1, 4, 0]),
         ]
 
         for converted, expected in zip(rec.queue, expected_queue):
@@ -644,7 +643,6 @@ class TestProgramConverter:
             load_program(program)(wires=range(3))
 
 
-@pytest.mark.xfail
 class TestQuilConverter:
     """Test that quil instances passed as string are properly converted."""
 
@@ -923,7 +921,6 @@ class TestQuilConverter:
             assert np.array_equal(converted.data, expected.data)
 
 
-@pytest.mark.xfail
 class TestQuilFileConverter:
     """Test that quil files are properly converted."""
 
@@ -955,7 +952,6 @@ class TestQuilFileConverter:
             assert converted.data == expected.data
 
 
-@pytest.mark.xfail
 class TestInspectionProperties:
     """Test that the inspection properties of ProgramLoader return the expected values."""
 
@@ -1034,7 +1030,6 @@ class TestInspectionProperties:
         assert str(loader) == "PennyLane Program Loader for PyQuil Program:\n" + str(loader.program)
 
 
-@pytest.mark.xfail
 class TestIntegration:
     """Test that the program loader integrates properly with PennyLane."""
 
@@ -1225,7 +1220,7 @@ class TestIntegration:
 
             return qml.expval(qml.PauliZ(0)), qml.expval(qml.PauliZ(1))
 
-        assert np.array_equal(qml.jacobian([angle]), circuit_reg.jacobian([angle]))
+        assert np.array_equal(qml.jacobian(circuit)(angle), qml.jacobian(circuit_reg)(angle))
 
     THETA = np.linspace(0.11, 3, 5)
     PHI = np.linspace(0.32, 3, 5)

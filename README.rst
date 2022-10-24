@@ -28,11 +28,11 @@ PennyLane Forest Plugin
 .. header-start-inclusion-marker-do-not-remove
 
 The PennyLane Forest plugin allows different Rigetti devices to work with
-PennyLane --- the wavefunction simulator, and the Quantum Virtual Machine (QVM).
+PennyLane --- the wavefunction simulator, the Quantum Virtual Machine (QVM), and Quantum Processing Units (QPUs).
 
 `pyQuil <https://pyquil.readthedocs.io>`__ is a Python library for quantum programming using the
 quantum instruction language (Quil) --- resulting quantum programs can be executed using the
-`Rigetti Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`__ and the `Rigetti QCS
+`Rigetti Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`__ and `Rigetti Quantum Cloud Services (QCS)
 <https://qcs.rigetti.com/>`__.
 
 `PennyLane <https://pennylane.readthedocs.io>`__ is a cross-platform Python library for quantum machine
@@ -46,22 +46,13 @@ The plugin documentation can be found here: `<https://docs.pennylane.ai/projects
 Features
 ========
 
-* Provides three devices to be used with PennyLane: ``forest.numpy_wavefunction``,
-  ``forest.wavefunction``, and ``forest.qvm``. These provide access to the pyQVM
-  Numpy wavefunction simulator, Forest wavefunction simulator, and quantum
-  virtual machine (QVM) respectively.
+* Provides four devices to be used with PennyLane: ``forest.numpy_wavefunction``,
+  ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the pyQVM
+  Numpy wavefunction simulator, pyQuil wavefunction simulator, quantum
+  virtual machine (QVM), and quantum processing units (QPUs) respectively.
 
 
 * All provided devices support all core qubit PennyLane operations and observables.
-
-
-* Provides custom PennyLane operations to cover additional pyQuil operations:
-  ``ISWAP``, ``PSWAP``, and ``CPHASE``. Every custom operation supports analytic
-  differentiation.
-
-* Combine Forest and the Rigetti Cloud Services with PennyLane's automatic differentiation and
-  optimization.
-
 
 .. installation-start-inclusion-marker-do-not-remove
 
@@ -86,14 +77,12 @@ Dependencies
 
 PennyLane-Forest requires the following libraries be installed:
 
-* `Python <http://python.org/>`__ >=3.6
+* `Python <http://python.org/>`__ >=3.7
 
 as well as the following Python packages:
 
-* `PennyLane <http://pennylane.readthedocs.io/>`__
-* `pyQuil <https://pyquil-docs.rigetti.com/en/stable/>`__ >=2.16, <2.28.3
-
-Note that the latest PyQuil version 3.0 is not currently supported.
+* `PennyLane <http://pennylane.readthedocs.io/>`__ >=0.15.0
+* `pyQuil <https://pyquil-docs.rigetti.com/en/stable/>`__ >=3.3.1, <4.0.0
 
 If you currently do not have Python 3 installed, we recommend
 `Anaconda for Python 3 <https://www.anaconda.com/download/>`__, a distributed version
@@ -105,11 +94,11 @@ Forest software development kit (SDK):
 
 * `Forest SDK <https://pyquil-docs.rigetti.com/en/stable/>`__
 
-Alternatively, you may sign up for Rigetti's Quantum Cloud Services (QCS) to acquire a Quantum Machine
-Image (QMI) which will allow you to compile your quantum code and run on real quantum processing units (QPUs),
-or on a preinstalled QVM. Note that this requires a valid QCS account.
+Alternatively, you may sign up for Rigetti's Quantum Cloud Services (QCS)  which will allow you to compile your 
+quantum code and run on real QPUs. Note that this requires a valid QCS account and the QCS CLI:
 
-* `Quantum Cloud Services <https://docs.rigetti.com/en/>`__
+* `QCS <https://docs.rigetti.com/en/>`__
+* `QCS CLI <https://docs.rigetti.com/qcs/guides/using-the-qcs-cli>`__
 
 Tests
 ~~~~~

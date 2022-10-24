@@ -36,21 +36,36 @@ import numpy as np
 from collections import OrderedDict
 
 from pyquil import Program
-from pyquil.api._base_connection import ForestConnection
-from pyquil.api._config import PyquilConfig
-
 from pyquil.quil import DefGate
-from pyquil.gates import X, Y, Z, H, PHASE, RX, RY, RZ, CZ, SWAP, CNOT, S, T, CSWAP, I
-
-# following gates are not supported by PennyLane
-from pyquil.gates import CPHASE00, CPHASE01, CPHASE10, CPHASE, CCNOT, ISWAP, PSWAP
+from pyquil.gates import (
+    X,
+    Y,
+    Z,
+    H,
+    PHASE,
+    RX,
+    RY,
+    RZ,
+    CZ,
+    SWAP,
+    CNOT,
+    S,
+    T,
+    CSWAP,
+    I,
+    CPHASE,
+    CPHASE00,
+    CPHASE01,
+    CPHASE10,
+    CCNOT,
+    ISWAP,
+    PSWAP,
+)
 
 from pennylane import QubitDevice, DeviceError
 from pennylane.wires import Wires
 
 from ._version import __version__
-
-pyquil_config = PyquilConfig()
 
 
 def basis_state(par, *wires):
@@ -142,7 +157,6 @@ pyquil_operation_map = {
     "RY": RY,
     "RZ": RZ,
     "Rot": rotation,
-    # the following gates are provided by the PL-Forest plugin
     "S": S,
     "T": T,
     "Toffoli": CCNOT,
@@ -164,30 +178,21 @@ class ForestDevice(QubitDevice):
             to estimate expectation values of observables.
             For simulator devices, 0 means the exact EV is returned.
     """
-    pennylane_requires = ">=0.17"
+    pennylane_requires = ">=0.18"
     version = __version__
     author = "Rigetti Computing Inc."
 
     _operation_map = pyquil_operation_map
     _capabilities = {"model": "qubit", "tensor_observables": True}
 
-    def __init__(self, wires, shots=1000, **kwargs):
+    def __init__(self, wires, shots=1000):
         super().__init__(wires, shots)
-        self.reset()
+        self.prog = Program()
+        self._state = None
 
-    @staticmethod
-    def _get_connection(**kwargs):
-        forest_url = kwargs.get("forest_url", pyquil_config.forest_url)
-        qvm_url = kwargs.get("qvm_url", pyquil_config.qvm_url)
-        compiler_url = kwargs.get("compiler_url", pyquil_config.quilc_url)
-
-        connection = ForestConnection(
-            sync_endpoint=qvm_url,
-            compiler_endpoint=compiler_url,
-            forest_cloud_endpoint=forest_url,
-        )
-
-        return connection
+    @property
+    def operations(self):
+        return set(self._operation_map.keys())
 
     @property
     def program(self):
@@ -195,7 +200,6 @@ class ForestDevice(QubitDevice):
         return self.prog
 
     def define_wire_map(self, wires):
-
         if hasattr(self, "wiring"):
             device_wires = Wires(self.wiring)
         else:
@@ -205,34 +209,8 @@ class ForestDevice(QubitDevice):
         return OrderedDict(zip(wires, device_wires))
 
     def apply(self, operations, **kwargs):
-        # pylint: disable=attribute-defined-outside-init
-        rotations = kwargs.get("rotations", [])
-
-        # Storing the active wires
-        self._active_wires = ForestDevice.active_wires(operations + rotations)
-
-        # Apply the circuit operations
-        for i, operation in enumerate(operations):
-            # map the ops' wires to the wire labels used by the device
-            device_wires = self.map_wires(operation.wires)
-            par = operation.parameters
-
-            if isinstance(par, list) and par:
-                if isinstance(par[0], np.ndarray) and par[0].shape == ():
-                    # Array not supported
-                    par = [float(i) for i in par]
-
-            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
-                name = operation.name
-                short_name = self.short_name
-                raise DeviceError(
-                    f"Operation {name} cannot be used after other Operations have already "
-                    f"been applied on a {short_name} device."
-                )
-
-            self.prog += self._operation_map[operation.name](*par, *device_wires.labels)
-
-        self.prog += self.apply_rotations(rotations)
+        self.prog += self.apply_circuit_operations(operations)
+        self.prog += self.apply_rotations(kwargs.get("rotations", []))
 
     def apply_rotations(self, rotations):
         """Apply the circuit rotations.
@@ -255,14 +233,42 @@ class ForestDevice(QubitDevice):
 
         return rotation_operations
 
-    def reset(self):
-        self.prog = Program()
-        self._active_wires = Wires([])
-        self._state = None
+    def apply_circuit_operations(self, operations):
+        """Apply circuit operations
 
-    @property
-    def operations(self):
-        return set(self._operation_map.keys())
+        Args:
+            operations (List[pennylane.Operation]): quantum operations that need to be applied
+
+        Returns:
+            pyquil.Program(): a pyQuil Program with the given operations
+        """
+        prog = Program()
+        for i, operation in enumerate(operations):
+            # map the ops' wires to the wire labels used by the device
+            device_wires = self.map_wires(operation.wires)
+            par = operation.parameters
+
+            if isinstance(par, list) and par:
+                if isinstance(par[0], np.ndarray) and par[0].shape == ():
+                    # Array not supported
+                    par = [float(i) for i in par]
+
+            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
+                name = operation.name
+                short_name = self.short_name
+                raise DeviceError(
+                    f"Operation {name} cannot be used after other Operations have already "
+                    f"been applied on a {short_name} device."
+                )
+
+            prog += self._operation_map[operation.name](*par, *device_wires.labels)
+
+        return prog
+
+    def reset(self):
+        """Resets the device after the previous run."""
+        self.prog = Program()
+        self._state = None
 
     def mat_vec_product(self, mat, vec, device_wire_labels):
         r"""Apply multiplication of a matrix to subsystems of the quantum state.
