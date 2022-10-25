@@ -22,6 +22,9 @@ Code details
 import warnings
 
 import numpy as np
+from pennylane.measurements import Expectation
+from pennylane.operation import Tensor
+from pennylane.tape import QuantumTape
 from pyquil import get_qc
 from pyquil.api import QuantumComputer
 from pyquil.experiment import SymmetrizationLevel
@@ -35,8 +38,6 @@ from pyquil.operator_estimation import (
 from pyquil.paulis import sI, sZ
 from pyquil.quil import Program
 from pyquil.quilbase import Gate
-
-from pennylane.operation import Tensor
 
 from .qc import QuantumComputerDevice
 
@@ -109,6 +110,7 @@ class QPUDevice(QuantumComputerDevice):
         self.as_qvm = not load_qc
         self.symmetrize_readout = symmetrize_readout
         self.calibrate_readout = calibrate_readout
+        self._skip_generate_samples = False
 
         super().__init__(device, wires=wires, shots=shots, active_reset=active_reset, **kwargs)
 
@@ -139,11 +141,7 @@ class QPUDevice(QuantumComputerDevice):
                 pauli_obs = sZ(wire)
 
             # Multi-qubit observable
-            elif (
-                len(device_wires) > 1
-                and isinstance(observable, Tensor)
-                and not self.parametric_compilation
-            ):
+            elif len(device_wires) > 1 and isinstance(observable, Tensor):
 
                 # All observables are rotated to be measured in the Z-basis, so we just need to
                 # check which wires exist in the observable, map them to physical qubits, and measure
@@ -193,3 +191,15 @@ class QPUDevice(QuantumComputerDevice):
 
         # Calculation of expectation value without using `measure_observables`
         return super().expval(observable, shot_range, bin_size)
+
+    def execute(self, circuit: QuantumTape, **kwargs):
+        self._skip_generate_samples = (
+            all(obs.return_type == Expectation for obs in circuit.observables)
+            and not self.parametric_compilation
+        )
+
+        return super().execute(circuit, **kwargs)
+
+    def generate_samples(self):
+        if not self._skip_generate_samples:
+            return super().generate_samples()
