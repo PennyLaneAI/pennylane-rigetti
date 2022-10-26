@@ -277,7 +277,6 @@ class TestPyQVMBasic(BaseTest):
         # verify the device is now in the expected state
         # Note we have increased the tolerance here, since we are only
         # performing 1024 shots.
-
         self.assertAllAlmostEqual(res, expected, delta=3 / np.sqrt(shots))
 
 

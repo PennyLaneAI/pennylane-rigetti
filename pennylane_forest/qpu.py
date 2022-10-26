@@ -201,6 +201,4 @@ class QPUDevice(QuantumComputerDevice):
         return super().execute(circuit, **kwargs)
 
     def generate_samples(self):
-        if self._skip_generate_samples:
-            return
-        return super().generate_samples()
+        return None if self._skip_generate_samples else super().generate_samples()
