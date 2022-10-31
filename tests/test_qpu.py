@@ -2,18 +2,18 @@
 Unit tests for the QPU device.
 """
 import logging
-from pyquil.experiment import SymmetrizationLevel
 
-import pytest
-import pyquil
+import numpy as np
 import pennylane as qml
-from pennylane import numpy as np
+import pyquil
+import pytest
+from conftest import BaseTest
+from flaky import flaky
 from pennylane.operation import Tensor
 from pennylane.wires import Wires
-import pennylane_forest as plf
-from conftest import BaseTest
+from pyquil.experiment import SymmetrizationLevel
 
-from flaky import flaky
+import pennylane_forest as plf
 
 log = logging.getLogger(__name__)
 
@@ -59,7 +59,9 @@ class TestQPUIntegration(BaseTest):
         with pytest.raises(ValueError, match="Device has a fixed number of"):
             qml.device("forest.qpu", device=device, shots=5, wires=100, load_qc=False)
 
-        dev_iterable_wires = qml.device("forest.qpu", device=device, shots=5, wires=range(4), load_qc=False)
+        dev_iterable_wires = qml.device(
+            "forest.qpu", device=device, shots=5, wires=range(4), load_qc=False
+        )
         assert dev_iterable_wires.wires == Wires(range(4))
 
         with pytest.raises(ValueError, match="Device has a fixed number of"):
@@ -161,6 +163,38 @@ class TestQPUIntegration(BaseTest):
 
         assert np.allclose(res, exp, atol=2e-2)
 
+    def test_skip_generate_samples(self, shots):
+        """Test that ``QubitDevice.generate_samples`` is skipped when using expval and
+        ``parametric_compilation`` is False."""
+        device = np.random.choice(TEST_QPU_LATTICES)
+        dev = qml.device(
+            "forest.qpu",
+            device=device,
+            shots=shots,
+            load_qc=False,
+            parametric_compilation=False,
+        )
+
+        @qml.qnode(dev)
+        def circuit_expval():
+            return qml.expval(qml.PauliZ(0))
+
+        @qml.qnode(dev)
+        def circuit_counts():
+            return qml.counts(qml.PauliZ(0))
+
+        assert dev._skip_generate_samples is False
+
+        res = circuit_expval()
+
+        assert res == 1.0
+        assert dev._skip_generate_samples is True
+
+        res = circuit_counts()
+
+        assert res == {1: shots}
+        assert dev._skip_generate_samples is False
+
 
 class TestQPUBasic(BaseTest):
     """Unit tests for the QPU (as a QVM)."""
@@ -190,7 +224,7 @@ class TestQPUBasic(BaseTest):
             symmetrize_readout=SymmetrizationLevel.NONE,
             calibrate_readout=None,
             parametric_compilation=False,
-            shots=shots
+            shots=shots,
         )
         qubit = 0  # just run program on the first qubit
 
@@ -342,7 +376,7 @@ class TestQPUBasic(BaseTest):
             readout_error=[0.9, 0.75],
             symmetrize_readout=SymmetrizationLevel.NONE,
             calibrate_readout=None,
-            parametric_compilation=False
+            parametric_compilation=False,
         )
 
         @qml.qnode(dev_qpu)
@@ -366,8 +400,8 @@ class TestQPUBasic(BaseTest):
             shots=10_000,
             readout_error=[0.9, 0.75],
             symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
-            calibrate_readout='plus-eig',
-            parametric_compilation=False
+            calibrate_readout="plus-eig",
+            parametric_compilation=False,
         )
 
         @qml.qnode(dev_qpu)
