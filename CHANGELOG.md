@@ -4,9 +4,10 @@
 
 #### Re-introduction of the Rigetti Quantum Proccessing Unit (QPU) device
 
-This release uses the latest version of pyQuil to connect to 
-[Rigetti Quantum Cloud Services (QCS)](https://docs.rigetti.com/qcs/) and use 
-the latest [Rigetti QPUs](https://qcs.rigetti.com/qpus) as a PennyLane device.
+This release uses the latest version of [pyQuil](https://github.com/rigetti/pyquil)
+to connect to [Rigetti Quantum Cloud Services (QCS)](https://docs.rigetti.com/qcs/)
+and enables the use of the latest [Rigetti QPUs](https://qcs.rigetti.com/qpus)
+as a PennyLane device.
 [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
 
 ### Breaking changes
