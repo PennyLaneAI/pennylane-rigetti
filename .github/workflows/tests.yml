@@ -45,7 +45,7 @@ jobs:
           pip install dist/PennyLane*.whl
 
       - name: Run tests
-        run: python -m pytest tests --cov=pennylane_forest --cov-report=term-missing --cov-report=xml -p no:warnings --tb=native
+        run: python -m pytest tests --cov=pennylane_rigetti --cov-report=term-missing --cov-report=xml -p no:warnings --tb=native
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1.0.7
@@ -87,8 +87,8 @@ jobs:
 
       - name: Run tests
         run: |
-          pl-device-test --device=forest.numpy_wavefunction --tb=short --skip-ops --analytic=True
-          pl-device-test --device=forest.wavefunction --tb=short --skip-ops --analytic=False --shots=20000
+          pl-device-test --device=rigetti.numpy_wavefunction --tb=short --skip-ops --analytic=True
+          pl-device-test --device=rigetti.wavefunction --tb=short --skip-ops --analytic=False --shots=20000
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1.0.7

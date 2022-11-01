@@ -23,7 +23,7 @@ jobs:
       - name: Run version bump
         run: >
           python .github/workflows/vb_script.py
-          --version_path "./pennylane_forest/_version.py"
+          --version_path "./pennylane_rigetti/_version.py"
           --changelog_path "./CHANGELOG.md" --pre_release
 
       - name: Create Pull Request
