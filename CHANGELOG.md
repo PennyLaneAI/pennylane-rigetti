@@ -18,7 +18,7 @@ as a PennyLane device.
   details.
   [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
 
-* The `forest_url` has been removed, as it is now managed by the QCS CLI.
+* The `forest_url` parameter has been removed, as it is now managed by the QCS CLI.
   [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
 
 * The `compiler_url` and `qvm_url` device parameters have been removed. The default
