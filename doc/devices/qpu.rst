@@ -1,11 +1,11 @@
 The QPU device
 ==============
 
-The intention of the ``forest.qpu`` device is to construct a device that will allow for execution on an actual QPU.
-Constructing and using this device is very similar in design and implementation as the ``forest.qvm`` device, with 
+The intention of the ``rigetti.qpu`` device is to construct a device that will allow for execution on an actual QPU.
+Constructing and using this device is very similar in design and implementation as the ``rigetti.qvm`` device, with 
 slight differences at initialization, such as not supporting the keyword argument ``noisy``.
 
-In addition, ``forest.qpu`` also accepts the optional ``active_reset`` keyword argument:
+In addition, ``rigetti.qpu`` also accepts the optional ``active_reset`` keyword argument:
 
 ``active_reset`` (*bool*)
     Whether to actively reset qubits instead of waiting for
@@ -19,7 +19,7 @@ Usage
 A QPU device can be created via:
 
 >>> import pennylane as qml
->>> dev_qpu = qml.device('forest.qpu', device='Aspen-M-2', shots=1000)
+>>> dev_qpu = qml.device('rigetti.qpu', device='Aspen-M-2', shots=1000)
 
 The QPU can then be used like this:
 

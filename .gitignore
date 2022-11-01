@@ -3,7 +3,7 @@
 doc/_build
 build
 dist
-PennyLane_Forest.egg-info
+PennyLane_Rigetti.egg-info
 .idea
 *.ipynb
 *.ipynb_checkpoints

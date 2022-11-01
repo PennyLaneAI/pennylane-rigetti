@@ -1,11 +1,11 @@
 The Numpy-Wavefunction device
 =============================
 
-The ``forest.numpy_wavefunction`` device provides an interface between PennyLane
+The ``rigetti.numpy_wavefunction`` device provides an interface between PennyLane
 and the pyQuil ``NumpyWavefunctionSimulator``.
 
 As the NumPy wavefunction simulator allows access and manipulation of the underlying
-quantum state vector, ``forest.numpy_wavefunction`` is able to support the full
+quantum state vector, ``rigetti.numpy_wavefunction`` is able to support the full
 suite of PennyLane and Quil quantum operations and observables.
 
 
@@ -16,12 +16,12 @@ suite of PennyLane and Quil quantum operations and observables.
 
 .. note::
 
-    By default, ``forest.numpy_wavefunction`` is initialized with ``analytic=True``, indicating
+    By default, ``rigetti.numpy_wavefunction`` is initialized with ``analytic=True``, indicating
     that the exact analytic expectation value is to be returned.
 
-    If the number of trials or shots provided to the ``forest.numpy_wavefunction`` is
+    If the number of trials or shots provided to the ``rigetti.numpy_wavefunction`` is
     instead non-zero, a spectral decomposition is performed and a Bernoulli distribution
-    is constructed and sampled. This allows the ``forest.numpy_wavefunction`` device to
+    is constructed and sampled. This allows the ``rigetti.numpy_wavefunction`` device to
     'approximate' the effect of sampling the expectation value.
 
 Usage
@@ -33,7 +33,7 @@ You can instantiate the device in PennyLane as follows:
 
     import pennylane as qml
 
-    dev_numpy = qml.device('forest.numpy_wavefunction', wires=2)
+    dev_numpy = qml.device('rigetti.numpy_wavefunction', wires=2)
 
 This device can then be used just like other devices for the definition and evaluation of QNodes within PennyLane.
 
@@ -58,4 +58,4 @@ array([0.97517033, 0.04904283])
 Supported operations
 ~~~~~~~~~~~~~~~~~~~~
 
-All Forest devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with the exception of the PennyLane ``QubitStateVector`` state preparation operation.
+All Rigetti devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with the exception of the PennyLane ``QubitStateVector`` state preparation operation.

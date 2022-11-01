@@ -2,9 +2,9 @@
 Custom operations
 =================
 
-**Module name:** :mod:`pennylane_forest.ops`
+**Module name:** :mod:`pennylane_rigetti.ops`
 
-.. currentmodule:: pennylane_forest.ops
+.. currentmodule:: pennylane_rigetti.ops
 
 Contains some additional PennyLane qubit operations.
 

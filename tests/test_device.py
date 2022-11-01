@@ -1,5 +1,5 @@
 """
-Unit tests for the abstract ForestDevice class
+Unit tests for the abstract RigettiDevice class
 """
 from unittest.mock import patch
 import pytest
@@ -9,25 +9,25 @@ from pennylane import numpy as np
 
 from conftest import I, U, U2, H
 
-from pennylane_forest.device import ForestDevice
+from pennylane_rigetti.device import RigettiDevice
 
 
 # make test deterministic
 np.random.seed(42)
 
 
-@patch.multiple(ForestDevice, __abstractmethods__=set())
+@patch.multiple(RigettiDevice, __abstractmethods__=set())
 class TestMatVecProduct:
-    """Unit tests matrix-vector product method of the ForestDevice class"""
+    """Unit tests matrix-vector product method of the RigettiDevice class"""
 
     def test_incorrect_matrix_size(self, tol):
         """Test that an exception is raised if the input matrix is
         applied to the incorrect number of wires"""
         wires = 3
-        dev = ForestDevice(wires=wires, shots=1)
+        dev = RigettiDevice(wires=wires, shots=1)
 
         # create a random length 2**wires vector
-        vec = np.random.random([2 ** wires])
+        vec = np.random.random([2**wires])
 
         # apply 2 qubit unitary to the full system
         with pytest.raises(ValueError, match="specify a 8 x 8 matrix for 3 wires"):
@@ -38,10 +38,10 @@ class TestMatVecProduct:
         over the entire subsystem agrees with standard
         dense matrix multiplication"""
         wires = 3
-        dev = ForestDevice(wires=wires, shots=1)
+        dev = RigettiDevice(wires=wires, shots=1)
 
         # create a random length 2**wires vector
-        vec = np.random.random([2 ** wires])
+        vec = np.random.random([2**wires])
 
         # make a 3 qubit unitary
         mat = np.kron(U2, H)
@@ -59,10 +59,10 @@ class TestMatVecProduct:
         over a permutation of the system agrees with standard
         dense matrix multiplication"""
         wires = 2
-        dev = ForestDevice(wires=wires, shots=1)
+        dev = RigettiDevice(wires=wires, shots=1)
 
         # create a random length 2**wires vector
-        vec = np.random.random([2 ** wires])
+        vec = np.random.random([2**wires])
 
         # apply to the system
         res = dev.mat_vec_product(U2, vec, device_wire_labels=[1, 0])
@@ -78,10 +78,10 @@ class TestMatVecProduct:
         over a consecutive subset of the system agrees with standard
         dense matrix multiplication"""
         wires = 3
-        dev = ForestDevice(wires=wires, shots=1)
+        dev = RigettiDevice(wires=wires, shots=1)
 
         # create a random length 2**wires vector
-        vec = np.random.random([2 ** wires])
+        vec = np.random.random([2**wires])
 
         # apply a 2 qubit unitary to wires 1, 2
         res = dev.mat_vec_product(U2, vec, device_wire_labels=[1, 2])
@@ -95,10 +95,10 @@ class TestMatVecProduct:
         """Test that matrix-vector multiplication over a non-consecutive subset
         of the system agrees with standard dense matrix multiplication"""
         wires = 3
-        dev = ForestDevice(wires=wires, shots=1)
+        dev = RigettiDevice(wires=wires, shots=1)
 
         # create a random length 2**wires vector
-        vec = np.random.random([2 ** wires])
+        vec = np.random.random([2**wires])
 
         # apply a 2 qubit unitary to wires 1, 2
         res = dev.mat_vec_product(U2, vec, device_wire_labels=[2, 0])
@@ -113,7 +113,7 @@ class TestMatVecProduct:
         """Test that there is an error raised when the BasisState is not
         applied as the first operation."""
         wires = 3
-        dev = ForestDevice(wires=wires, shots=1)
+        dev = RigettiDevice(wires=wires, shots=1)
 
         operation = qml.BasisState(np.array([1, 0, 0]), wires=list(range(wires)))
         queue = [qml.PauliX(0), operation]
@@ -129,7 +129,7 @@ class TestMatVecProduct:
         """Test that there is an error raised when the QubitStateVector is not
         applied as the first operation."""
         wires = 1
-        dev = ForestDevice(wires=wires, shots=1)
+        dev = RigettiDevice(wires=wires, shots=1)
 
         operation = qml.QubitStateVector(np.array([1, 0]), wires=list(range(wires)))
         queue = [qml.PauliX(0), operation]

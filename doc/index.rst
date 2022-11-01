@@ -1,4 +1,4 @@
-PennyLane-Forest Plugin
+PennyLane-Rigetti Plugin
 #######################
 
 :Release: |release|
@@ -7,30 +7,30 @@ PennyLane-Forest Plugin
   :start-after:	header-start-inclusion-marker-do-not-remove
   :end-before: header-end-inclusion-marker-do-not-remove
 
-Once Pennylane-Forest is installed, the provided Forest devices can be accessed straight
+Once Pennylane-Rigetti is installed, the provided Rigetti devices can be accessed straight
 away in PennyLane, without the need to import any additional packages.
 
 Devices
 ~~~~~~~
-Currently, PennyLane-Forest provides these Forest devices for PennyLane:
+Currently, PennyLane-Rigetti provides these Rigetti devices for PennyLane:
 
 .. title-card::
-    :name: 'forest.numpy_wavefunction'
+    :name: 'rigetti.numpy_wavefunction'
     :description: pyQuil's Numpy wavefunction simulator backend.
     :link: devices/numpy_wavefunction.html
 
 .. title-card::
-    :name: 'forest.wavefunction'
+    :name: 'rigetti.wavefunction'
     :description: The QCS wavefunction simulator backend.
     :link: devices/wavefunction.html
 
 .. title-card::
-    :name: 'forest.qvm'
+    :name: 'rigetti.qvm'
     :description: QCS QVM and pyQuil pyQVM simulator.
     :link: devices/qvm.html
 
 .. title-card::
-    :name: 'forest.qpu'
+    :name: 'rigetti.qpu'
     :description: QCS QPU.
     :link: devices/qpu.html
 
@@ -43,7 +43,7 @@ Currently, PennyLane-Forest provides these Forest devices for PennyLane:
 Tutorials
 ~~~~~~~~~
 
-Check out these demos to see the PennyLane-Forest plugin in action:
+Check out these demos to see the PennyLane-Rigetti plugin in action:
 
 .. raw:: html
 
@@ -66,12 +66,12 @@ Check out these demos to see the PennyLane-Forest plugin in action:
 You can also try it out using any of the qubit based `demos from the PennyLane documentation
 <https://pennylane.ai/qml/demonstrations.html>`_, for example the tutorial on
 `qubit rotation <https://pennylane.ai/qml/demos/tutorial_qubit_rotation.html>`_.
-Simply replace ``'default.qubit'`` with a ``'forest.XXX'`` device if you have an API key for
+Simply replace ``'default.qubit'`` with a ``'rigetti.XXX'`` device if you have an API key for
 hardware access.
 
 .. code-block:: python
 
-    dev = qml.device('forest.XXX', wires=XXX)
+    dev = qml.device('rigetti.XXX', wires=XXX)
 
 .. raw:: html
 

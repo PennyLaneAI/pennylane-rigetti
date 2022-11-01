@@ -2,7 +2,7 @@ import numpy as np
 import pennylane as qml
 import pennylane.devices.default_qubit as dq
 import pytest
-from pennylane_forest.ops import *
+from pennylane_rigetti.ops import *
 from pennylane.wires import Wires
 
 

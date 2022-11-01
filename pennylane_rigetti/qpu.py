@@ -2,12 +2,12 @@
 QPU Device
 ==========
 
-**Module name:** :mod:`pennylane_forest.qpu`
+**Module name:** :mod:`pennylane_rigetti.qpu`
 
-.. currentmodule:: pennylane_forest.qpu
+.. currentmodule:: pennylane_rigetti.qpu
 
 This module contains the :class:`~.QPUDevice` class, a PennyLane device that allows
-evaluation and differentiation of Rigetti's Forest Quantum Processing Units (QPUs)
+evaluation and differentiation of Rigetti's Quantum Processing Units (QPUs)
 using PennyLane.
 
 Classes
@@ -43,7 +43,7 @@ from .qc import QuantumComputerDevice
 
 
 class QPUDevice(QuantumComputerDevice):
-    r"""Forest QPU device for PennyLane.
+    r"""Rigetti QPU device for PennyLane.
 
     Args:
         device (str): the name of the device to initialise.
@@ -74,8 +74,8 @@ class QPUDevice(QuantumComputerDevice):
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
-    name = "Forest QPU Device"
-    short_name = "forest.qpu"
+    name = "Rigetti QPU Device"
+    short_name = "rigetti.qpu"
 
     def __init__(
         self,

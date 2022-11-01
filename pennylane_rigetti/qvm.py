@@ -2,12 +2,12 @@
 QVM Device
 ==========
 
-**Module name:** :mod:`pennylane_forest.qvm`
+**Module name:** :mod:`pennylane_rigetti.qvm`
 
-.. currentmodule:: pennylane_forest.qvm
+.. currentmodule:: pennylane_rigetti.qvm
 
 This module contains the :class:`~.QVMDevice` class, a PennyLane device that allows
-evaluation and differentiation of Rigetti's Forest Quantum Virtual Machines (QVMs)
+evaluation and differentiation of Rigetti's Quantum Virtual Machines (QVMs)
 using PennyLane.
 
 Classes
@@ -29,7 +29,7 @@ from .qc import QuantumComputerDevice
 
 
 class QVMDevice(QuantumComputerDevice):
-    r"""Forest QVM device for PennyLane.
+    r"""Rigetti QVM device for PennyLane.
 
     This device supports both the Rigetti Lisp QVM, as well as the built-in pyQuil pyQVM.
     If using the pyQVM, the ``qvm_url`` QVM server url keyword argument does not need to
@@ -62,8 +62,8 @@ class QVMDevice(QuantumComputerDevice):
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
-    name = "Forest QVM Device"
-    short_name = "forest.qvm"
+    name = "Rigetti QVM Device"
+    short_name = "rigetti.qvm"
 
     def __init__(self, device, *, shots=1000, wires=None, noisy=False, **kwargs):
         if shots is None:

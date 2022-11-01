@@ -4,14 +4,15 @@ Integration tests for quantum gradient computations.
 import pennylane as qml
 from pennylane import numpy as np
 
+
 def test_simulator_qvm_default_agree(tol, qvm, compiler):
-    """Test that forest.wavefunction, forest.qvm, and default.qubit agree
+    """Test that rigetti.wavefunction, rigetti.qvm, and default.qubit agree
     on the calculation of quantum gradients."""
     w = 2
 
     dev1 = qml.device("default.qubit", wires=w)
-    dev2 = qml.device("forest.wavefunction", wires=w)
-    dev3 = qml.device("forest.qvm", device="9q-square-qvm", shots=5000)
+    dev2 = qml.device("rigetti.wavefunction", wires=w)
+    dev3 = qml.device("rigetti.qvm", device="9q-square-qvm", shots=5000)
 
     in_state = np.zeros([w], requires_grad=False)
     in_state[0] = 1
@@ -29,7 +30,7 @@ def test_simulator_qvm_default_agree(tol, qvm, compiler):
     func2 = qml.QNode(func, dev2)
     func3 = qml.QNode(func, dev3)
 
-    params = [np.array(0.2, requires_grad=True),  np.array(0.453, requires_grad=True)]
+    params = [np.array(0.2, requires_grad=True), np.array(0.453, requires_grad=True)]
 
     # check all evaluate to the same value
     # NOTE: we increase the tolerance when using the QVM
@@ -49,13 +50,13 @@ def test_simulator_qvm_default_agree(tol, qvm, compiler):
 
 
 def test_gradient_with_custom_operator(qvm, compiler):
-    """Test that forest.wavefunction forest.qvm agree
-    on the calculation of quantum gradients when a custom Forest
+    """Test that rigetti.wavefunction rigetti.qvm agree
+    on the calculation of quantum gradients when a custom Rigetti
     operator is used."""
     w = 9
 
-    dev2 = qml.device("forest.wavefunction", wires=w)
-    dev3 = qml.device("forest.qvm", device="9q-square-qvm", shots=5000)
+    dev2 = qml.device("rigetti.wavefunction", wires=w)
+    dev3 = qml.device("rigetti.qvm", device="9q-square-qvm", shots=5000)
 
     def func(x, y):
         """Reference QNode"""
@@ -69,7 +70,7 @@ def test_gradient_with_custom_operator(qvm, compiler):
     func2 = qml.QNode(func, dev2)
     func3 = qml.QNode(func, dev3)
 
-    params = [np.array(0.2, requires_grad=True),  np.array(0.453, requires_grad=True)]
+    params = [np.array(0.2, requires_grad=True), np.array(0.453, requires_grad=True)]
 
     # check all evaluate to the same value
     # NOTE: we increase the tolerance when using the QVM

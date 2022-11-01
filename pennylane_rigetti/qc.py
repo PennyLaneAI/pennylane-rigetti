@@ -2,9 +2,9 @@
 Base Quantum Computer device class
 ==================================
 
-**Module name:** :mod:`pennylane_forest.qc`
+**Module name:** :mod:`pennylane_rigetti.qc`
 
-.. currentmodule:: pennylane_forest.qc
+.. currentmodule:: pennylane_rigetti.qc
 
 This module contains the :class:`~.QuantumComputerDevice` base class that can be
 used to build PennyLane devices from pyQuil QuantumComputers (such as a Rigetti Quantum Processor Unit).
@@ -31,11 +31,11 @@ from pyquil.quil import Pragma
 from pennylane import DeviceError, numpy as np
 from pennylane.wires import Wires
 
-from .device import ForestDevice
+from .device import RigettiDevice
 from ._version import __version__
 
 
-class QuantumComputerDevice(ForestDevice, ABC):
+class QuantumComputerDevice(RigettiDevice, ABC):
     r"""Abstract Quantum Computer device for PennyLane.
 
     This is a base class for common logic shared by pyQuil ``QuantumComputer``s (i.e. QVMs, QPUs).

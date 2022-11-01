@@ -7,7 +7,7 @@ import pyquil
 import pyquil.gates as g
 import pytest
 from pennylane.tape import OperationRecorder
-from pennylane_forest.converter import *
+from pennylane_rigetti.converter import *
 
 
 class TestProgramConverter:
@@ -1248,10 +1248,10 @@ class TestIntegration:
 
         @qml.qnode(dev)
         def circuit(params):
-            program_pl(parameter_map={delta1: params[0],
-                                      delta2: params[1],
-                                      delta3: params[2]},
-                                      wires=range(len(program_pl.defined_qubits)))
+            program_pl(
+                parameter_map={delta1: params[0], delta2: params[1], delta3: params[2]},
+                wires=range(len(program_pl.defined_qubits)),
+            )
             return qml.expval(qml.PauliX(0) @ qml.PauliY(2))
 
         dcircuit = qml.grad(circuit, 0)
@@ -1259,7 +1259,7 @@ class TestIntegration:
         expected = [
             np.cos(theta) * np.sin(phi) * np.sin(varphi),
             np.sin(theta) * np.cos(phi) * np.sin(varphi),
-            np.sin(theta) * np.sin(phi) * np.cos(varphi)
+            np.sin(theta) * np.sin(phi) * np.cos(varphi),
         ]
 
         assert np.allclose(res, expected, tol)

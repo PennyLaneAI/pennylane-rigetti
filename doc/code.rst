@@ -1,7 +1,7 @@
-pennylane-forest
+pennylane-rigetti
 ================
 
-This section contains the API documentation for the PennyLane-Forest plugin.
+This section contains the API documentation for the PennyLane-Rigetti plugin.
 
 .. warning::
 
@@ -9,10 +9,10 @@ This section contains the API documentation for the PennyLane-Forest plugin.
     to use these classes and functions directly.
 
     See the :doc:`overview </index>` page for more
-    details using the available Forest devices with PennyLane.
+    details using the available Rigetti devices with PennyLane.
 
-.. currentmodule:: pennylane_forest
+.. currentmodule:: pennylane_rigetti
 
-.. automodapi:: pennylane_forest
+.. automodapi:: pennylane_rigetti
     :no-heading:
     :include-all-objects:

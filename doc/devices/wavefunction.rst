@@ -1,22 +1,22 @@
 The Wavefunction device
 =======================
 
-The ``forest.wavefunction`` device provides an interface between PennyLane and
+The ``rigetti.wavefunction`` device provides an interface between PennyLane and
 the Forest SDK `wavefunction simulator <https://pyquil-docs.rigetti.com/en/stable/wavefunction_simulator.html>`_. Because
 the wavefunction simulator allows access and manipulation of the underlying quantum state vector,
-``forest.wavefunction`` is able to support the full suite of PennyLane and Quil quantum operations and observables.
+``rigetti.wavefunction`` is able to support the full suite of PennyLane and Quil quantum operations and observables.
 
 In addition, it is generally faster than running equivalent simulations on the QVM, as the final state
 can be inspected and the expectation value calculated analytically, rather than by sampling measurements.
 
 .. note::
 
-    By default, ``forest.wavefunction`` is initialized with ``shots=0``, indicating
+    By default, ``rigetti.wavefunction`` is initialized with ``shots=0``, indicating
     that the exact analytic expectation value is to be returned.
 
-    If the number of trials or shots provided to the ``forest.wavefunction`` is
+    If the number of trials or shots provided to the ``rigetti.wavefunction`` is
     instead non-zero, a spectral decomposition is performed and a Bernoulli distribution
-    is constructed and sampled. This allows the ``forest.wavefunction`` device to
+    is constructed and sampled. This allows the ``rigetti.wavefunction`` device to
     'approximate' the effect of sampling the expectation value.
 
 Usage
@@ -28,7 +28,7 @@ You can instantiate the device in PennyLane as follows:
 
     import pennylane as qml
 
-    dev_wfun = qml.device('forest.wavefunction', wires=2)
+    dev_wfun = qml.device('rigetti.wavefunction', wires=2)
     
 This device can then be used just like other devices for the definition and evaluation of QNodes within PennyLane.
 

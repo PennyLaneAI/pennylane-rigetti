@@ -177,7 +177,7 @@ def mock_qvm():
     mock_qc = get_qc("2q-qvm", as_qvm=True)
     mock_qc.compile = MagicMock(return_value=Program())
     mock_qc.run = MagicMock(return_value=QAMExecutionResult(executable=Program()))
-    with patch('pennylane_forest.qvm.get_qc', return_value=mock_qc):
+    with patch("pennylane_rigetti.qvm.get_qc", return_value=mock_qc):
         yield mock_qc
 
 
