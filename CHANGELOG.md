@@ -12,6 +12,11 @@ as a PennyLane device.
 
 ### Breaking changes
 
+* The package has been renamed to `pennylane-rigetti`. The top level import is now
+  `pennylane_rigetti`. In addition, the prefix for device short names have been
+  changed to `rigetti`. For example, `rigetti.qpu`.
+  [#110](https://github.com/PennyLaneAI/pennylane-forest/pull/110)
+
 * A new version of the QCS CLI is required if you want to use your QCS account
   to run your workloads on a live Rigetti QPU. See 
   [Using the QCS CLI](https://docs.rigetti.com/qcs/guides/using-the-qcs-cli) for
