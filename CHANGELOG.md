@@ -2,7 +2,42 @@
 
 ### New features since last release
 
+#### Re-introduction of the Rigetti Quantum Proccessing Unit (QPU) device
+
+This release uses the latest version of [pyQuil](https://github.com/rigetti/pyquil)
+to connect to [Rigetti Quantum Cloud Services (QCS)](https://docs.rigetti.com/qcs/)
+and enables the use of the latest [Rigetti QPUs](https://qcs.rigetti.com/qpus)
+as a PennyLane device.
+[#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
+
 ### Breaking changes
+
+* A new version of the QCS CLI is required if you want to use your QCS account
+  to run your workloads on a live Rigetti QPU. See 
+  [Using the QCS CLI](https://docs.rigetti.com/qcs/guides/using-the-qcs-cli) for
+  details.
+  [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
+
+* The `forest_url` parameter has been removed, as it is now managed by the QCS CLI.
+  [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
+
+* The `compiler_url` and `qvm_url` device parameters have been removed. The default
+  URLs can be overridden using the `QCS_SETTINGS_APPLICATIONS_PYQUIL_QUILC_URL`
+  and `QCS_SETTINGS_APPLICATIONS_PYQUIL_QVM_URL` environment variables,
+  respectively.
+  [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
+
+* The `timeout` parameter for all devices has been renamed to
+  `compiler_timeout`.
+  [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
+
+* There is now a default execution timeout of 10 seconds. This can be configured
+  for a device by using the new `execution_timeout` parameter.
+  [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
+
+* The `S`, `T`, `CSWAP`, `ISWAP`, and `CCNOT` operations have been removed.
+  Import them directly from `pennylane` instead.
+  [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
 
 ### Improvements
 
@@ -14,9 +49,15 @@
 
 ### Bug fixes
 
+* The QPU device now correctly sets the number of shots when parametric 
+  compilation is disabled. 
+  [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Antal Szava, Marquess Valdez.
 
 ---
 
