@@ -66,7 +66,7 @@ Antal Szava, Marquess Valdez.
 * Defines the missing `state` method and `returns_state` entry of the
   `capabilities` dictionary for `forest.wavefunction` and
   `forest.numpy_wavefunction`.
-  [(#36)](https://github.com/PennyLaneAI/pennylane-qulacs/pull/36)
+  [(#101)](https://github.com/PennyLaneAI/pennylane-forest/pull/101)
 
 ### Contributors
 
