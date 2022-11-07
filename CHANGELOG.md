@@ -1,4 +1,4 @@
-# Release 0.25.0-dev
+# Release 0.27.0
 
 ### New features since last release
 
@@ -44,8 +44,6 @@ as a PennyLane device.
 * Improves the computation of the expectation value when using `QPUDevice` by
   skipping the `Device.generate_samples` method.
   [#108](https://github.com/PennyLaneAI/pennylane-forest/pull/108)
-
-### Documentation
 
 ### Bug fixes
 
