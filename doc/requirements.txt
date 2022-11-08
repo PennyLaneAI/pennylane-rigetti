@@ -1,7 +1,0 @@
-docutils==0.16
-pennylane
-pyquil>=2.16,<2.28.3
-sphinx-automodapi
-pygments-github-lexers
-# do not pin
-pennylane-sphinx-theme
