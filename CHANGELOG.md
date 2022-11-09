@@ -1,4 +1,4 @@
-# Release 0.25.0-dev
+# Release 0.27.0
 
 ### New features since last release
 
@@ -45,8 +45,6 @@ as a PennyLane device.
   skipping the `Device.generate_samples` method.
   [#108](https://github.com/PennyLaneAI/pennylane-forest/pull/108)
 
-### Documentation
-
 ### Bug fixes
 
 * The QPU device now correctly sets the number of shots when parametric 
@@ -68,7 +66,7 @@ Antal Szava, Marquess Valdez.
 * Defines the missing `state` method and `returns_state` entry of the
   `capabilities` dictionary for `forest.wavefunction` and
   `forest.numpy_wavefunction`.
-  [(#36)](https://github.com/PennyLaneAI/pennylane-qulacs/pull/36)
+  [(#101)](https://github.com/PennyLaneAI/pennylane-forest/pull/101)
 
 ### Contributors
 
