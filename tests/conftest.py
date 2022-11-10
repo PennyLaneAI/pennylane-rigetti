@@ -16,7 +16,7 @@ from pyquil.api._qvm import QVMNotRunning
 
 # defaults
 TOLERANCE = 1e-5
-QVM_SHOTS = 15000
+QVM_SHOTS = 12000
 COMPILER_TIMEOUT = 100
 EXECUTION_TIMEOUT = 500
 
