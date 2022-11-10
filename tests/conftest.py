@@ -16,7 +16,7 @@ from pyquil.api._qvm import QVMNotRunning
 
 # defaults
 TOLERANCE = 1e-5
-QVM_SHOTS = 10000
+QVM_SHOTS = 12000
 COMPILER_TIMEOUT = 100
 EXECUTION_TIMEOUT = 500
 
@@ -177,7 +177,7 @@ def mock_qvm():
     mock_qc = get_qc("2q-qvm", as_qvm=True)
     mock_qc.compile = MagicMock(return_value=Program())
     mock_qc.run = MagicMock(return_value=QAMExecutionResult(executable=Program()))
-    with patch('pennylane_forest.qvm.get_qc', return_value=mock_qc):
+    with patch("pennylane_forest.qvm.get_qc", return_value=mock_qc):
         yield mock_qc
 
 
