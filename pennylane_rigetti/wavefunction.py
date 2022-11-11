@@ -2,9 +2,9 @@
 Wavefunction simulator device
 =============================
 
-**Module name:** :mod:`pennylane_forest.wavefunction`
+**Module name:** :mod:`pennylane_rigetti.wavefunction`
 
-.. currentmodule:: pennylane_forest.wavefunction
+.. currentmodule:: pennylane_rigetti.wavefunction
 
 This module contains the :class:`~.WavefunctionDevice` class, a PennyLane device that allows
 evaluation and differentiation of Rigetti's WavefunctionSimulator using PennyLane.
@@ -32,7 +32,7 @@ from pyquil.api import WavefunctionSimulator
 
 from pennylane.wires import Wires
 
-from .device import ForestDevice
+from .device import RigettiDevice
 
 
 I = np.identity(2)
@@ -45,7 +45,7 @@ H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)  # Hadamard matrix
 observable_map = {"PauliX": X, "PauliY": Y, "PauliZ": Z, "Identity": I, "Hadamard": H}
 
 
-class WavefunctionDevice(ForestDevice):
+class WavefunctionDevice(RigettiDevice):
     r"""Wavefunction simulator device for PennyLane.
 
     Args:
@@ -55,8 +55,8 @@ class WavefunctionDevice(ForestDevice):
         shots (int): Number of circuit evaluations/random samples used
             to estimate expectation values of observables.
     """
-    name = "Forest Wavefunction Simulator Device"
-    short_name = "forest.wavefunction"
+    name = "Rigetti Wavefunction Simulator Device"
+    short_name = "rigetti.wavefunction"
 
     observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
 
@@ -68,7 +68,7 @@ class WavefunctionDevice(ForestDevice):
 
     def apply(self, operations, **kwargs):
         rotations = kwargs.get("rotations", [])
-        self._active_wires = ForestDevice.active_wires(operations + rotations)
+        self._active_wires = RigettiDevice.active_wires(operations + rotations)
 
         super().apply(operations, **kwargs)
         self._state = self.qc.wavefunction(self.prog).amplitudes

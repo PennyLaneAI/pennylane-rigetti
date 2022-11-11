@@ -23,4 +23,4 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run Black
-        run: black -l 100 pennylane_forest/ --check
+        run: black -l 100 pennylane_rigetti/ --check

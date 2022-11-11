@@ -3,38 +3,38 @@ import sys
 import os
 from setuptools import setup
 
-with open("pennylane_forest/_version.py") as f:
+with open("pennylane_rigetti/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 
 requirements = ["pyquil>=3.0.0,<4.0.0", "qcs-api-client>=0.20.13<0.22.0", "pennylane>=0.18"]
 
 info = {
-    "name": "PennyLane-Forest",
+    "name": "PennyLane-Rigetti",
     "version": version,
     "maintainer": "Xanadu Inc.",
     "maintainer_email": "software@xanadu.ai",
-    "url": "https://github.com/PennyLaneAI/pennylane-forest",
+    "url": "https://github.com/PennyLaneAI/pennylane-rigetti",
     "license": "BSD 3-Clause",
-    "packages": ["pennylane_forest"],
+    "packages": ["pennylane_rigetti"],
     "entry_points": {
         "pennylane.plugins": [
-            "forest.qvm = pennylane_forest:QVMDevice",
-            "forest.qpu = pennylane_forest:QPUDevice",
-            "forest.wavefunction = pennylane_forest:WavefunctionDevice",
-            "forest.numpy_wavefunction = pennylane_forest:NumpyWavefunctionDevice",
+            "rigetti.qvm = pennylane_rigetti:QVMDevice",
+            "rigetti.qpu = pennylane_rigetti:QPUDevice",
+            "rigetti.wavefunction = pennylane_rigetti:WavefunctionDevice",
+            "rigetti.numpy_wavefunction = pennylane_rigetti:NumpyWavefunctionDevice",
         ],
         "pennylane.io": [
-            "pyquil_program = pennylane_forest:load_program",
-            "quil = pennylane_forest:load_quil",
-            "quil_file = pennylane_forest:load_quil_from_file",
+            "pyquil_program = pennylane_rigetti:load_program",
+            "quil = pennylane_rigetti:load_quil",
+            "quil_file = pennylane_rigetti:load_quil_from_file",
         ],
     },
     "description": "Rigetti backend for the PennyLane library",
     "long_description": open("README.rst").read(),
-    "provides": ["pennylane_forest"],
+    "provides": ["pennylane_rigetti"],
     "install_requires": requirements,
-    "long_description_content_type": "text/x-rst"
+    "long_description_content_type": "text/x-rst",
 }
 
 classifiers = [

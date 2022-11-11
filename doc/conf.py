@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# PennyLane-Forest documentation build configuration file, created by
+# PennyLane-Rigetti documentation build configuration file, created by
 # sphinx-quickstart on Tue Apr 17 11:43:51 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -62,7 +62,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "PennyLane-Forest"
+project = "PennyLane-Rigetti"
 copyright = "2022"
 author = "Xanadu"
 
@@ -72,10 +72,10 @@ add_module_names = False
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-import pennylane_forest
+import pennylane_rigetti
 
 # The full version, including alpha/beta/rc tags.
-release = pennylane_forest.__version__
+release = pennylane_rigetti.__version__
 
 # The short X.Y version.
 version = re.match(r"^(\d+\.\d+)", release).expand(r"\1")
@@ -217,7 +217,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "PennyLane-Forestdoc"
+htmlhelp_basename = "PennyLane-Rigettidoc"
 
 # # -- Xanadu theme ---------------------------------------------------------
 html_theme = 'pennylane'
@@ -227,7 +227,7 @@ html_theme = 'pennylane'
 
 # xanadu theme options (see theme.conf for more information)
 html_theme_options = {
-    "navbar_name": "PennyLane-Forest",
+    "navbar_name": "PennyLane-Rigetti",
     "extra_copyrights": [
         "TensorFlow, the TensorFlow logo, and any related marks are trademarks "
         "of Google Inc."
@@ -237,7 +237,7 @@ html_theme_options = {
     "google_analytics_tracking_id": "UA-130507810-1"
 }
 
-edit_on_github_project = 'PennyLaneAI/pennylane-forest'
+edit_on_github_project = 'PennyLaneAI/pennylane-rigetti'
 edit_on_github_branch = 'master/doc'
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -263,7 +263,7 @@ latex_additional_files = ["macros.tex"]
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "PennyLane-Forest.tex", "PennyLane-Forest Documentation", "Xanadu Inc.", "manual"),
+    (master_doc, "PennyLane-Rigetti.tex", "PennyLane-Rigetti Documentation", "Xanadu Inc.", "manual"),
 ]
 
 
@@ -271,7 +271,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "PennyLane-Forest", "PennyLane-Forest Documentation", [author], 1)]
+man_pages = [(master_doc, "PennyLane-Rigetti", "PennyLane-Rigetti Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -282,10 +282,10 @@ man_pages = [(master_doc, "PennyLane-Forest", "PennyLane-Forest Documentation", 
 texinfo_documents = [
     (
         master_doc,
-        "PennyLane-Forest",
-        "PennyLane-Forest Documentation",
+        "PennyLane-Rigetti",
+        "PennyLane-Rigetti Documentation",
         author,
-        "PennyLane-Forest",
+        "PennyLane-Rigetti",
         "Plugin for the PennyLane quantum machine learning library.",
         "Miscellaneous",
     ),

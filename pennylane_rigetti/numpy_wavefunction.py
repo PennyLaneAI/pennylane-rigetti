@@ -2,9 +2,9 @@
 NumpyWavefunction simulator device
 ==================================
 
-**Module name:** :mod:`pennylane_forest.numpy_wavefunction`
+**Module name:** :mod:`pennylane_rigetti.numpy_wavefunction`
 
-.. currentmodule:: pennylane_forest.numpy_wavefunction
+.. currentmodule:: pennylane_rigetti.numpy_wavefunction
 
 This module contains the :class:`~.NumpyWavefunctionDevice` class, a PennyLane device that allows
 evaluation and differentiation of pyQuil's NumpyWavefunctionSimulator using PennyLane.
@@ -22,11 +22,11 @@ Code details
 from pyquil.pyqvm import PyQVM
 from pyquil.simulation import NumpyWavefunctionSimulator
 
-from .device import ForestDevice
+from .device import RigettiDevice
 from ._version import __version__
 
 
-class NumpyWavefunctionDevice(ForestDevice):
+class NumpyWavefunctionDevice(RigettiDevice):
     r"""NumpyWavefunction simulator device for PennyLane.
 
     Args:
@@ -37,7 +37,7 @@ class NumpyWavefunctionDevice(ForestDevice):
             to estimate expectation values of observables.
     """
     name = "pyQVM NumpyWavefunction Simulator Device"
-    short_name = "forest.numpy_wavefunction"
+    short_name = "rigetti.numpy_wavefunction"
 
     observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
 
@@ -67,5 +67,5 @@ class NumpyWavefunctionDevice(ForestDevice):
         # returns amplitudes in the opposite of the Rigetti Lisp QVM (which considers qubit
         # 0 as the rightmost bit). This may change in the future, so in the future this
         # might need to get udpated to be similar to the pre_measure function of
-        # pennylane_forest/wavefunction.py
+        # pennylane_rigetti/wavefunction.py
         self._state = self.qc.execute(self.prog).wf_simulator.wf.flatten()

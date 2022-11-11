@@ -15,7 +15,7 @@ from pyquil.api._quantum_computer import QuantumComputer
 from conftest import BaseTest
 from conftest import I, Z, H, U, U2, test_operation_map, QVM_SHOTS
 
-import pennylane_forest as plf
+import pennylane_rigetti as plf
 
 import pyquil
 
@@ -361,7 +361,7 @@ class TestQVMBasic(BaseTest):
         s1 = dev.sample(O1.obs)
 
         # s1 should only contain 1 and -1
-        self.assertAllAlmostEqual(s1 ** 2, 1, delta=tol)
+        self.assertAllAlmostEqual(s1**2, 1, delta=tol)
         self.assertAllAlmostEqual(s1, 1 - 2 * dev._samples[:, 0], delta=tol)
 
     def test_sample_values_hermitian(self, qvm, execution_timeout, tol):
@@ -470,7 +470,9 @@ class TestQVMBasic(BaseTest):
 
     def test_raise_error_if_shots_is_none(self, shots):
         """Test that instantiating a QVMDevice to be used for analytic computations raises an error"""
-        with pytest.raises(ValueError, match="QVM device cannot be used for analytic computations."):
+        with pytest.raises(
+            ValueError, match="QVM device cannot be used for analytic computations."
+        ):
             dev = plf.QVMDevice(device="2q-qvm", shots=None)
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
@@ -495,7 +497,7 @@ class TestQVMBasic(BaseTest):
 
     def test_compiled_program_stored(self, qvm, monkeypatch):
         """Test that QVM device stores the latest compiled program."""
-        dev = qml.device("forest.qvm", device="2q-qvm")
+        dev = qml.device("rigetti.qvm", device="2q-qvm")
 
         assert dev.compiled_program is None
 
@@ -517,7 +519,7 @@ class TestQVMBasic(BaseTest):
 
     def test_stored_compiled_program_correct(self, qvm, monkeypatch):
         """Test that QVM device stores the latest compiled program."""
-        dev = qml.device("forest.qvm", device="2q-qvm")
+        dev = qml.device("rigetti.qvm", device="2q-qvm")
 
         assert dev.compiled_program is None
 
@@ -540,7 +542,7 @@ class TestParametricCompilation(BaseTest):
 
     def test_compiled_program_was_stored_in_dict(self, qvm, mock_qvm, monkeypatch):
         """Test that QVM device stores the compiled program correctly in a dictionary"""
-        dev = qml.device("forest.qvm", device="2q-qvm")
+        dev = qml.device("rigetti.qvm", device="2q-qvm")
         theta = 0.432
         phi = 0.123
 
@@ -569,10 +571,12 @@ class TestParametricCompilation(BaseTest):
             assert len(dev._compiled_program_dict.items()) == 1
             assert mock_qvm.compile.call_count == 1
 
-    def test_parametric_compilation_with_numeric_and_symbolic_queue(self, mock_qvm, execution_timeout):
+    def test_parametric_compilation_with_numeric_and_symbolic_queue(
+        self, mock_qvm, execution_timeout
+    ):
         """Tests that a program containing numeric and symbolic variables as
         well is only compiled once."""
-        dev = qml.device("forest.qvm", device="2q-qvm", execution_timeout=execution_timeout)
+        dev = qml.device("rigetti.qvm", device="2q-qvm", execution_timeout=execution_timeout)
 
         param1 = np.array(1, requires_grad=False)
         param2 = np.array(2, requires_grad=True)
@@ -606,7 +610,7 @@ class TestParametricCompilation(BaseTest):
     def test_apply_qubitstatesvector_raises_an_error_if_not_first(self):
         """Test that there is an error raised when the QubitStateVector is not
         applied as the first operation."""
-        dev = qml.device("forest.qvm", device="2q-qvm", parametric_compilation=True)
+        dev = qml.device("rigetti.qvm", device="2q-qvm", parametric_compilation=True)
 
         operation = qml.QubitStateVector(np.array([1, 0]), wires=list(range(2)))
         queue = [qml.PauliX(0), operation]
@@ -626,35 +630,49 @@ class TestQVMIntegration(BaseTest):
 
     def test_load_qvm_device(self, qvm):
         """Test that the QVM device loads correctly"""
-        dev = qml.device("forest.qvm", device="2q-qvm")
+        dev = qml.device("rigetti.qvm", device="2q-qvm")
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 1000)
-        self.assertEqual(dev.short_name, "forest.qvm")
+        self.assertEqual(dev.short_name, "rigetti.qvm")
 
     def test_load_qvm_device_from_topology(self, qvm):
         """Test that the QVM device, from an input topology, loads correctly"""
         topology = nx.complete_graph(2)
-        dev = qml.device("forest.qvm", device=topology)
+        dev = qml.device("rigetti.qvm", device=topology)
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 1000)
-        self.assertEqual(dev.short_name, "forest.qvm")
+        self.assertEqual(dev.short_name, "rigetti.qvm")
 
     def test_load_virtual_qpu_device(self, qvm):
         """Test that the QPU simulators load correctly"""
-        qml.device("forest.qvm", device=np.random.choice(TEST_QPU_LATTICES))
+        qml.device("rigetti.qvm", device=np.random.choice(TEST_QPU_LATTICES))
 
     def test_qvm_args(self):
         """Test that the QVM plugin requires correct arguments"""
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
-            qml.device("forest.qvm")
+            qml.device("rigetti.qvm")
 
         with pytest.raises(ValueError, match="Number of shots must be a positive integer"):
-            qml.device("forest.qvm", "2q-qvm", shots=0)
+            qml.device("rigetti.qvm", "2q-qvm", shots=0)
 
     def test_qubit_unitary(self, shots, compiler_timeout, execution_timeout, qvm, compiler):
         """Test that an arbitrary unitary operation works"""
-        dev1 = qml.device("forest.qvm", device="3q-qvm", shots=shots, compiler_timeout=compiler_timeout, execution_timeout=execution_timeout, parametric_compilation=False)
-        dev2 = qml.device("forest.qvm", device="9q-square-qvm", shots=shots, compiler_timeout=compiler_timeout, execution_timeout=execution_timeout, parametric_compilation=False)
+        dev1 = qml.device(
+            "rigetti.qvm",
+            device="3q-qvm",
+            shots=shots,
+            compiler_timeout=compiler_timeout,
+            execution_timeout=execution_timeout,
+            parametric_compilation=False,
+        )
+        dev2 = qml.device(
+            "rigetti.qvm",
+            device="9q-square-qvm",
+            shots=shots,
+            compiler_timeout=compiler_timeout,
+            execution_timeout=execution_timeout,
+            parametric_compilation=False,
+        )
 
         def circuit():
             """Reference QNode"""
@@ -685,7 +703,7 @@ class TestQVMIntegration(BaseTest):
         As the results coming from the qvm are stochastic, a constraint of 2 out of 5 runs was added.
         """
         shots = 100_000
-        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
+        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS)
 
         a = 0.543
         b = 0.123
@@ -708,7 +726,7 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
+        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS)
 
         @qml.qnode(dev)
         def circuit():
@@ -725,7 +743,7 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
+        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS)
 
         @qml.qnode(dev)
         def circuit():
@@ -742,7 +760,7 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS)
+        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS)
 
         @qml.qnode(dev)
         def circuit():
@@ -755,7 +773,7 @@ class TestQVMIntegration(BaseTest):
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_stored(self, qvm, device):
         """Test that QVM device stores the compiled program correctly"""
-        dev = qml.device("forest.qvm", device=device, timeout=100)
+        dev = qml.device("rigetti.qvm", device=device, timeout=100)
 
         assert len(dev._compiled_program_dict.items()) == 0
 
@@ -788,7 +806,7 @@ class TestQVMIntegration(BaseTest):
         self, qvm, device, statements
     ):
         """Test that QVM device stores the compiled program when the QNode is mutated correctly"""
-        dev = qml.device("forest.qvm", device=device, timeout=100)
+        dev = qml.device("rigetti.qvm", device=device, timeout=100)
 
         assert len(dev._compiled_program_dict.items()) == 0
 
@@ -818,7 +836,7 @@ class TestQVMIntegration(BaseTest):
     def test_compiled_program_was_stored_mutable_qnode_with_loop(self, qvm, device):
         """Test that QVM device stores the compiled program when the QNode is
         mutated correctly"""
-        dev = qml.device("forest.qvm", device=device, timeout=80)
+        dev = qml.device("rigetti.qvm", device=device, timeout=80)
 
         assert len(dev._compiled_program_dict.items()) == 0
 
@@ -841,7 +859,7 @@ class TestQVMIntegration(BaseTest):
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_used(self, qvm, device, monkeypatch):
         """Test that QVM device used the compiled program correctly, after it was stored"""
-        dev = qml.device("forest.qvm", device=device, timeout=100)
+        dev = qml.device("rigetti.qvm", device=device, timeout=100)
 
         number_of_qnodes = 6
         obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
@@ -880,7 +898,7 @@ class TestQVMIntegration(BaseTest):
         obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
         obs_list = obs * number_of_qnodes
 
-        dev = qml.device("forest.qvm", device=device, timeout=100)
+        dev = qml.device("rigetti.qvm", device=device, timeout=100)
 
         shape = qml.StronglyEntanglingLayers.shape(n_layers=4, n_wires=dev.num_wires)
         params = np.random.random(size=shape)
@@ -907,7 +925,9 @@ class TestQVMIntegration(BaseTest):
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
 
-        dev = qml.device("forest.qvm", device=device, shots=QVM_SHOTS, parametric_compilation=False)
+        dev = qml.device(
+            "rigetti.qvm", device=device, shots=QVM_SHOTS, parametric_compilation=False
+        )
 
         @qml.qnode(dev)
         def circuit():

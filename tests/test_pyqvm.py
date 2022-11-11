@@ -10,7 +10,7 @@ from conftest import U2, BaseTest, H, I, U, Z, test_operation_map
 from pennylane.circuit_graph import CircuitGraph
 from pennylane.tape import QuantumTape
 
-import pennylane_forest as plf
+import pennylane_rigetti as plf
 
 log = logging.getLogger(__name__)
 
@@ -239,7 +239,7 @@ class TestPyQVMBasic(BaseTest):
             # get the equivalent pennylane operation class
             op = getattr(qml.ops, gate)
         except AttributeError:
-            # get the equivalent pennylane-forest operation class
+            # get the equivalent pennylane-rigetti operation class
             op = getattr(plf, gate)
 
         # the list of wires to apply the operation to
@@ -287,8 +287,8 @@ class TestQVMIntegration(BaseTest):
 
     def test_qubit_unitary(self, shots):
         """Test that an arbitrary unitary operation works"""
-        dev1 = qml.device("forest.qvm", device="3q-pyqvm", shots=shots)
-        dev2 = qml.device("forest.qvm", device="9q-square-pyqvm", shots=shots)
+        dev1 = qml.device("rigetti.qvm", device="3q-pyqvm", shots=shots)
+        dev2 = qml.device("rigetti.qvm", device="9q-square-pyqvm", shots=shots)
 
         def circuit():
             """Reference QNode"""
@@ -314,7 +314,7 @@ class TestQVMIntegration(BaseTest):
     def test_one_qubit_wavefunction_circuit(self, device, shots):
         """Test that the wavefunction plugin provides correct result for simple circuit."""
         shots = 10000
-        dev = qml.device("forest.qvm", device=device, shots=shots)
+        dev = qml.device("rigetti.qvm", device=device, shots=shots)
 
         a = 0.543
         b = 0.123

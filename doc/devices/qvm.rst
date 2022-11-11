@@ -1,7 +1,7 @@
 The QVM device
 ===============
 
-The ``forest.qvm`` device provides an interface between PennyLane and the Forest
+The ``rigetti.qvm`` device provides an interface between PennyLane and the Forest
 SDK `quantum virtual machine <https://pyquil-docs.rigetti.com/en/stable/qvm.html>`_ or the pyQuil built-in
 pyQVM. The QVM is used to simulate various quantum abstract machines, ranging from simulations of
 physical QPUs to completely connected lattices.
@@ -9,7 +9,7 @@ physical QPUs to completely connected lattices.
 Usage
 ~~~~~
 
-When initializing the ``forest.qvm`` device, the following required keyword argument must also be passed:
+When initializing the ``rigetti.qvm`` device, the following required keyword argument must also be passed:
 
 ``device`` (*str* or *networkx.Graph*)
     The name or topology of the quantum computer to initialize.
@@ -20,25 +20,25 @@ When initializing the ``forest.qvm`` device, the following required keyword argu
     * Any other supported Rigetti device architecture, for example a QPU lattice such as ``'Aspen-8'``.
     * Graph topology (as a ``networkx.Graph`` object) representing the device architecture.
 
-Note that, unlike ``forest.wavefunction``, you do not pass the number of wires - this is inferred
+Note that, unlike ``rigetti.wavefunction``, you do not pass the number of wires - this is inferred
 automatically from the requested quantum computer topology.
 
 >>> import pennylane as qml
->>> dev = qml.device('forest.qvm', device='Aspen-8')
+>>> dev = qml.device('rigetti.qvm', device='Aspen-8')
 >>> dev.num_wires
 16
 
 In addition, you may also request a QVM with noise models to better simulate a physical
 QPU; this is done by passing the keyword argument ``noisy=True``:
 
->>> dev = qml.device('forest.qvm', device='Aspen-8', noisy=True)
+>>> dev = qml.device('rigetti.qvm', device='Aspen-8', noisy=True)
 
 Note that only the `default noise models <https://pyquil-docs.rigetti.com/en/stable/apidocs/noise.html>`_ provided by
 pyQuil are currently supported.
 
 To specify the pyQVM, simply append ``pyqvm`` to the end of the device name instead of ``qvm``:
 
->>> dev = qml.device('forest.qvm', device='4q-pyqvm')
+>>> dev = qml.device('rigetti.qvm', device='4q-pyqvm')
 
 The device can then be used just like other devices for the definition and evaluation of QNodes within PennyLane.
 
@@ -76,9 +76,9 @@ For example, see how increasing the shot count increases the expectation value a
         qml.RX(x, wires=[0])
         return qml.expval(qml.PauliZ(0))
 
-    dev_exact = qml.device('forest.wavefunction', wires=1)
-    dev_s1024 = qml.device('forest.qvm', device='1q-qvm')
-    dev_s100000 = qml.device('forest.qvm', device='1q-qvm', shots=100000)
+    dev_exact = qml.device('rigetti.wavefunction', wires=1)
+    dev_s1024 = qml.device('rigetti.qvm', device='1q-qvm')
+    dev_s100000 = qml.device('rigetti.qvm', device='1q-qvm', shots=100000)
 
     circuit_exact = qml.QNode(circuit, dev_exact)
     circuit_s1024 = qml.QNode(circuit, dev_s1024)
@@ -132,12 +132,12 @@ Since :math:`U` is unitary, it can be applied to the specified qubit before meas
 | ``qml.Hadamard`` | :math:`R_y(-\pi/4)`               |
 +------------------+-----------------------------------+
 
-To see how this affects the resultant Quil program, you may use the :attr:`~.ForestDevice.program` property
+To see how this affects the resultant Quil program, you may use the :attr:`~.RigettiDevice.program` property
 to print out the Quil program after evaluation on the device.
 
 .. code-block:: python
 
-    dev = qml.device('forest.qvm', device='2q-qvm')
+    dev = qml.device('rigetti.qvm', device='2q-qvm')
 
     @qml.qnode(dev)
     def circuit(x):
@@ -157,8 +157,8 @@ MEASURE 0 ro[0]
 
 .. note::
 
-    :attr:`~.ForestDevice.program` will return the **last evaluated quantum program** performed on the device.
-    If viewing :attr:`~.ForestDevice.program` after evaluating a quantum gradient or performing an optimization,
+    :attr:`~.RigettiDevice.program` will return the **last evaluated quantum program** performed on the device.
+    If viewing :attr:`~.RigettiDevice.program` after evaluating a quantum gradient or performing an optimization,
     this may not match the user-defined QNode, as PennyLane automatically modifies the QNode to take into account
     the `parameter shift rule <https://pennylane.ai/qml/glossary/parameter_shift.html>`_, product rule, and chain rule.
 

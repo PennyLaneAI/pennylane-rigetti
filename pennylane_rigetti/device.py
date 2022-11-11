@@ -1,16 +1,16 @@
 """
-Base Forest device class
+Base Rigetti device class
 ========================
 
-**Module name:** :mod:`pennylane_forest.device`
+**Module name:** :mod:`pennylane_rigetti.device`
 
-.. currentmodule:: pennylane_forest.device
+.. currentmodule:: pennylane_rigetti.device
 
-This module contains a base class for constructing Forest devices for PennyLane,
+This module contains a base class for constructing Rigetti devices for PennyLane,
 as well as some auxillary functions for converting PennyLane supported operations
 (such as ``BasisState``, ``Rot``) to the equivalent pyQuil operations.
 
-This class provides all the boilerplate for supporting Forest devices on PennyLane.
+This class provides all the boilerplate for supporting Rigetti devices on PennyLane.
 
 Auxiliary functions
 -------------------
@@ -24,7 +24,7 @@ Classes
 -------
 
 .. autosummary::
-   ForestDevice
+   RigettiDevice
 
 Code details
 ~~~~~~~~~~~~
@@ -167,8 +167,8 @@ pyquil_operation_map = {
 }
 
 
-class ForestDevice(QubitDevice):
-    r"""Abstract Forest device for PennyLane.
+class RigettiDevice(QubitDevice):
+    r"""Abstract Rigetti device for PennyLane.
 
     Args:
         wires (int or Iterable[Number, str]]): Number of subsystems represented by the device,
@@ -215,7 +215,7 @@ class ForestDevice(QubitDevice):
     def apply_rotations(self, rotations):
         """Apply the circuit rotations.
 
-        This method serves as an auxiliary method to :meth:`~.ForestDevice.apply`.
+        This method serves as an auxiliary method to :meth:`~.RigettiDevice.apply`.
 
         Args:
             rotations (List[pennylane.Operation]): operations that rotate into the

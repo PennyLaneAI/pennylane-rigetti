@@ -3,7 +3,7 @@ from collections.abc import Sequence
 
 import numpy as np
 import pennylane as qml
-import pennylane_forest as plf
+import pennylane_rigetti as plf
 import pyquil
 from pyquil import simulation
 from pyquil.gates import Gate

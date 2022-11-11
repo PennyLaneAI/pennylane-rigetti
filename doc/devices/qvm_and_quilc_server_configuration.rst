@@ -3,7 +3,7 @@ QVM and quilc server configuration
 
 .. note::
 
-    If using the downloadable Forest SDK with the default server configurations
+    If using the downloadable Rigetti SDK with the default server configurations
     for the QVM and the Quil compiler (i.e., you launch them with the commands
     ``qvm -S`` and ``quilc -R``), then no special configuration is needed.
     If using a non-default port or host for either of the servers, see the 

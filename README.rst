@@ -1,33 +1,33 @@
-PennyLane Forest Plugin
+PennyLane Rigetti Plugin
 #######################
 
-.. image:: https://img.shields.io/github/workflow/status/PennyLaneAI/pennylane-forest/Tests/master?logo=github&style=flat-square
+.. image:: https://img.shields.io/github/workflow/status/PennyLaneAI/pennylane-rigetti/Tests/master?logo=github&style=flat-square
     :alt: GitHub Workflow Status (branch)
-    :target: https://github.com/PennyLaneAI/pennylane-forest/actions?query=workflow%3ATests
+    :target: https://github.com/PennyLaneAI/pennylane-rigetti/actions?query=workflow%3ATests
 
-.. image:: https://img.shields.io/codecov/c/github/PennyLaneAI/pennylane-forest/master.svg?logo=codecov&style=flat-square
+.. image:: https://img.shields.io/codecov/c/github/PennyLaneAI/pennylane-rigetti/master.svg?logo=codecov&style=flat-square
     :alt: Codecov coverage
-    :target: https://codecov.io/gh/PennyLaneAI/pennylane-forest
+    :target: https://codecov.io/gh/PennyLaneAI/pennylane-rigetti
 
-.. image:: https://img.shields.io/codefactor/grade/github/PennyLaneAI/pennylane-forest/master?logo=codefactor&style=flat-square
+.. image:: https://img.shields.io/codefactor/grade/github/PennyLaneAI/pennylane-rigetti/master?logo=codefactor&style=flat-square
     :alt: CodeFactor Grade
-    :target: https://www.codefactor.io/repository/github/pennylaneai/pennylane-forest
+    :target: https://www.codefactor.io/repository/github/pennylaneai/pennylane-rigetti
 
-.. image:: https://readthedocs.com/projects/xanaduai-pennylane-forest/badge/?version=latest&style=flat-square
+.. image:: https://readthedocs.com/projects/xanaduai-pennylane-rigetti/badge/?version=latest&style=flat-square
     :alt: Read the Docs
-    :target: https://docs.pennylane.ai/projects/forest
+    :target: https://docs.pennylane.ai/projects/rigetti
 
-.. image:: https://img.shields.io/pypi/v/pennylane-forest.svg?style=flat-square
+.. image:: https://img.shields.io/pypi/v/pennylane-rigetti.svg?style=flat-square
     :alt: PyPI
-    :target: https://pypi.org/project/pennylane-forest
+    :target: https://pypi.org/project/pennylane-rigetti
 
-.. image:: https://img.shields.io/pypi/pyversions/pennylane-forest.svg?style=flat-square
+.. image:: https://img.shields.io/pypi/pyversions/pennylane-rigetti.svg?style=flat-square
     :alt: PyPI - Python Version
-    :target: https://pypi.org/project/pennylane-forest
+    :target: https://pypi.org/project/pennylane-rigetti
 
 .. header-start-inclusion-marker-do-not-remove
 
-The PennyLane Forest plugin allows different Rigetti devices to work with
+The PennyLane Rigetti plugin allows different Rigetti devices to work with
 PennyLane --- the wavefunction simulator, the Quantum Virtual Machine (QVM), and Quantum Processing Units (QPUs).
 
 `pyQuil <https://pyquil.readthedocs.io>`__ is a Python library for quantum programming using the
@@ -41,13 +41,13 @@ learning, automatic differentiation, and optimization of hybrid quantum-classica
 
 .. header-end-inclusion-marker-do-not-remove
 
-The plugin documentation can be found here: `<https://docs.pennylane.ai/projects/forest>`__.
+The plugin documentation can be found here: `<https://docs.pennylane.ai/projects/rigetti>`__.
 
 Features
 ========
 
-* Provides four devices to be used with PennyLane: ``forest.numpy_wavefunction``,
-  ``forest.wavefunction``, ``forest.qvm``, and ``forest.qpu``. These provide access to the pyQVM
+* Provides four devices to be used with PennyLane: ``rigetti.numpy_wavefunction``,
+  ``rigetti.wavefunction``, ``rigetti.qvm``, and ``rigetti.qpu``. These provide access to the pyQVM
   Numpy wavefunction simulator, pyQuil wavefunction simulator, quantum
   virtual machine (QVM), and quantum processing units (QPUs) respectively.
 
@@ -59,15 +59,15 @@ Features
 Installation
 ============
 
-PennyLane-Forest, as well as all required Python packages mentioned above, can be installed via ``pip``:
+PennyLane-Rigetti, as well as all required Python packages mentioned above, can be installed via ``pip``:
 ::
 
-   	$ python -m pip install pennylane-forest
+   	$ python -m pip install pennylane-rigetti
 
 
 Make sure you are using the Python 3 version of pip.
 
-Alternatively, you can install PennyLane-Forest from the source code by navigating to the top-level directory and running
+Alternatively, you can install PennyLane-Rigetti from the source code by navigating to the top-level directory and running
 ::
 
 	$ python setup.py install
@@ -75,7 +75,7 @@ Alternatively, you can install PennyLane-Forest from the source code by navigati
 Dependencies
 ~~~~~~~~~~~~
 
-PennyLane-Forest requires the following libraries be installed:
+PennyLane-Rigetti requires the following libraries be installed:
 
 * `Python <http://python.org/>`__ >=3.7
 
@@ -103,7 +103,7 @@ quantum code and run on real QPUs. Note that this requires a valid QCS account a
 Tests
 ~~~~~
 
-To test that the PennyLane-Forest plugin is working correctly you can run
+To test that the PennyLane-Rigetti plugin is working correctly you can run
 
 .. code-block:: bash
 
@@ -139,9 +139,9 @@ or applications built on PennyLane.
 Authors
 =======
 
-PennyLane-Forest is the work of `many contributors <https://github.com/PennyLaneAI/pennylane-forest/graphs/contributors>`__.
+PennyLane-Rigetti is the work of `many contributors <https://github.com/PennyLaneAI/pennylane-forest/graphs/contributors>`__.
 
-If you are doing research using PennyLane and PennyLane-Forest, please cite `our paper <https://arxiv.org/abs/1811.04968>`__:
+If you are doing research using PennyLane and PennyLane-Rigetti, please cite `our paper <https://arxiv.org/abs/1811.04968>`__:
 
     Ville Bergholm, Josh Izaac, Maria Schuld, Christian Gogolin, M. Sohaib Alam, Shahnawaz Ahmed,
     Juan Miguel Arrazola, Carsten Blank, Alain Delgado, Soran Jahangiri, Keri McKiernan, Johannes Jakob Meyer,
@@ -153,8 +153,8 @@ If you are doing research using PennyLane and PennyLane-Forest, please cite `our
 Support
 =======
 
-- **Source Code:** https://github.com/PennyLaneAI/pennylane-forest
-- **Issue Tracker:** https://github.com/PennyLaneAI/pennylane-forest/issues
+- **Source Code:** https://github.com/PennyLaneAI/pennylane-rigetti
+- **Issue Tracker:** https://github.com/PennyLaneAI/pennylane-rigetti/issues
 - **PennyLane Forum:** https://discuss.pennylane.ai
 
 If you are having issues, please let us know by posting the issue on our Github issue tracker, or
@@ -167,7 +167,7 @@ by asking a question in the forum.
 License
 =======
 
-PennyLane-Forest is **free** and **open source**, released under the BSD 3-Clause `license
-<https://github.com/PennyLaneAI/pennylane-forest/blob/master/LICENSE>`__.
+PennyLane-Rigetti is **free** and **open source**, released under the BSD 3-Clause `license
+<https://github.com/PennyLaneAI/pennylane-rigetti/blob/master/LICENSE>`__.
 
 .. license-end-inclusion-marker-do-not-remove
