@@ -60,7 +60,7 @@ as a PennyLane device.
 
 This release contains contributions from (in alphabetical order):
 
-Antal Szava, Marquess Valdez.
+Albert Mitjans Coma, Antal Szava, Marquess Valdez.
 
 ---
 
