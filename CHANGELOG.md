@@ -6,6 +6,10 @@
 
 ### Improvements
 
+* With the introduction of custom measurement classes, all the `MeasurementProcess.return_type`
+  checks have been changed by `isinstance` checks.
+  [(#388)](https://github.com/PennyLaneAI/pennylane-lightning/pull/388)
+
 ### Documentation
 
 ### Bug fixes
@@ -14,6 +18,7 @@
 
 This release contains contributions from (in alphabetical order):
 
+Albert Mitjans-Coma
 ---
 
 # Release 0.27.0
