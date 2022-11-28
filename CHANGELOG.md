@@ -8,7 +8,7 @@
 
 * With the introduction of custom measurement classes, all the `MeasurementProcess.return_type`
   checks have been changed by `isinstance` checks.
-  [(#388)](https://github.com/PennyLaneAI/pennylane-lightning/pull/388)
+  [(#118)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/118)
 
 ### Documentation
 
