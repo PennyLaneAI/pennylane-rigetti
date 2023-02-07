@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
-import sys
-import os
 from setuptools import setup
 
 with open("pennylane_rigetti/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
-
-
-requirements = ["pyquil>=3.0.0,<4.0.0", "qcs-api-client>=0.20.13<0.22.0", "pennylane>=0.18"]
 
 info = {
     "name": "PennyLane-Rigetti",
@@ -33,7 +28,15 @@ info = {
     "description": "Rigetti backend for the PennyLane library",
     "long_description": open("README.rst").read(),
     "provides": ["pennylane_rigetti"],
-    "install_requires": requirements,
+    "install_requires": [
+        "numpy>=1.21,<1.24",
+        "networkx>=2.5,<3.0",
+        "pennylane>=0.18",
+        "pyquil>=3.0.0,<4.0.0",
+        "qcs-api-client>=0.20.13,<0.22.0",
+        #"msgpack>=0.6,<1.0",  # rpcq
+    ],
+    "extras_require": {"test": ["flaky", "pytest"]},
     "long_description_content_type": "text/x-rst",
 }
 

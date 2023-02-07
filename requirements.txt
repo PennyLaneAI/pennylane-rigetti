@@ -1,5 +1,0 @@
-pyquil>=3.0.0,<4.0.0
-pennylane>=0.18
-qcs-api-client>=0.20.13<0.22.0
-networkx
-flaky
