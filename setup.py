@@ -4,6 +4,9 @@ from setuptools import setup
 with open("pennylane_rigetti/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
+with open("./requirements.txt") as f:
+    requirements = [req.strip() for req in f.readlines()]
+
 info = {
     "name": "PennyLane-Rigetti",
     "version": version,
@@ -28,13 +31,7 @@ info = {
     "description": "Rigetti backend for the PennyLane library",
     "long_description": open("README.rst").read(),
     "provides": ["pennylane_rigetti"],
-    "install_requires": [
-        "numpy>=1.21,<1.24",
-        "networkx>=2.5,<3.0",
-        "pennylane>=0.18",
-        "pyquil>=3.0.0,<4.0.0",
-        "qcs-api-client>=0.20.13,<0.22.0",
-    ],
+    "install_requires": requirements,
     "extras_require": {"test": ["flaky", "pytest"]},
     "long_description_content_type": "text/x-rst",
 }
