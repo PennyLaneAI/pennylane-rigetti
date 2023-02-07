@@ -34,7 +34,6 @@ info = {
         "pennylane>=0.18",
         "pyquil>=3.0.0,<4.0.0",
         "qcs-api-client>=0.20.13,<0.22.0",
-        #"msgpack>=0.6,<1.0",  # rpcq
     ],
     "extras_require": {"test": ["flaky", "pytest"]},
     "long_description_content_type": "text/x-rst",
