@@ -33,6 +33,7 @@ compiled_program = (
     "CZ 1 0\n"
     "MEASURE 1 ro[0]\n"
     "MEASURE 0 ro[1]\n"
+    "HALT\n"
 )
 
 
