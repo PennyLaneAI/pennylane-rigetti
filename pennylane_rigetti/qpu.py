@@ -123,10 +123,8 @@ class QPUDevice(QuantumComputerDevice):
 
         # `measure_observables` called only when parametric compilation is turned off
         if not self.parametric_compilation:
-
             # Single-qubit observable
             if len(device_wires) == 1:
-
                 # Ensure sensible observable
                 assert observable.name in [
                     "PauliX",
@@ -142,7 +140,6 @@ class QPUDevice(QuantumComputerDevice):
 
             # Multi-qubit observable
             elif len(device_wires) > 1 and isinstance(observable, Tensor):
-
                 # All observables are rotated to be measured in the Z-basis, so we just need to
                 # check which wires exist in the observable, map them to physical qubits, and measure
                 # the product of PauliZ operators on those qubits
