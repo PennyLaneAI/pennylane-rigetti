@@ -15,20 +15,20 @@ jobs:
           python-version: 3.8
 
       - name: Run Forest Quilc
-        run: docker run --rm -d -p 5555:5555 rigetti/quilc:1.22.0 -R
+        run: docker run --rm -d -p 5555:5555 rigetti/quilc:1.26.0 -R
 
       - name: Run Forest QVM
         run: docker run --rm -d -p 5000:5000 rigetti/qvm -S
 
       - name: Build and install Plugin
         run: |
-          python -m pip install --upgrade pip wheel
+          pip install -U pip wheel
           python setup.py bdist_wheel
           pip install dist/PennyLane*.whl
 
       - name: Install test dependencies
         run: |
-          pip install wheel pytest pytest-cov pytest-mock flaky --upgrade
+          pip install -r requirements-test.txt
 
       - name: Run tests
         run: |
