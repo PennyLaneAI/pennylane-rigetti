@@ -288,7 +288,7 @@ class ParametrizedGate:
         pl_gate_instance = self.pl_gate(*resolved_params, wires=resolved_wires)
 
         if self.is_inverted:
-            pl_gate_instance.inv()
+            return qml.adjoint(pl_gate_instance)
 
         return pl_gate_instance
 
