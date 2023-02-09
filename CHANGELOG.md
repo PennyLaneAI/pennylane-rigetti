@@ -5,6 +5,7 @@
 ### Breaking changes
 
 * `pennylane-rigetti` no longer supports `python3.7`. A newer python version is required.
+  [(#121)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/121)
 
 ### Improvements
 
