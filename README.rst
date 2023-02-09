@@ -77,7 +77,7 @@ Dependencies
 
 PennyLane-Rigetti requires the following libraries be installed:
 
-* `Python <http://python.org/>`__ >=3.7
+* `Python <http://python.org/>`__ >=3.8
 
 as well as the following Python packages:
 

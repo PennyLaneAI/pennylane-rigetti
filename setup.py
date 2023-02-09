@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
+import os
+import sys
+
 from setuptools import setup
 
 with open("pennylane_rigetti/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
-with open("./requirements.txt") as f:
-    requirements = [req.strip() for req in f.readlines()]
+
+requirements = ["pyquil>=3.0.0,<4.0.0", "qcs-api-client>=0.20.13<0.22.0", "pennylane>=0.18"]
 
 info = {
     "name": "PennyLane-Rigetti",
@@ -32,7 +35,6 @@ info = {
     "long_description": open("README.rst").read(),
     "provides": ["pennylane_rigetti"],
     "install_requires": requirements,
-    "extras_require": {"test": ["flaky", "pytest"]},
     "long_description_content_type": "text/x-rst",
 }
 
@@ -48,7 +50,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
