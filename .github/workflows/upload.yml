@@ -20,15 +20,10 @@ jobs:
       - name: Run Forest QVM
         run: docker run --rm -d -p 5000:5000 rigetti/qvm -S
 
-      - name: Build and install Plugin
+      - name: Install plugin and test dependencies
         run: |
-          pip install -U pip wheel
-          python setup.py bdist_wheel
-          pip install dist/PennyLane*.whl
-
-      - name: Install test dependencies
-        run: |
-          pip install -r requirements-test.txt
+          python -m pip install --upgrade pip
+          pip install '.[test]'
 
       - name: Run tests
         run: |
