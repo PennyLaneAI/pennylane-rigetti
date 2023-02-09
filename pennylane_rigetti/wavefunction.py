@@ -129,7 +129,6 @@ class WavefunctionDevice(RigettiDevice):
 
         for string, amplitude in zip(subsystem_bit_strings, self._state):
             for w in inactive_wires:
-
                 # expand the bitstring by inserting a zero bit for each inactive qubit
                 string = np.insert(string, w, 0)
 

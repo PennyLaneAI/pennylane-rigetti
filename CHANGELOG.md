@@ -4,6 +4,9 @@
 
 ### Breaking changes
 
+* `pennylane-rigetti` no longer supports `python3.7`. A newer python version is required.
+  [(#121)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/121)
+
 ### Improvements
 
 ### Documentation
@@ -13,6 +16,8 @@
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Albert Mitjans Coma
 
 ---
 
@@ -36,7 +41,7 @@ as a PennyLane device.
   [#110](https://github.com/PennyLaneAI/pennylane-forest/pull/110)
 
 * A new version of the QCS CLI is required if you want to use your QCS account
-  to run your workloads on a live Rigetti QPU. See 
+  to run your workloads on a live Rigetti QPU. See
   [Using the QCS CLI](https://docs.rigetti.com/qcs/guides/using-the-qcs-cli) for
   details.
   [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
@@ -70,8 +75,8 @@ as a PennyLane device.
 
 ### Bug fixes
 
-* The QPU device now correctly sets the number of shots when parametric 
-  compilation is disabled. 
+* The QPU device now correctly sets the number of shots when parametric
+  compilation is disabled.
   [#107](https://github.com/PennyLaneAI/pennylane-forest/pull/107)
 
 ### Contributors
