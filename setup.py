@@ -8,7 +8,8 @@ with open("pennylane_rigetti/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 
-requirements = ["pyquil>=3.0.0,<4.0.0", "qcs-api-client>=0.20.13<0.22.0", "pennylane>=0.18"]
+with open("./requirements.txt") as f:
+    requirements = [req.strip() for req in f.readlines()]
 
 info = {
     "name": "PennyLane-Rigetti",
