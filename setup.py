@@ -7,7 +7,6 @@ from setuptools import setup
 with open("pennylane_rigetti/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
-
 with open("./requirements.txt") as f:
     requirements = [req.strip() for req in f.readlines()]
 
