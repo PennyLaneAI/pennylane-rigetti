@@ -13,6 +13,9 @@
 * `pennylane-rigetti` no longer supports `python3.7`. A newer python version is required.
   [(#121)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/121)
 
+* Removed the use of in-place inversion for PennyLane operations.
+  [(#122)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/122)
+
 ### Improvements
 
 ### Documentation
