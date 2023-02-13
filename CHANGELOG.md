@@ -4,6 +4,12 @@
 
 ### Breaking changes
 
+* Build dependency specification is now solely in `requirements.txt`, which is read
+  by `setup.py`. What's more, a missing comma has been added to the version bounds
+  on `qcs-api-client`, fixing ([#120](https://github.com/PennyLaneAI/pennylane-rigetti/pull/120))
+  a bug ([#119](https://github.com/PennyLaneAI/pennylane-rigetti/issues/119)) that
+  was causing errors when trying to use the package.
+
 * `pennylane-rigetti` no longer supports `python3.7`. A newer python version is required.
   [(#121)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/121)
 
@@ -21,6 +27,7 @@
 This release contains contributions from (in alphabetical order):
 
 Albert Mitjans Coma
+Graham Enos
 
 ---
 

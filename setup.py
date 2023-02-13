@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-import os
-import sys
-
+from pathlib import Path
 from setuptools import setup
 
-with open("pennylane_rigetti/_version.py") as f:
+_here = Path(__file__).parent
+
+with open(_here / "pennylane_rigetti" / "_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
+with open(_here / "requirements.txt") as f:
+    requirements = [req.strip() for req in f.readlines()]
 
-requirements = ["pyquil>=3.0.0,<4.0.0", "qcs-api-client>=0.20.13<0.22.0", "pennylane>=0.18"]
+with open(_here / "requirements-test.txt") as f:
+    test_requirements = [req.strip() for req in f.readlines()]
 
 info = {
     "name": "PennyLane-Rigetti",
@@ -35,6 +38,7 @@ info = {
     "long_description": open("README.rst").read(),
     "provides": ["pennylane_rigetti"],
     "install_requires": requirements,
+    "extras_require": {"test": test_requirements},
     "long_description_content_type": "text/x-rst",
 }
 
