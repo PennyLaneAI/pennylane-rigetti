@@ -48,8 +48,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
          wires (Iterable[Number, str]): Iterable that contains unique labels for the
             qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``).
             The number of labels must match the number of qubits accessible on the backend.
-            If not provided, qubits are addressed as consecutive integers ``[0, 1, ...]``, and their number
-            is inferred from the backend.
+            If not provided, qubits are addressed by the backend.
         active_reset (bool): whether to actively reset qubits instead of waiting for
             for qubits to decay to the ground state naturally.
             Setting this to ``True`` results in a significantly faster expectation value
@@ -97,9 +96,8 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         self.num_wires = len(self.qc.qubits())
 
         if wires is None:
-            # infer the number of modes from the device specs
-            # and use consecutive integer wire labels
-            wires = range(self.num_wires)
+            # infer the wires from the device specs
+            wires = self.qc.qubits()
 
         if isinstance(wires, int):
             raise ValueError(
@@ -113,7 +111,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
                 f"cannot be created with {len(wires)} wires."
             )
 
-        self.wiring = dict(enumerate(self.qc.qubits()))
+        self.wiring = {q: q for q in wires}
         self.active_reset = active_reset
 
         super().__init__(wires, shots)
@@ -224,7 +222,10 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             # Prepare for parametric compilation
             par = []
             for param in operation.data:
-                if getattr(param, "requires_grad", False) and operation.name != "BasisState":
+                if (
+                    getattr(param, "requires_grad", False)
+                    and operation.name != "BasisState"
+                ):
                     # Using the idx for trainable parameter objects to specify the
                     # corresponding symbolic parameter
                     parameter_string = "theta" + str(id(param))
@@ -266,7 +267,9 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             for region, value in self._parameter_map.items():
                 self.prog.write_memory(region_name=region, value=value)
             # Fetch the compiled program, or compile and store it if it doesn't exist
-            self._compiled_program = self._compiled_program_dict.get(self.circuit_hash, None)
+            self._compiled_program = self._compiled_program_dict.get(
+                self.circuit_hash, None
+            )
             if self._compiled_program is None:
                 self._compiled_program = self.compile()
                 self._compiled_program_dict[self.circuit_hash] = self._compiled_program
