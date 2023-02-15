@@ -246,7 +246,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
     def compile(self) -> QuantumExecutable:
         """Compiles the program for the target device"""
-        return self.qc.compile(self.prog)
+        return self.qc.compile(self.prog, protoquil=True)
 
     def execute(self, circuit, **kwargs):
         """Executes the given circuit"""
