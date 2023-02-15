@@ -190,12 +190,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
         rotations = kwargs.get("rotations", [])
         self.prog += self.apply_rotations(rotations)
-
-        qubits = sorted(self.wiring.values())
-        ro = self.prog.declare("ro", "BIT", len(qubits))
-        for i, q in enumerate(qubits):
-            self.prog.inst(MEASURE(q, ro[i]))
-
+        self.prog.measure_all()
         self.prog.wrap_in_numshots_loop(self.shots)
 
     def apply_parametric_operations(self, operations):
