@@ -20,12 +20,12 @@ Code details
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, List
 from collections import OrderedDict
 
 from pyquil import Program
 from pyquil.api import QAMExecutionResult, QuantumComputer, QuantumExecutable
-from pyquil.gates import RESET
+from pyquil.gates import RESET, MEASURE
 from pyquil.quil import Pragma
 
 from pennylane import DeviceError, numpy as np
@@ -111,7 +111,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
                 f"cannot be created with {len(wires)} wires."
             )
 
-        self.wiring = {q: q for q in wires}
+        self.wiring = {q: q for q in sorted(wires)}
         self.active_reset = active_reset
 
         super().__init__(wires, shots)
@@ -178,10 +178,8 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
     def apply(self, operations, **kwargs):
         """Applies the given quantum operations."""
-        prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
         if self.active_reset:
-            prag += RESET()
-        self.prog = prag + self.prog
+            self.prog = Program(RESET()) + self.prog
 
         if self.parametric_compilation:
             self.prog += self.apply_parametric_operations(operations)
@@ -190,8 +188,17 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
         rotations = kwargs.get("rotations", [])
         self.prog += self.apply_rotations(rotations)
-        self.prog.measure_all()
         self.prog.wrap_in_numshots_loop(self.shots)
+        # Measure every qubit used by the program into a readout register.
+        # Devices don't always have sequentially adressed qubits, so
+        # we use a normalized value to index them into the readout register.
+        ro = self.prog.declare("ro", "BIT", len(self.wiring.values()))
+        used_qubits = self.prog.get_qubits(indices=True)
+        normalized_qubit_indices = {
+            wire: i for i, wire in enumerate(list(self.wiring.values()))
+        }
+        for qubit in used_qubits:
+            self.prog += MEASURE(qubit, ro[normalized_qubit_indices[qubit]])
 
     def apply_parametric_operations(self, operations):
         """Applies a parametric program by applying parametric operation with symbolic parameters.
