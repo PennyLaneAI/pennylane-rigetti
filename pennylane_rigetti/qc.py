@@ -194,11 +194,8 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         # we use a normalized value to index them into the readout register.
         ro = self.prog.declare("ro", "BIT", len(self.wiring.values()))
         used_qubits = self.prog.get_qubits(indices=True)
-        normalized_qubit_indices = {
-            wire: i for i, wire in enumerate(list(self.wiring.values()))
-        }
-        for qubit in used_qubits:
-            self.prog += MEASURE(qubit, ro[normalized_qubit_indices[qubit]])
+        for i, qubit in enumerate(used_qubits):
+            self.prog += MEASURE(qubit, ro[i])
 
     def apply_parametric_operations(self, operations):
         """Applies a parametric program by applying parametric operation with symbolic parameters.
