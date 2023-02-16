@@ -22,12 +22,19 @@
 
 ### Bug fixes
 
+* Wire mapping is now based on the device specification instead of being assumed to be a zero-indexed 
+  sequence. 
+
+* QPU devices now configure the compiler to generate programs that will be compatible to
+  run on a real QPU.
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
 
 Albert Mitjans Coma
 Graham Enos
+Marquess Valdez
 
 ---
 
