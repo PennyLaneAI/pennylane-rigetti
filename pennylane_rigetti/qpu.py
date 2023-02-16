@@ -26,7 +26,7 @@ from pennylane.measurements import Expectation
 from pennylane.operation import Tensor
 from pennylane.tape import QuantumTape
 from pyquil import get_qc
-from pyquil.api import QuantumComputer
+from pyquil.api import QuantumComputer, QuantumExecutable
 from pyquil.experiment import SymmetrizationLevel
 from pyquil.operator_estimation import (
     Experiment,
@@ -112,7 +112,12 @@ class QPUDevice(QuantumComputerDevice):
         self.calibrate_readout = calibrate_readout
         self._skip_generate_samples = False
 
-        super().__init__(device, wires=wires, shots=shots, active_reset=active_reset, **kwargs)
+        super().__init__(
+            device, wires=wires, shots=shots, active_reset=active_reset, **kwargs
+        )
+
+    def compile(self) -> QuantumExecutable:
+        return self.qc.compile(self.prog, protoquil=True)
 
     def get_qc(self, device, **kwargs) -> QuantumComputer:
         return get_qc(device, as_qvm=self.as_qvm, **kwargs)

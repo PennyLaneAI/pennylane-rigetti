@@ -25,7 +25,7 @@ from collections import OrderedDict
 
 from pyquil import Program
 from pyquil.api import QAMExecutionResult, QuantumComputer, QuantumExecutable
-from pyquil.gates import RESET, MEASURE
+from pyquil.gates import RESET
 from pyquil.quil import Pragma
 
 from pennylane import DeviceError, numpy as np
@@ -246,7 +246,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
     def compile(self) -> QuantumExecutable:
         """Compiles the program for the target device"""
-        return self.qc.compile(self.prog, protoquil=True)
+        return self.qc.compile(self.prog)
 
     def execute(self, circuit, **kwargs):
         """Executes the given circuit"""
