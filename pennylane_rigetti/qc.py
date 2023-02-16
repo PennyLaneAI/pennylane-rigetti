@@ -20,13 +20,12 @@ Code details
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List
+from typing import Dict
 from collections import OrderedDict
 
 from pyquil import Program
 from pyquil.api import QAMExecutionResult, QuantumComputer, QuantumExecutable
 from pyquil.gates import RESET, MEASURE
-from pyquil.quil import Pragma
 
 from pennylane import DeviceError, numpy as np
 from pennylane.wires import Wires
@@ -221,10 +220,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             # Prepare for parametric compilation
             par = []
             for param in operation.data:
-                if (
-                    getattr(param, "requires_grad", False)
-                    and operation.name != "BasisState"
-                ):
+                if getattr(param, "requires_grad", False) and operation.name != "BasisState":
                     # Using the idx for trainable parameter objects to specify the
                     # corresponding symbolic parameter
                     parameter_string = "theta" + str(id(param))
@@ -266,9 +262,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             for region, value in self._parameter_map.items():
                 self.prog.write_memory(region_name=region, value=value)
             # Fetch the compiled program, or compile and store it if it doesn't exist
-            self._compiled_program = self._compiled_program_dict.get(
-                self.circuit_hash, None
-            )
+            self._compiled_program = self._compiled_program_dict.get(self.circuit_hash, None)
             if self._compiled_program is None:
                 self._compiled_program = self.compile()
                 self._compiled_program_dict[self.circuit_hash] = self._compiled_program
