@@ -192,8 +192,8 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         # Measure every qubit used by the program into a readout register.
         # Devices don't always have sequentially adressed qubits, so
         # we use a normalized value to index them into the readout register.
-        ro = self.prog.declare("ro", "BIT", len(self.wiring.values()))
         used_qubits = self.prog.get_qubits(indices=True)
+        ro = self.prog.declare("ro", "BIT", len(used_qubits))
         for i, qubit in enumerate(used_qubits):
             self.prog += MEASURE(qubit, ro[i])
 
