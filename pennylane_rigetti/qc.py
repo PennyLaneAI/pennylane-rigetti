@@ -84,6 +84,12 @@ class QuantumComputerDevice(RigettiDevice, ABC):
                 their numeric values. This map will be used to bind parameters in a parametric
                 program using PyQuil."""
 
+            self._batched_parameter_map = {}
+            """dict[str, list[float]]: a map of broadcasted parameter names to each of their values"""
+
+            self._batch_size = 0
+            """the batch size of the currently executing circuit"""
+
             self._parameter_reference_map = {}
             """dict[str, pyquil.quilatom.MemoryReference]: stores the string of symbolic
                 parameters associated with their PyQuil memory references."""
@@ -191,10 +197,14 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         # Measure every qubit used by the program into a readout register.
         # Devices don't always have sequentially adressed qubits, so
         # we use a normalized value to index them into the readout register.
+        qubits = sorted(self.wiring.values())
+        ro = self.prog.declare("ro", "BIT", len(qubits))
         used_qubits = self.prog.get_qubits(indices=True)
-        ro = self.prog.declare("ro", "BIT", len(used_qubits))
-        for i, qubit in enumerate(used_qubits):
-            self.prog += MEASURE(qubit, ro[i])
+        normalized_qubit_indices = {
+            wire: i for i, wire in enumerate(list(self.wiring.values()))
+        }
+        for qubit in used_qubits:
+            self.prog += MEASURE(qubit, ro[normalized_qubit_indices[qubit]])
 
     def apply_parametric_operations(self, operations):
         """Applies a parametric program by applying parametric operation with symbolic parameters.
@@ -206,7 +216,6 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             pyquil.Prgram(): a pyQuil Program with the given operations
         """
         prog = Program()
-        # Apply the circuit operations
         for i, operation in enumerate(operations):
             # map the operation wires to the physical device qubits
             device_wires = self.map_wires(operation.wires)
@@ -219,56 +228,102 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
             # Prepare for parametric compilation
             par = []
-            for param in operation.data:
-                if getattr(param, "requires_grad", False) and operation.name != "BasisState":
-                    # Using the idx for trainable parameter objects to specify the
-                    # corresponding symbolic parameter
-                    parameter_string = "theta" + str(id(param))
+            if operation.batch_size is not None:
+                parameter_string = f"theta{i}"
+                if parameter_string not in self._parameter_reference_map:
+                    # Create a new PyQuil memory reference and store it in the
+                    # parameter reference map if it was not done so already
+                    current_ref = self.prog.declare(parameter_string, "REAL")
+                    self._parameter_reference_map[parameter_string] = current_ref
 
-                    if parameter_string not in self._parameter_reference_map:
-                        # Create a new PyQuil memory reference and store it in the
-                        # parameter reference map if it was not done so already
-                        current_ref = self.prog.declare(parameter_string, "REAL")
-                        self._parameter_reference_map[parameter_string] = current_ref
+                # Store the values bound to the symbolic parameter
+                self._batched_parameter_map[parameter_string] = operation.data
 
-                    # Store the numeric value bound to the symbolic parameter
-                    self._parameter_map[parameter_string] = [param.unwrap()]
+                # Appending the parameter reference to the parameters
+                # of the corresponding operation
+                par.append(self._parameter_reference_map[parameter_string])
+            else:
+                for param in operation.data:
+                    if (
+                        getattr(param, "requires_grad", False)
+                        and operation.name != "BasisState"
+                    ):
+                        # Using the idx for trainable parameter objects to specify the
+                        # corresponding symbolic parameter
+                        parameter_string = "theta" + str(id(param))
 
-                    # Appending the parameter reference to the parameters
-                    # of the corresponding operation
-                    par.append(self._parameter_reference_map[parameter_string])
-                else:
-                    par.append(param)
+                        if parameter_string not in self._parameter_reference_map:
+                            # Create a new PyQuil memory reference and store it in the
+                            # parameter reference map if it was not done so already
+                            current_ref = self.prog.declare(parameter_string, "REAL")
+                            self._parameter_reference_map[
+                                parameter_string
+                            ] = current_ref
+
+                        # Store the numeric value bound to the symbolic parameter
+                        self._parameter_map[parameter_string] = [param.unwrap()]
+
+                        # Appending the parameter reference to the parameters
+                        # of the corresponding operation
+                        par.append(self._parameter_reference_map[parameter_string])
+                    else:
+                        par.append(param)
 
             prog += self._operation_map[operation.name](*par, *device_wires.labels)
 
         return prog
 
+    @classmethod
+    def capabilities(cls):
+        capabilities = super().capabilities().copy()
+        capabilities.update(supports_broadcasting=True)
+        return capabilities
+
     def compile(self) -> QuantumExecutable:
         """Compiles the program for the target device"""
         return self.qc.compile(self.prog)
 
+    def _compile_with_cache(self) -> QuantumExecutable:
+        """When parametric compilation is enabled, fetches the compiled program from the cache if it exists.
+        If not, the program is compiled and stored in the cache.
+
+        If parametric compilation is disabled, this just compiles the program
+        """
+        if not self.parametric_compilation:
+            return self.compile()
+
+        compiled_program = self._compiled_program_dict.get(self.circuit_hash, None)
+        if compiled_program is None:
+            compiled_program = self.compile()
+            self._compiled_program_dict[self.circuit_hash] = self._compiled_program
+        return compiled_program
+
     def execute(self, circuit, **kwargs):
         """Executes the given circuit"""
         if self.parametric_compilation:
+            self._batch_size = circuit.batch_size
             self._circuit_hash = circuit.graph.hash
         return super().execute(circuit, **kwargs)
 
     def generate_samples(self):
         """Executes the program on the QuantumComputer and uses the results to return the
         computational basis samples of all wires."""
+        self._compiled_program = self._compile_with_cache()
         if self.parametric_compilation:
+            results = []
             # Set the parameter values in executable memory
             for region, value in self._parameter_map.items():
-                self.prog.write_memory(region_name=region, value=value)
-            # Fetch the compiled program, or compile and store it if it doesn't exist
-            self._compiled_program = self._compiled_program_dict.get(self.circuit_hash, None)
-            if self._compiled_program is None:
-                self._compiled_program = self.compile()
-                self._compiled_program_dict[self.circuit_hash] = self._compiled_program
-        else:
-            # Parametric compilation is disabled, just compile the program
-            self._compiled_program = self.compile()
+                self._compiled_program.write_memory(region_name=region, value=value)
+            if self._batch_size is not None:
+                for i in range(self._batch_size):
+                    for region, values in self._batched_parameter_map.items():
+                        self._compiled_program.write_memory(
+                            region_name=region, value=values[0][i]
+                        )
+                    samples = self.qc.run(self._compiled_program)
+                    samples = self.extract_samples(samples)
+                    results.append(samples)
+                return np.array(results)
 
         results = self.qc.run(self._compiled_program)
         return self.extract_samples(results)
@@ -295,3 +350,5 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             self._circuit_hash = None
             self._parameter_map = {}
             self._parameter_reference_map = {}
+            self._batched_parameter_map = {}
+            self._batch_size = None
