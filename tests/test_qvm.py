@@ -612,7 +612,7 @@ class TestParametricCompilation(BaseTest):
         applied as the first operation."""
         dev = qml.device("rigetti.qvm", device="2q-qvm", parametric_compilation=True)
 
-        operation = qml.QubitStateVector(np.array([1, 0]), wires=list(range(2)))
+        operation = qml.QubitStateVector(np.array([1, 0]), wires=[0])
         queue = [qml.PauliX(0), operation]
         with pytest.raises(
             qml.DeviceError,
