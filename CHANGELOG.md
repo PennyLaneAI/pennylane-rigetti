@@ -1,6 +1,4 @@
-# Release 0.28.0-dev
-
-### New features since last release
+# Release 0.29.0
 
 ### Breaking changes
 
@@ -12,10 +10,6 @@
 
 * Removed the use of in-place inversion for PennyLane operations.
   [(#122)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/122)
-
-### Improvements
-
-### Documentation
 
 ### Bug fixes
 
