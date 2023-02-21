@@ -1,21 +1,17 @@
-# Release 0.28.0-dev
-
-### New features since last release
+# Release 0.29.0
 
 ### Breaking changes
-
-* Build dependency specification is now solely in `requirements.txt`, which is read by `setup.py`.
-  [(#120)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/120)
 
 * `pennylane-rigetti` no longer supports `python3.7`. A newer python version is required.
   [(#121)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/121)
 
-* Removed the use of in-place inversion for PennyLane operations.
-  [(#122)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/122)
-
 ### Improvements
 
-### Documentation
+* Build dependency specification is now solely in `requirements.txt`, which is read by `setup.py`.
+  [(#120)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/120)
+
+* Removed the use of in-place inversion for PennyLane operations.
+  [(#122)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/122)
 
 ### Bug fixes
 
