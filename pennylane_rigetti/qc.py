@@ -82,9 +82,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             raise ValueError("Number of shots must be a positive integer or None.")
 
         if parallel and max_threads <= 0:
-            raise ValueError(
-                "max_threads must be set to a positive integer greater than 0"
-            )
+            raise ValueError("max_threads must be set to a positive integer greater than 0")
 
         self._parallel = parallel
         self._max_threads = max_threads
@@ -222,9 +220,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         qubits = sorted(self.wiring.values())
         ro = self.prog.declare("ro", "BIT", len(qubits))
         used_qubits = self.prog.get_qubits(indices=True)
-        normalized_qubit_indices = {
-            wire: i for i, wire in enumerate(list(self.wiring.values()))
-        }
+        normalized_qubit_indices = {wire: i for i, wire in enumerate(list(self.wiring.values()))}
         for qubit in used_qubits:
             self.prog += MEASURE(qubit, ro[normalized_qubit_indices[qubit]])
 
@@ -266,10 +262,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
                 par.append(self._parameter_reference_map[parameter_string])
             else:
                 for param in operation.data:
-                    if (
-                        getattr(param, "requires_grad", False)
-                        and operation.name != "BasisState"
-                    ):
+                    if getattr(param, "requires_grad", False) and operation.name != "BasisState":
                         # Using the idx for trainable parameter objects to specify the
                         # corresponding symbolic parameter
                         parameter_string = "theta" + str(id(param))
@@ -278,9 +271,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
                             # Create a new PyQuil memory reference and store it in the
                             # parameter reference map if it was not done so already
                             current_ref = self.prog.declare(parameter_string, "REAL")
-                            self._parameter_reference_map[
-                                parameter_string
-                            ] = current_ref
+                            self._parameter_reference_map[parameter_string] = current_ref
 
                         # Store the numeric value bound to the symbolic parameter
                         self._parameter_map[parameter_string] = [param.unwrap()]
@@ -403,9 +394,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             if self._batch_size is not None:
                 for i in range(self._batch_size):
                     for region, values in self._batched_parameter_map.items():
-                        self._compiled_program.write_memory(
-                            region_name=region, value=values[i]
-                        )
+                        self._compiled_program.write_memory(region_name=region, value=values[i])
                     samples = self.qc.run(self._compiled_program)
                     samples = self.extract_samples(samples)
                     results.append(samples)
