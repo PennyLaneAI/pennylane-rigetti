@@ -1,5 +1,5 @@
 PennyLane Rigetti Plugin
-#######################
+########################
 
 .. image:: https://img.shields.io/github/workflow/status/PennyLaneAI/pennylane-rigetti/Tests/master?logo=github&style=flat-square
     :alt: GitHub Workflow Status (branch)
