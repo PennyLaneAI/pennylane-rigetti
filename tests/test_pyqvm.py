@@ -39,7 +39,7 @@ class TestPyQVMBasic(BaseTest):
         res = circuit()
 
         # below are the analytic expectation values for this circuit (trace should always be 1)
-        self.assertAllAlmostEqual(res, np.array([1, 1]), delta=3 / np.sqrt(shots))
+        assert np.allclose(res, np.array([1, 1]), atol=3 / np.sqrt(shots))
 
     def test_pauliz_expectation(self, shots):
         """Test that PauliZ expectation value is correct"""
@@ -57,8 +57,8 @@ class TestPyQVMBasic(BaseTest):
 
         res = circuit()
         # below are the analytic expectation values for this circuit
-        self.assertAllAlmostEqual(
-            res, np.array([np.cos(theta), np.cos(theta) * np.cos(phi)]), delta=3 / np.sqrt(shots)
+        assert np.allclose(
+            res, np.array([np.cos(theta), np.cos(theta) * np.cos(phi)]), atol=3 / np.sqrt(shots)
         )
 
     def test_paulix_expectation(self, shots):
@@ -77,8 +77,8 @@ class TestPyQVMBasic(BaseTest):
 
         res = circuit()
         # below are the analytic expectation values for this circuit
-        self.assertAllAlmostEqual(
-            res, np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]), delta=3 / np.sqrt(shots)
+        assert np.allclose(
+            res, np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]), atol=3 / np.sqrt(shots)
         )
 
     def test_pauliy_expectation(self, shots):
@@ -98,8 +98,8 @@ class TestPyQVMBasic(BaseTest):
         res = circuit()
 
         # below are the analytic expectation values for this circuit
-        self.assertAllAlmostEqual(
-            res, np.array([0, -np.cos(theta) * np.sin(phi)]), delta=3 / np.sqrt(shots)
+        assert np.allclose(
+            res, np.array([0, -np.cos(theta) * np.sin(phi)]), atol=3 / np.sqrt(shots)
         )
 
     def test_hadamard_expectation(self, shots):
@@ -122,7 +122,7 @@ class TestPyQVMBasic(BaseTest):
         expected = np.array(
             [np.sin(theta) * np.sin(phi) + np.cos(theta), np.cos(theta) * np.cos(phi) + np.sin(phi)]
         ) / np.sqrt(2)
-        self.assertAllAlmostEqual(res, expected, delta=3 / np.sqrt(shots))
+        assert np.allclose(res, expected, atol=3 / np.sqrt(shots))
 
     def test_hermitian_expectation(self, shots):
         """Test that arbitrary Hermitian expectation values are correct"""
@@ -148,7 +148,7 @@ class TestPyQVMBasic(BaseTest):
         ev2 = ((a - d) * np.cos(theta) * np.cos(phi) + 2 * re_b * np.sin(phi) + a + d) / 2
         expected = np.array([ev1, ev2])
 
-        self.assertAllAlmostEqual(res, expected, delta=3 / np.sqrt(shots))
+        assert np.allclose(res, expected, atol=3 / np.sqrt(shots))
 
     def test_multi_qubit_hermitian_expectation(self, shots):
         """Test that arbitrary multi-qubit Hermitian expectation values are correct"""
@@ -184,7 +184,7 @@ class TestPyQVMBasic(BaseTest):
             - 6
         )
 
-        self.assertAllAlmostEqual(res, expected, delta=6 / np.sqrt(shots))
+        assert np.allclose(res, expected, atol=6 / np.sqrt(shots))
 
     def test_var(self, shots):
         """Tests for variance calculation"""
@@ -277,7 +277,7 @@ class TestPyQVMBasic(BaseTest):
         # verify the device is now in the expected state
         # Note we have increased the tolerance here, since we are only
         # performing 1024 shots.
-        self.assertAllAlmostEqual(res, expected, delta=4 / np.sqrt(shots))
+        assert np.allclose(res, expected, atol=4 / np.sqrt(shots))
 
 
 class TestQVMIntegration(BaseTest):
@@ -303,12 +303,8 @@ class TestQVMIntegration(BaseTest):
         out_state = U2 @ np.array([1, 0, 0, 1]) / np.sqrt(2)
         obs = np.kron(np.array([[1, 0], [0, -1]]), I)
 
-        self.assertAllAlmostEqual(
-            circuit1(), np.vdot(out_state, obs @ out_state), delta=3 / np.sqrt(shots)
-        )
-        self.assertAllAlmostEqual(
-            circuit2(), np.vdot(out_state, obs @ out_state), delta=3 / np.sqrt(shots)
-        )
+        assert np.allclose(circuit1(), np.vdot(out_state, obs @ out_state), atol=3 / np.sqrt(shots))
+        assert np.allclose(circuit2(), np.vdot(out_state, obs @ out_state), atol=3 / np.sqrt(shots))
 
     @pytest.mark.parametrize("device", ["2q-pyqvm"])
     def test_one_qubit_wavefunction_circuit(self, device, shots):
