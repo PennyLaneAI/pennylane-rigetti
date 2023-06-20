@@ -6,6 +6,12 @@
 
 ### Improvements
 
+* Remove the use of the deprecated function `qml.map` in the tests
+  [(#129)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/129)
+
+* Update logic in the tests to reflect the new PennyLane return type system
+  [(#129)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/129)
+
 ### Documentation
 
 ### Bug fixes
@@ -13,6 +19,8 @@
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Matthew Silverman
 
 ---
 
