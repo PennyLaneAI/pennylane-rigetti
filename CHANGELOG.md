@@ -1,8 +1,4 @@
-# Release 0.30.0-dev
-
-### New features since last release
-
-### Breaking changes
+# Release 0.31.0
 
 ### Improvements
 
@@ -11,10 +7,6 @@
 
 * Update logic in the tests to reflect the new PennyLane return type system
   [(#129)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/129)
-
-### Documentation
-
-### Bug fixes
 
 ### Contributors
 
