@@ -588,7 +588,6 @@ class TestParametricCompilation(BaseTest):
         first = True
 
         for run_idx in range(number_of_runs):
-
             with qml.tape.QuantumTape() as tape:
                 qml.RX(param1, wires=[0])
                 qml.RX(param2, wires=[1])
@@ -777,16 +776,13 @@ class TestQVMIntegration(BaseTest):
 
         assert len(dev._compiled_program_dict.items()) == 0
 
-        def circuit(params, wires):
+        @qml.qnode(dev)
+        def circuit():
             qml.Hadamard(0)
             qml.CNOT(wires=[0, 1])
+            return tuple(qml.expval(qml.PauliZ(0) @ qml.PauliZ(1)) for _ in range(6))
 
-        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
-        obs_list = obs * 6
-
-        qnodes = qml.map(circuit, obs_list, dev)
-
-        qnodes([])
+        circuit()
         assert dev.circuit_hash in dev._compiled_program_dict
         assert len(dev._compiled_program_dict.items()) == 1
 
@@ -810,18 +806,15 @@ class TestQVMIntegration(BaseTest):
 
         assert len(dev._compiled_program_dict.items()) == 0
 
-        def circuit(params, wires, statement=None):
+        @qml.qnode(dev)
+        def circuit(statement=None):
             if statement:
                 qml.Hadamard(0)
             qml.CNOT(wires=[0, 1])
+            return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
 
-        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
-        obs_list = obs * 6
-
-        qnodes = qml.map(circuit, obs_list, dev)
-
-        for idx, stmt in enumerate(statements):
-            qnodes[idx]([], statement=stmt)
+        for stmt in statements:
+            circuit(statement=stmt)
             assert dev.circuit_hash in dev._compiled_program_dict
 
         # Using that True evaluates to 1
@@ -829,7 +822,7 @@ class TestQVMIntegration(BaseTest):
 
         # Checks if all elements in the list were either ``True`` or ``False``
         # In such a case we have compiled only one program
-        length = 1 if (number_of_true == 6 or number_of_true == 0) else 2
+        length = 1 if number_of_true in [6, 0] else 2
         assert len(dev._compiled_program_dict.items()) == length
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
@@ -840,48 +833,42 @@ class TestQVMIntegration(BaseTest):
 
         assert len(dev._compiled_program_dict.items()) == 0
 
-        def circuit(params, wires, rounds=1):
+        @qml.qnode(dev)
+        def circuit(rounds=1):
             for i in range(rounds):
                 qml.Hadamard(0)
                 qml.CNOT(wires=[0, 1])
+            return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
 
-        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
-        obs_list = obs * 6
-
-        qnodes = qml.map(circuit, obs_list, dev)
-
-        for idx, qnode in enumerate(qnodes):
-            qnode([], rounds=idx)
+        n_calls = 6
+        for idx in range(n_calls):
+            circuit(rounds=idx)
             assert dev.circuit_hash in dev._compiled_program_dict
 
-        assert len(dev._compiled_program_dict.items()) == len(qnodes)
+        assert len(dev._compiled_program_dict.items()) == n_calls
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_used(self, qvm, device, monkeypatch):
         """Test that QVM device used the compiled program correctly, after it was stored"""
         dev = qml.device("rigetti.qvm", device=device, timeout=100)
 
-        number_of_qnodes = 6
-        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
-        obs_list = obs * number_of_qnodes
-
-        qnodes = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev)
         shape = qml.StronglyEntanglingLayers.shape(n_layers=4, n_wires=dev.num_wires)
         params = np.random.random(size=shape)
 
+        @qml.qnode(dev)
+        def circuit(weights):
+            qml.templates.StronglyEntanglingLayers(weights, wires=dev.wires)
+            return qml.expval(qml.PauliZ(0) @ qml.PauliZ(1))
+
         # For the first evaluation, use the real compile method
-        qnodes[0](params)
+        circuit(params)
 
         call_history = []
         with monkeypatch.context() as m:
             m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
 
-            for i in range(1, number_of_qnodes):
-                qnodes[i](params)
-
-        # Then use the mocked one to see if it was called
-
-        results = qnodes(params)
+            for i in range(5):
+                circuit(params)
 
         assert len(call_history) == 0
         assert dev.circuit_hash in dev._compiled_program_dict
@@ -894,23 +881,21 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 1 out of 5 runs was added.
         """
-        number_of_qnodes = 6
-        obs = [qml.PauliZ(0) @ qml.PauliZ(1)]
-        obs_list = obs * number_of_qnodes
-
         dev = qml.device("rigetti.qvm", device=device, timeout=100)
 
         shape = qml.StronglyEntanglingLayers.shape(n_layers=4, n_wires=dev.num_wires)
         params = np.random.random(size=shape)
 
-        qnodes = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev)
+        def circuit(weights):
+            qml.templates.StronglyEntanglingLayers(weights, wires=dev.wires)
+            return tuple(qml.expval(qml.PauliZ(0) @ qml.PauliZ(1)) for _ in range(6))
 
-        results = qnodes(params)
+        qnode_rigetti = qml.QNode(circuit, dev)
+        results = qnode_rigetti(params)
 
         dev2 = qml.device("default.qubit", wires=dev.num_wires)
-        qnodes2 = qml.map(qml.templates.StronglyEntanglingLayers, obs_list, dev2)
-
-        results2 = qnodes2(params)
+        qnode_default = qml.QNode(circuit, dev2)
+        results2 = qnode_default(params)
 
         assert np.allclose(results, results2, atol=6e-02, rtol=0)
         assert dev.circuit_hash in dev._compiled_program_dict
