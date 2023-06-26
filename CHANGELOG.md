@@ -2,15 +2,17 @@
 
 ### New features since last release
 
-### Breaking changes
+### Improvements 🛠
 
-### Improvements
+### Breaking changes 💔
 
-### Documentation
+### Deprecations 👋
 
-### Bug fixes
+### Documentation 📝
 
-### Contributors
+### Bug fixes 🐛
+
+### Contributors ✍️
 
 This release contains contributions from (in alphabetical order):
 
