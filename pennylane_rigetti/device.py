@@ -253,7 +253,7 @@ class RigettiDevice(QubitDevice):
                     # Array not supported
                     par = [float(i) for i in par]
 
-            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
+            if i > 0 and operation.name in ("QubitStateVector", "StatePrep", "BasisState"):
                 name = operation.name
                 short_name = self.short_name
                 raise DeviceError(
