@@ -7,7 +7,7 @@
 ### Breaking changes 💔
 
 * Support for Python 3.8 has been removed.
-  [(#)]()
+  [(#136)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/136)
 
 ### Deprecations 👋
 
