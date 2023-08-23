@@ -96,7 +96,7 @@ Printing out the results of the three device expectation values:
 Supported operations
 ~~~~~~~~~~~~~~~~~~~~
 
-All devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with the exception of the PennyLane ``QubitStateVector`` state preparation operation.
+All devices support all PennyLane `operations and observables <https://pennylane.readthedocs.io/en/stable/introduction/operations.html#qubit-operations>`_, with the exception of the PennyLane ``StatePrepBase`` state preparation operations.
 
 Supported observables
 ~~~~~~~~~~~~~~~~~~~~~
