@@ -9,6 +9,9 @@
 
 ### Breaking changes 💔
 
+* Support for Python 3.8 has been removed, and support for Python 3.11 has been added.
+  [(#136)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/136)
+
 ### Deprecations 👋
 
 ### Documentation 📝
@@ -19,7 +22,8 @@
 
 This release contains contributions from (in alphabetical order):
 
- Jay Soni
+Mudit Pandey,
+Jay Soni
 
 ---
 
