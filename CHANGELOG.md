@@ -1,20 +1,21 @@
-# Release 0.32.0-dev
-
-### New features since last release
+# Release 0.32.0
 
 ### Improvements 🛠
 
+* Added support for `qml.StatePrep` as a state preparation operation.
+  [(#137)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/137)
+
 ### Breaking changes 💔
 
-### Deprecations 👋
-
-### Documentation 📝
-
-### Bug fixes 🐛
+* Support for Python 3.8 has been removed, and support for Python 3.11 has been added.
+  [(#136)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/136)
 
 ### Contributors ✍️
 
 This release contains contributions from (in alphabetical order):
+
+Mudit Pandey,
+Jay Soni
 
 ---
 
