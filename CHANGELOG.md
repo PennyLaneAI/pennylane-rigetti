@@ -1,6 +1,4 @@
-# Release 0.32.0-dev
-
-### New features since last release
+# Release 0.32.0
 
 ### Improvements 🛠
 
@@ -11,12 +9,6 @@
 
 * Support for Python 3.8 has been removed, and support for Python 3.11 has been added.
   [(#136)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/136)
-
-### Deprecations 👋
-
-### Documentation 📝
-
-### Bug fixes 🐛
 
 ### Contributors ✍️
 
