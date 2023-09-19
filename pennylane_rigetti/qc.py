@@ -326,6 +326,17 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         return super().execute(circuit, **kwargs)
 
     def batch_execute(self, circuits):
+        """Execute a batch of quantum circuits on the device.
+
+        The circuits are represented by tapes, and they are executed one-by-one using the
+        device's ``execute`` method. The results are collected in a list.
+
+        Args:
+            circuits (list[~.tape.QuantumTape]): circuits to execute on the device
+
+        Returns:
+            list[array[float]]: list of measured value(s)
+        """
         if not self._parallel or len(circuits) <= 1:
             return super().batch_execute(circuits)
 
