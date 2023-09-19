@@ -28,11 +28,10 @@ TEST_QPU_LATTICES = ["4q-qvm"]
 
 compiled_program = (
     "DECLARE ro BIT[2]\n"
-    'PRAGMA INITIAL_REWIRING "PARTIAL"\n'
-    "RZ(0.432) 1\n"
-    "CZ 1 0\n"
-    "MEASURE 1 ro[0]\n"
-    "MEASURE 0 ro[1]\n"
+    "RZ(0.432) 0\n"
+    "CZ 0 1\n"
+    "MEASURE 0 ro[0]\n"
+    "MEASURE 1 ro[1]\n"
     "HALT\n"
 )
 

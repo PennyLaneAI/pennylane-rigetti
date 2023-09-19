@@ -218,8 +218,8 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         # Devices don't always have sequentially adressed qubits, so
         # we use a normalized value to index them into the readout register.
         qubits = sorted(self.wiring.values())
+        used_qubits = self.wiring.keys()
         ro = self.prog.declare("ro", "BIT", len(qubits))
-        used_qubits = self.prog.get_qubits(indices=True)
         normalized_qubit_indices = {wire: i for i, wire in enumerate(list(self.wiring.values()))}
         for qubit in used_qubits:
             self.prog += MEASURE(qubit, ro[normalized_qubit_indices[qubit]])
@@ -315,7 +315,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         compiled_program = self._compiled_program_dict.get(circuit_hash, None)
         if compiled_program is None:
             compiled_program = self.compile()
-            self._compiled_program_dict[circuit_hash] = self._compiled_program
+            self._compiled_program_dict[circuit_hash] = compiled_program
         return compiled_program
 
     def execute(self, circuit, **kwargs):
@@ -391,7 +391,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             # Set the parameter values in executable memory
             for region, value in self._parameter_map.items():
                 self._compiled_program.write_memory(region_name=region, value=value)
-            if self._batch_size is not None:
+            if self._batch_size:
                 for i in range(self._batch_size):
                     for region, values in self._batched_parameter_map.items():
                         self._compiled_program.write_memory(region_name=region, value=values[i])
