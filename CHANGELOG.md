@@ -4,6 +4,12 @@
 
 ### Improvements 🛠
 
+* The `rigetti.qvm` and `rigetti.qpu` device can now be initialized
+  with a `parallel` and `max_threads` parameter. When `parallel` is
+  set to True, jobs will be executed in parallel using a `ThreadPool`.
+  This can be used in conjunction with `max_threads` to set the
+  maximum number of worker threads to use.
+
 ### Breaking changes 💔
 
 ### Deprecations 👋
@@ -12,15 +18,17 @@
 
 ### Bug fixes 🐛
 
-* Wire mapping is now based on the device specification instead of being assumed to be a zero-indexed 
-  sequence. 
+* Wire mapping is now based on the device specification instead of being
+  assumed to be a zero-indexed sequence. 
 
-* QPU devices now configure the compiler to generate programs that will be compatible to
-  run on a real QPU.
+* QPU devices now configure the compiler to generate programs that will
+  be compatible to run on a real QPU.
 
 ### Contributors ✍️
 
 This release contains contributions from (in alphabetical order):
+
+Marquess Valdez
 
 ---
 # Release 0.32.0
@@ -88,11 +96,7 @@ This release contains contributions from (in alphabetical order):
 
 Albert Mitjans Coma
 Graham Enos
-<<<<<<< HEAD
-Marquess Valdez
-=======
 Mudit Pandey
->>>>>>> master
 
 ---
 
