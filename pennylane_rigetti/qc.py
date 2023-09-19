@@ -288,6 +288,11 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
     @classmethod
     def capabilities(cls):
+        """Get the capabilities of this device class.
+
+        Returns:
+            dict[str->*]: results
+        """
         capabilities = super().capabilities().copy()
         capabilities.update(supports_broadcasting=True)
         return capabilities
