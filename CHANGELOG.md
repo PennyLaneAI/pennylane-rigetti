@@ -1,26 +1,16 @@
-# Release 0.28.0-dev
+# Release 0.33.0-dev
 
 ### New features since last release
 
-### Breaking changes
+### Improvements 🛠
 
-* Build dependency specification is now solely in `requirements.txt`, which is read
-  by `setup.py`. What's more, a missing comma has been added to the version bounds
-  on `qcs-api-client`, fixing ([#120](https://github.com/PennyLaneAI/pennylane-rigetti/pull/120))
-  a bug ([#119](https://github.com/PennyLaneAI/pennylane-rigetti/issues/119)) that
-  was causing errors when trying to use the package.
+### Breaking changes 💔
 
-* `pennylane-rigetti` no longer supports `python3.7`. A newer python version is required.
-  [(#121)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/121)
+### Deprecations 👋
 
-* Removed the use of in-place inversion for PennyLane operations.
-  [(#122)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/122)
+### Documentation 📝
 
-### Improvements
-
-### Documentation
-
-### Bug fixes
+### Bug fixes 🐛
 
 * Wire mapping is now based on the device specification instead of being assumed to be a zero-indexed 
   sequence. 
@@ -28,13 +18,81 @@
 * QPU devices now configure the compiler to generate programs that will be compatible to
   run on a real QPU.
 
+### Contributors ✍️
+
+This release contains contributions from (in alphabetical order):
+
+---
+# Release 0.32.0
+
+### Improvements 🛠
+
+* Added support for `qml.StatePrep` as a state preparation operation.
+  [(#137)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/137)
+
+### Breaking changes 💔
+
+* Support for Python 3.8 has been removed, and support for Python 3.11 has been added.
+  [(#136)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/136)
+
+### Contributors ✍️
+
+This release contains contributions from (in alphabetical order):
+
+Mudit Pandey,
+Jay Soni
+
+---
+
+# Release 0.31.0
+
+### Improvements
+
+* Remove the use of the deprecated function `qml.map` in the tests
+  [(#129)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/129)
+
+* Update logic in the tests to reflect the new PennyLane return type system
+  [(#129)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/129)
+
+### Contributors
+
+This release contains contributions from (in alphabetical order):
+
+Matthew Silverman
+
+---
+
+# Release 0.29.0
+
+### Breaking changes
+
+* `pennylane-rigetti` no longer supports `python3.7`. A newer python version is required.
+  [(#121)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/121)
+
+### Improvements
+
+* Build dependency specification is now solely in `requirements.txt`, which is read by `setup.py`.
+  [(#120)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/120)
+
+* Removed the use of in-place inversion for PennyLane operations.
+  [(#122)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/122)
+
+### Bug fixes
+
+* A missing comma has been added to the version bounds on `qcs-api-client`.
+  [(#120)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/120)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
 
 Albert Mitjans Coma
 Graham Enos
+<<<<<<< HEAD
 Marquess Valdez
+=======
+Mudit Pandey
+>>>>>>> master
 
 ---
 

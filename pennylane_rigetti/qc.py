@@ -238,7 +238,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             # map the operation wires to the physical device qubits
             device_wires = self.map_wires(operation.wires)
 
-            if i > 0 and operation.name in ("QubitStateVector", "BasisState"):
+            if i > 0 and operation.name in ("QubitStateVector", "StatePrep", "BasisState"):
                 raise DeviceError(
                     f"Operation {operation.name} cannot be used after other Operations have already been applied "
                     f"on a {self.short_name} device."

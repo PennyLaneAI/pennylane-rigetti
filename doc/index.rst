@@ -51,12 +51,12 @@ Check out these demos to see the PennyLane-Rigetti plugin in action:
 
 .. title-card::
     :name: Ensemble classification with QCS and Qiskit devices
-    :description: Use two QPUs in parallel to help solve a machine learning classification problem.
+    :description: <img src="https://pennylane.ai/_images/ensemble_diagram.png" width="100%" />
     :link:  https://pennylane.ai/qml/demos/ensemble_multi_qpu.html
 
 .. title-card::
     :name: PyTorch and noisy devices
-    :description: Use PyTorch and a noisy QVM to see how optimization responds to noisy qubits.
+    :description: <img src="https://pennylane.ai/_images/bloch.gif" width="100%" />
     :link:  https://pennylane.ai/qml/demos/pytorch_noise.html
 
 .. raw:: html
