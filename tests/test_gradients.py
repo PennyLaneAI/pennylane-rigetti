@@ -14,7 +14,7 @@ def test_simulator_qvm_default_agree(tol, qvm, compiler):
     dev2 = qml.device("rigetti.wavefunction", wires=w)
     dev3 = qml.device("rigetti.qvm", device="9q-square-qvm", shots=5000)
 
-    in_state = np.zeros([w], requires_grad=False)
+    in_state = np.zeros([w], dtype=np.int64, requires_grad=False)
     in_state[0] = 1
     in_state[1] = 1
 
