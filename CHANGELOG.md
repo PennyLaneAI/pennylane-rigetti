@@ -1,20 +1,15 @@
-# Release 0.33.0-dev
-
-### New features since last release
+# Release 0.33.0
 
 ### Improvements 🛠
 
-### Breaking changes 💔
-
-### Deprecations 👋
-
-### Documentation 📝
-
-### Bug fixes 🐛
+* Added support for NumPy versions >= 1.24
+  [(#142)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/142)
 
 ### Contributors ✍️
 
 This release contains contributions from (in alphabetical order):
+
+Matthew Silverman
 
 ---
 # Release 0.32.0
