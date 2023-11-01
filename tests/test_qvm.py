@@ -606,12 +606,13 @@ class TestParametricCompilation(BaseTest):
         assert len(dev._compiled_program_dict.items()) == 1
         assert mock_qvm.compile.call_count == 1
 
-    def test_apply_qubitstatesvector_raises_an_error_if_not_first(self):
-        """Test that there is an error raised when the QubitStateVector is not
+    @pytest.mark.parametrize("op", [qml.QubitStateVector, qml.StatePrep])
+    def test_apply_qubitstatesvector_raises_an_error_if_not_first(self, op):
+        """Test that there is an error raised when the QubitStateVector or StatPrep is not
         applied as the first operation."""
         dev = qml.device("rigetti.qvm", device="2q-qvm", parametric_compilation=True)
 
-        operation = qml.QubitStateVector(np.array([1, 0]), wires=[0])
+        operation = op(np.array([1, 0]), wires=[0])
         queue = [qml.PauliX(0), operation]
         with pytest.raises(
             qml.DeviceError,

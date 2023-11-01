@@ -1,7 +1,7 @@
 PennyLane Rigetti Plugin
 ########################
 
-.. image:: https://img.shields.io/github/workflow/status/PennyLaneAI/pennylane-rigetti/Tests/master?logo=github&style=flat-square
+.. image:: https://img.shields.io/github/actions/workflow/status/PennyLaneAI/pennylane-rigetti/tests.yml?branch=master&logo=github&style=flat-square
     :alt: GitHub Workflow Status (branch)
     :target: https://github.com/PennyLaneAI/pennylane-rigetti/actions?query=workflow%3ATests
 
@@ -77,7 +77,7 @@ Dependencies
 
 PennyLane-Rigetti requires the following libraries be installed:
 
-* `Python <http://python.org/>`__ >=3.8
+* `Python <http://python.org/>`__ >=3.9
 
 as well as the following Python packages:
 
