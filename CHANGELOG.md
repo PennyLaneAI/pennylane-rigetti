@@ -4,6 +4,9 @@
 
 ### Improvements 🛠
 
+* Use `tape.measurements` instead of `tape.observables` to identify the type of measurement process
+  [(#)]()
+
 ### Breaking changes 💔
 
 ### Deprecations 👋
@@ -15,6 +18,8 @@
 ### Contributors ✍️
 
 This release contains contributions from (in alphabetical order):
+
+Matthew Silverman
 
 ---
 # Release 0.33.0

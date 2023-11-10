@@ -191,7 +191,7 @@ class QPUDevice(QuantumComputerDevice):
 
     def execute(self, circuit: QuantumTape, **kwargs):
         self._skip_generate_samples = (
-            all(obs.return_type == Expectation for obs in circuit.observables)
+            all(mp.return_type is Expectation for mp in circuit.measurements)
             and not self.parametric_compilation
         )
 
