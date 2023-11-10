@@ -5,7 +5,7 @@
 ### Improvements 🛠
 
 * Use `tape.measurements` instead of `tape.observables` to identify the type of measurement process
-  [(#)]()
+  [(#146)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/146)
 
 ### Breaking changes 💔
 
