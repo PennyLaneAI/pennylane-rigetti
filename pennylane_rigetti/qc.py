@@ -93,17 +93,26 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
         self.qc = self.get_qc(device, **timeout_args)
 
-        qubits = sorted([qubit.id for qubit in self.qc.quantum_processor.to_compiler_isa().qubits.values() if qubit.dead is False])
+        qubits = sorted(
+            [
+                qubit.id
+                for qubit in self.qc.quantum_processor.to_compiler_isa().qubits.values()
+                if qubit.dead is False
+            ]
+        )
 
         # Interpret wires as Pennylane would, and use the labels to map to actual qubits on the device.
         if isinstance(wires, int):
             pennylane_wires = Wires(list(range(wires)))
         elif isinstance(wires, Iterable):
-           pennylane_wires = Wires(wires)
+            pennylane_wires = Wires(wires)
         else:
             raise ValueError("wires must be an integer or an iterable of numbers or strings.")
 
-        self.wiring = {label: qubit for label, qubit in zip(pennylane_wires.labels, qubits[:len(pennylane_wires)])}
+        self.wiring = {
+            label: qubit
+            for label, qubit in zip(pennylane_wires.labels, qubits[: len(pennylane_wires)])
+        }
         self.num_wires = len(self.wiring)
         self.active_reset = active_reset
 
