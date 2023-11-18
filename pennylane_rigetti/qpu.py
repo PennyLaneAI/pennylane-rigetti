@@ -67,6 +67,9 @@ class QPUDevice(QuantumComputerDevice):
             symmetrization by default
         calibrate_readout (str): method to perform calibration for readout error mitigation,
             normalizing by the expectation value in the +1-eigenstate of the observable by default
+        parallel (bool): If set to ``True`` batched circuits are executed in parallel.
+        max_threads (int): If ``parallel`` is set to ``True``, this controls the maximum number of threads
+            that can be used during parallel execution of jobs. Has no effect if ``parallel`` is ``False``
 
     Keyword args:
         compiler_timeout (int): number of seconds to wait for a response from quilc (default 10).

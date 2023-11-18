@@ -6,6 +6,11 @@
 
 * Use `tape.measurements` instead of `tape.observables` to identify the type of measurement process
   [(#146)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/146)
+* The `rigetti.qvm` and `rigetti.qpu` device can now be initialized
+  with a `parallel` and `max_threads` parameter. When `parallel` is
+  set to True, jobs will be executed in parallel using a `ThreadPool`.
+  This can be used in conjunction with `max_threads` to set the
+  maximum number of worker threads to use.
 
 ### Breaking changes 💔
 
@@ -19,6 +24,7 @@
 
 This release contains contributions from (in alphabetical order):
 
+Marquess Valdez,
 Matthew Silverman
 
 ---
