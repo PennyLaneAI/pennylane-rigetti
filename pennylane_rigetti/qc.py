@@ -22,6 +22,7 @@ Code details
 from abc import ABC, abstractmethod
 from typing import Dict
 from collections import OrderedDict
+from multiprocessing.pool import ThreadPool
 
 from pyquil import Program
 from pyquil.api import QAMExecutionResult, QuantumComputer, QuantumExecutable
