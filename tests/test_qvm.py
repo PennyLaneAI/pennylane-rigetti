@@ -202,12 +202,8 @@ class TestQVMBasic(BaseTest):
         a = H[0, 0]
         re_b = H[0, 1].real
         d = H[1, 1]
-        ev1 = (
-            (a - d) * np.cos(theta) + 2 * re_b * np.sin(theta) * np.sin(phi) + a + d
-        ) / 2
-        ev2 = (
-            (a - d) * np.cos(theta) * np.cos(phi) + 2 * re_b * np.sin(phi) + a + d
-        ) / 2
+        ev1 = ((a - d) * np.cos(theta) + 2 * re_b * np.sin(theta) * np.sin(phi) + a + d) / 2
+        ev2 = ((a - d) * np.cos(theta) * np.cos(phi) + 2 * re_b * np.sin(phi) + a + d) / 2
         expected = np.array([ev1, ev2])
 
         self.assertAllAlmostEqual(res, expected, delta=4 / np.sqrt(shots))
@@ -275,9 +271,7 @@ class TestQVMBasic(BaseTest):
         dev._samples = dev.generate_samples()
 
         var = np.array([dev.var(O1.obs)])
-        expected = 0.25 * (
-            3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi)
-        )
+        expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
 
         self.assertAlmostEqual(var, expected, delta=3 / np.sqrt(shots))
 
@@ -445,9 +439,7 @@ class TestQVMBasic(BaseTest):
         )
 
     @pytest.mark.parametrize("parallel", [False, True])
-    def test_sample_values_hermitian_multi_qubit(
-        self, qvm, execution_timeout, tol, parallel
-    ):
+    def test_sample_values_hermitian_multi_qubit(self, qvm, execution_timeout, tol, parallel):
         """Tests if the samples of a multi-qubit Hermitian observable returned by sample have
         the correct values
         """
@@ -518,9 +510,7 @@ class TestQVMBasic(BaseTest):
     def test_raise_error_if_shots_is_not_positive(self, shots):
         """Test that instantiating a QVMDevice if the number of shots is not a postivie
         integer raises an error"""
-        with pytest.raises(
-            ValueError, match="Number of shots must be a positive integer."
-        ):
+        with pytest.raises(ValueError, match="Number of shots must be a positive integer."):
             plf.QVMDevice(device="2q-qvm", shots=shots)
 
     def test_raise_error_if_shots_is_none(self, shots):
@@ -534,9 +524,7 @@ class TestQVMBasic(BaseTest):
     def test_timeout_set_correctly(self, shots, device):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
-        dev = plf.QVMDevice(
-            device=device, shots=shots, compiler_timeout=100, execution_timeout=101
-        )
+        dev = plf.QVMDevice(device=device, shots=shots, compiler_timeout=100, execution_timeout=101)
         assert dev.qc.compiler._timeout == 100
         assert dev.qc.qam._qvm_client.timeout == 101
 
@@ -607,9 +595,7 @@ class TestParametricCompilation(BaseTest):
     """Test that parametric compilation works fine and the same program only compiles once."""
 
     @pytest.mark.parametrize("parallel", [False, True])
-    def test_compiled_program_was_stored_in_dict(
-        self, qvm, mock_qvm, monkeypatch, parallel
-    ):
+    def test_compiled_program_was_stored_in_dict(self, qvm, mock_qvm, monkeypatch, parallel):
         """Test that QVM device stores the compiled program correctly in a dictionary"""
         dev = qml.device("rigetti.qvm", device="2q-qvm", parallel=parallel)
         theta = 0.432
@@ -727,9 +713,7 @@ class TestQVMIntegration(BaseTest):
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
             qml.device("rigetti.qvm")
 
-        with pytest.raises(
-            ValueError, match="Number of shots must be a positive integer"
-        ):
+        with pytest.raises(ValueError, match="Number of shots must be a positive integer"):
             qml.device("rigetti.qvm", "2q-qvm", shots=0)
 
     @pytest.mark.parametrize("parallel", [False, True])
@@ -780,17 +764,13 @@ class TestQVMIntegration(BaseTest):
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     @pytest.mark.parametrize("requires_grad", [True, False])
     @pytest.mark.parametrize("parallel", [False, True])
-    def test_one_qubit_wavefunction_circuit(
-        self, device, qvm, compiler, requires_grad, parallel
-    ):
+    def test_one_qubit_wavefunction_circuit(self, device, qvm, compiler, requires_grad, parallel):
         """Test that the wavefunction plugin provides correct result for simple circuit.
 
         As the results coming from the qvm are stochastic, a constraint of 2 out of 5 runs was added.
         """
         shots = 100_000
-        dev = qml.device(
-            "rigetti.qvm", device=device, shots=QVM_SHOTS, parallel=parallel
-        )
+        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS, parallel=parallel)
 
         a = 0.543
         b = 0.123
@@ -804,9 +784,7 @@ class TestQVMIntegration(BaseTest):
             qml.Rot(x, y, z, wires=0)
             return qml.expval(qml.PauliZ(0))
 
-        self.assertAlmostEqual(
-            circuit(a, b, c), np.cos(a) * np.sin(b), delta=3 / np.sqrt(shots)
-        )
+        self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=3 / np.sqrt(shots))
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
@@ -816,9 +794,7 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        dev = qml.device(
-            "rigetti.qvm", device=device, shots=QVM_SHOTS, parallel=parallel
-        )
+        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS, parallel=parallel)
 
         @qml.qnode(dev)
         def circuit():
@@ -958,9 +934,7 @@ class TestQVMIntegration(BaseTest):
 
         call_history = []
         with monkeypatch.context() as m:
-            m.setattr(
-                QuantumComputer, "compile", lambda self, prog: call_history.append(prog)
-            )
+            m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
 
             for i in range(5):
                 circuit(params)
@@ -971,9 +945,7 @@ class TestQVMIntegration(BaseTest):
 
     @flaky(max_runs=10, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
-    def test_compiled_program_was_correct_compared_with_default_qubit(
-        self, qvm, device, tol
-    ):
+    def test_compiled_program_was_correct_compared_with_default_qubit(self, qvm, device, tol):
         """Test that QVM device stores the compiled program correctly by comparing it with default.qubit.
 
         As the results coming from the qvm are stochastic, a constraint of 1 out of 5 runs was added.
@@ -1000,9 +972,7 @@ class TestQVMIntegration(BaseTest):
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
-    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(
-        self, device, qvm, compiler
-    ):
+    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, device, qvm, compiler):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         was turned off.
 
