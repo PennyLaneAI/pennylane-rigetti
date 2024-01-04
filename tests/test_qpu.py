@@ -69,7 +69,8 @@ class TestQPUIntegration(BaseTest):
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize(
-        "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
+        "obs",
+        [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)],
     )
     def test_tensor_expval_parametric_compilation(self, obs):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
@@ -85,6 +86,7 @@ class TestQPUIntegration(BaseTest):
             shots=10000,
             load_qc=False,
             parametric_compilation=True,
+            parallel=True,
         )
         dev_1 = qml.device(
             "rigetti.qpu",
@@ -92,6 +94,7 @@ class TestQPUIntegration(BaseTest):
             shots=10000,
             load_qc=False,
             parametric_compilation=True,
+            parallel=True,
         )
 
         def template(param):
@@ -116,7 +119,8 @@ class TestQPUIntegration(BaseTest):
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize(
-        "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
+        "obs",
+        [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)],
     )
     def test_tensor_expval_operator_estimation(self, obs, shots):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
@@ -163,7 +167,8 @@ class TestQPUIntegration(BaseTest):
 
         assert np.allclose(res, exp, atol=2e-2)
 
-    def test_skip_generate_samples(self, shots):
+    @pytest.mark.parametrize("parallel", [False, True])
+    def test_skip_generate_samples(self, shots, parallel):
         """Test that ``QubitDevice.generate_samples`` is skipped when using expval and
         ``parametric_compilation`` is False."""
         device = np.random.choice(TEST_QPU_LATTICES)
@@ -173,6 +178,7 @@ class TestQPUIntegration(BaseTest):
             shots=shots,
             load_qc=False,
             parametric_compilation=False,
+            parallel=parallel,
         )
 
         @qml.qnode(dev)
@@ -205,7 +211,7 @@ class TestQPUBasic(BaseTest):
         """Test that a warning is raised if parameter compilation and operator estimation are both turned on."""
         device = np.random.choice(TEST_QPU_LATTICES)
         with pytest.warns(Warning, match="Operator estimation is being turned off."):
-            dev = qml.device(
+            qml.device(
                 "rigetti.qpu",
                 device=device,
                 shots=1000,
@@ -339,7 +345,8 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(results[3:], -1.0, atol=2e-2)
 
     @flaky(max_runs=10, min_passes=3)
-    def test_multi_qub_no_readout_errors(self):
+    @pytest.mark.parametrize("parallel", [False, True])
+    def test_multi_qub_no_readout_errors(self, parallel):
         """Test the QPU plugin with no readout errors or correction"""
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
@@ -348,6 +355,7 @@ class TestQPUBasic(BaseTest):
             load_qc=False,
             symmetrize_readout=SymmetrizationLevel.NONE,
             calibrate_readout=None,
+            parallel=parallel,
         )
 
         @qml.qnode(dev_qpu)
@@ -365,7 +373,8 @@ class TestQPUBasic(BaseTest):
         assert np.isclose(result, 0.5, atol=2e-2)
 
     @flaky(max_runs=10, min_passes=3)
-    def test_multi_qub_readout_errors(self):
+    @pytest.mark.parametrize("parallel", [False, True])
+    def test_multi_qub_readout_errors(self, parallel):
         """Test the QPU plugin with readout errors"""
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
@@ -377,6 +386,7 @@ class TestQPUBasic(BaseTest):
             symmetrize_readout=SymmetrizationLevel.NONE,
             calibrate_readout=None,
             parametric_compilation=False,
+            parallel=parallel,
         )
 
         @qml.qnode(dev_qpu)
@@ -390,7 +400,8 @@ class TestQPUBasic(BaseTest):
         assert np.isclose(result, 0.38, atol=2e-2)
 
     @flaky(max_runs=10, min_passes=3)
-    def test_multi_qub_readout_correction(self):
+    @pytest.mark.parametrize("parallel", [False, True])
+    def test_multi_qub_readout_correction(self, parallel):
         """Test the QPU plugin with readout errors and correction"""
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
@@ -402,6 +413,7 @@ class TestQPUBasic(BaseTest):
             symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
             parametric_compilation=False,
+            parallel=parallel,
         )
 
         @qml.qnode(dev_qpu)
@@ -415,7 +427,8 @@ class TestQPUBasic(BaseTest):
         assert np.isclose(result, 0.5, atol=3e-2)
 
     @flaky(max_runs=10, min_passes=3)
-    def test_2q_gate(self, shots):
+    @pytest.mark.parametrize("parallel", [False, True])
+    def test_2q_gate(self, shots, parallel):
         """Test that the two qubit gate with the PauliZ observable works correctly.
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
@@ -430,6 +443,7 @@ class TestQPUBasic(BaseTest):
             symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
             shots=shots,
+            parallel=parallel,
         )
 
         @qml.qnode(dev_qpu)
@@ -441,7 +455,8 @@ class TestQPUBasic(BaseTest):
         assert np.allclose(circuit(), 0.0, atol=2e-2)
 
     @flaky(max_runs=10, min_passes=3)
-    def test_2q_gate_pauliz_identity_tensor(self, shots):
+    @pytest.mark.parametrize("parallel", [False, True])
+    def test_2q_gate_pauliz_identity_tensor(self, shots, parallel):
         """Test that the PauliZ tensor Identity observable works correctly.
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
@@ -455,6 +470,7 @@ class TestQPUBasic(BaseTest):
             symmetrize_readout=SymmetrizationLevel.EXHAUSTIVE,
             calibrate_readout="plus-eig",
             shots=shots,
+            parallel=parallel,
         )
 
         @qml.qnode(dev_qpu)
