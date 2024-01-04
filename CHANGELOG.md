@@ -1,19 +1,9 @@
-# Release 0.34.0-dev
-
-### New features since last release
+# Release 0.34.0
 
 ### Improvements 🛠
 
 * Use `tape.measurements` instead of `tape.observables` to identify the type of measurement process
   [(#146)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/146)
-
-### Breaking changes 💔
-
-### Deprecations 👋
-
-### Documentation 📝
-
-### Bug fixes 🐛
 
 ### Contributors ✍️
 
