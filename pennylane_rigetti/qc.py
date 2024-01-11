@@ -23,14 +23,14 @@ from abc import ABC, abstractmethod
 from typing import Dict
 from pennylane.queuing import OrderedDict
 from pennylane.utils import Iterable
+from pennylane import DeviceError, numpy as np
+from pennylane.wires import Wires
+
 
 from pyquil import Program
 from pyquil.api import QVM, QPU, QAMExecutionResult, QuantumComputer, QuantumExecutable
 from pyquil.gates import RESET, MEASURE
 from pyquil.quil import Pragma
-
-from pennylane import DeviceError, numpy as np
-from pennylane.wires import Wires
 
 from .device import RigettiDevice
 from ._version import __version__
