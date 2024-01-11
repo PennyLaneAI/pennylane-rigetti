@@ -7,8 +7,6 @@ import numpy as np
 import pennylane as qml
 import pytest
 from conftest import U2, BaseTest, H, I, U, Z, test_operation_map
-from pennylane.circuit_graph import CircuitGraph
-from pennylane.tape import QuantumTape
 
 import pennylane_rigetti as plf
 
@@ -34,7 +32,9 @@ class TestPyQVMBasic(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RX(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            return qml.expval(qml.Identity(wires=[0])), qml.expval(qml.Identity(wires=[1]))
+            return qml.expval(qml.Identity(wires=[0])), qml.expval(
+                qml.Identity(wires=[1])
+            )
 
         res = circuit()
 
@@ -58,7 +58,9 @@ class TestPyQVMBasic(BaseTest):
         res = circuit()
         # below are the analytic expectation values for this circuit
         assert np.allclose(
-            res, np.array([np.cos(theta), np.cos(theta) * np.cos(phi)]), atol=3 / np.sqrt(shots)
+            res,
+            np.array([np.cos(theta), np.cos(theta) * np.cos(phi)]),
+            atol=3 / np.sqrt(shots),
         )
 
     def test_paulix_expectation(self, shots):
@@ -78,7 +80,9 @@ class TestPyQVMBasic(BaseTest):
         res = circuit()
         # below are the analytic expectation values for this circuit
         assert np.allclose(
-            res, np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]), atol=3 / np.sqrt(shots)
+            res,
+            np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]),
+            atol=3 / np.sqrt(shots),
         )
 
     def test_pauliy_expectation(self, shots):
@@ -114,13 +118,18 @@ class TestPyQVMBasic(BaseTest):
             qml.RY(theta, wires=[0])
             qml.RY(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            return qml.expval(qml.Hadamard(wires=[0])), qml.expval(qml.Hadamard(wires=[1]))
+            return qml.expval(qml.Hadamard(wires=[0])), qml.expval(
+                qml.Hadamard(wires=[1])
+            )
 
         res = circuit()
 
         # below are the analytic expectation values for this circuit
         expected = np.array(
-            [np.sin(theta) * np.sin(phi) + np.cos(theta), np.cos(theta) * np.cos(phi) + np.sin(phi)]
+            [
+                np.sin(theta) * np.sin(phi) + np.cos(theta),
+                np.cos(theta) * np.cos(phi) + np.sin(phi),
+            ]
         ) / np.sqrt(2)
         assert np.allclose(res, expected, atol=3 / np.sqrt(shots))
 
@@ -136,7 +145,9 @@ class TestPyQVMBasic(BaseTest):
             qml.RY(theta, wires=[0])
             qml.RY(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            return qml.expval(qml.Hermitian(H, wires=[0])), qml.expval(qml.Hermitian(H, wires=[1]))
+            return qml.expval(qml.Hermitian(H, wires=[0])), qml.expval(
+                qml.Hermitian(H, wires=[1])
+            )
 
         res = circuit()
         # below are the analytic expectation values for this circuit with arbitrary
@@ -144,8 +155,12 @@ class TestPyQVMBasic(BaseTest):
         a = H[0, 0]
         re_b = H[0, 1].real
         d = H[1, 1]
-        ev1 = ((a - d) * np.cos(theta) + 2 * re_b * np.sin(theta) * np.sin(phi) + a + d) / 2
-        ev2 = ((a - d) * np.cos(theta) * np.cos(phi) + 2 * re_b * np.sin(phi) + a + d) / 2
+        ev1 = (
+            (a - d) * np.cos(theta) + 2 * re_b * np.sin(theta) * np.sin(phi) + a + d
+        ) / 2
+        ev2 = (
+            (a - d) * np.cos(theta) * np.cos(phi) + 2 * re_b * np.sin(phi) + a + d
+        ) / 2
         expected = np.array([ev1, ev2])
 
         assert np.allclose(res, expected, atol=3 / np.sqrt(shots))
@@ -200,7 +215,9 @@ class TestPyQVMBasic(BaseTest):
             return qml.var(qml.PauliZ(wires=[0]))
 
         var = circuit()
-        expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
+        expected = 0.25 * (
+            3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi)
+        )
 
         self.assertAlmostEqual(var, expected, delta=3 / np.sqrt(shots))
 
@@ -287,8 +304,8 @@ class TestQVMIntegration(BaseTest):
 
     def test_qubit_unitary(self, shots):
         """Test that an arbitrary unitary operation works"""
-        dev1 = qml.device("rigetti.qvm", device="3q-pyqvm", shots=shots)
-        dev2 = qml.device("rigetti.qvm", device="9q-square-pyqvm", shots=shots)
+        dev1 = qml.device("rigetti.qvm", wires=3, device="3q-pyqvm", shots=shots)
+        dev2 = qml.device("rigetti.qvm", wires=9, device="9q-square-pyqvm", shots=shots)
 
         def circuit():
             """Reference QNode"""
@@ -303,14 +320,18 @@ class TestQVMIntegration(BaseTest):
         out_state = U2 @ np.array([1, 0, 0, 1]) / np.sqrt(2)
         obs = np.kron(np.array([[1, 0], [0, -1]]), I)
 
-        assert np.allclose(circuit1(), np.vdot(out_state, obs @ out_state), atol=3 / np.sqrt(shots))
-        assert np.allclose(circuit2(), np.vdot(out_state, obs @ out_state), atol=3 / np.sqrt(shots))
+        assert np.allclose(
+            circuit1(), np.vdot(out_state, obs @ out_state), atol=3 / np.sqrt(shots)
+        )
+        assert np.allclose(
+            circuit2(), np.vdot(out_state, obs @ out_state), atol=3 / np.sqrt(shots)
+        )
 
-    @pytest.mark.parametrize("device", ["2q-pyqvm"])
+    @pytest.mark.parametrize("device", ["3q-pyqvm"])
     def test_one_qubit_wavefunction_circuit(self, device, shots):
         """Test that the wavefunction plugin provides correct result for simple circuit."""
         shots = 10000
-        dev = qml.device("rigetti.qvm", device=device, shots=shots)
+        dev = qml.device("rigetti.qvm", wires=3, device=device, shots=shots)
 
         a = 0.543
         b = 0.123
@@ -324,4 +345,6 @@ class TestQVMIntegration(BaseTest):
             qml.Rot(x, y, z, wires=0)
             return qml.expval(qml.PauliZ(0))
 
-        self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=5 / np.sqrt(shots))
+        self.assertAlmostEqual(
+            circuit(a, b, c), np.cos(a) * np.sin(b), delta=5 / np.sqrt(shots)
+        )

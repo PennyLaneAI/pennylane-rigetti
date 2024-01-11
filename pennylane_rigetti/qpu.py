@@ -47,13 +47,11 @@ class QPUDevice(QuantumComputerDevice):
 
     Args:
         device (str): the name of the device to initialise.
+        wires (Iterable[Number, str]): Iterable that contains unique labels for the
+            qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``). The number of labels must
+            not exceed the number of qubits accessible on the backend.
         shots (int): number of circuit evaluations/random samples used
             to estimate expectation values of observables.
-         wires (Iterable[Number, str]): Iterable that contains unique labels for the
-            qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``).
-            The number of labels must match the number of qubits accessible on the backend.
-            If not provided, qubits are addressed as consecutive integers ``[0, 1, ...]``, and their number
-            is inferred from the backend.
         active_reset (bool): whether to actively reset qubits instead of waiting for
             for qubits to decay to the ground state naturally.
             Setting this to ``True`` results in a significantly faster expectation value
@@ -80,9 +78,9 @@ class QPUDevice(QuantumComputerDevice):
     def __init__(
         self,
         device,
+        wires,
         *,
         shots=1000,
-        wires=None,
         active_reset=True,
         load_qc=True,
         readout_error=None,
@@ -112,7 +110,9 @@ class QPUDevice(QuantumComputerDevice):
         self.calibrate_readout = calibrate_readout
         self._skip_generate_samples = False
 
-        super().__init__(device, wires=wires, shots=shots, active_reset=active_reset, **kwargs)
+        super().__init__(
+            device, wires=wires, shots=shots, active_reset=active_reset, **kwargs
+        )
 
     def get_qc(self, device, **kwargs) -> QuantumComputer:
         return get_qc(device, as_qvm=self.as_qvm, **kwargs)

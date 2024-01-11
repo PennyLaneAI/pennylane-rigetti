@@ -21,11 +21,11 @@ Code details
 
 from abc import ABC, abstractmethod
 from typing import Dict
-from collections import OrderedDict
+from pennylane.queuing import OrderedDict
 from pennylane.utils import Iterable
 
 from pyquil import Program
-from pyquil.api import QAMExecutionResult, QuantumComputer, QuantumExecutable
+from pyquil.api import QVM, QPU, QAMExecutionResult, QuantumComputer, QuantumExecutable
 from pyquil.gates import RESET, MEASURE
 from pyquil.quil import Pragma
 
@@ -44,11 +44,12 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
     Args:
         device (str): the name of the device to initialise.
-        shots (int): number of circuit evaluations/random samples used
-            to estimate expectation values of observables.
         wires (Union[int, Iterable[Number, str]]): Number of qubits represented by the device, or an iterable that contains
             unique labels for the qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``). When an integer is provided, qubits
-            are addressed as consecutive integers ``[0, 1, n]`` and mapped to the first available qubits on the device.
+            are addressed as consecutive integers ``[0, 1, n]`` and mapped to the first available qubits on the device. `wires` must
+            be provided for QPU devices. If not provided for a QVM device, then the number of wires is inferred from the QVM.
+        shots (int): number of circuit evaluations/random samples used
+            to estimate expectation values of observables.
         active_reset (bool): whether to actively reset qubits instead of waiting for
             for qubits to decay to the ground state naturally.
             Setting this to ``True`` results in a significantly faster expectation value
@@ -63,7 +64,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
     version = __version__
     author = "Rigetti Computing Inc."
 
-    def __init__(self, device, *, shots=1000, wires=None, active_reset=False, **kwargs):
+    def __init__(self, device, *, wires=None, shots=1000, active_reset=False, **kwargs):
         if shots is not None and shots <= 0:
             raise ValueError("Number of shots must be a positive integer or None.")
 
@@ -101,17 +102,38 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             ]
         )
 
+        if wires is None:
+            if not isinstance(self.qc.qam, QPU):
+                wires = len(qubits)
+            else:
+                raise ValueError(
+                    "Wires must be specified for a QPU device. Got None for wires."
+                )
+
         # Interpret wires as Pennylane would, and use the labels to map to actual qubits on the device.
         if isinstance(wires, int):
             pennylane_wires = Wires(list(range(wires)))
         elif isinstance(wires, Iterable):
             pennylane_wires = Wires(wires)
+        elif isinstance(self.qc.qam, QVM):
+            pennylane_wires = Wires(len(qubits))
         else:
-            raise ValueError("wires must be an integer or an iterable of numbers or strings.")
+            raise ValueError(
+                "Wires for a device must be an integer or an iterable of numbers or strings."
+            )
+
+        if len(pennylane_wires) > len(qubits):
+            raise ValueError(
+                "Wires must not exceed available qubits on the device. Got "
+                f"{len(pennylane_wires)} wires, but the device only has {len(qubits)} "
+                "qubits."
+            )
 
         self.wiring = {
             label: qubit
-            for label, qubit in zip(pennylane_wires.labels, qubits[: len(pennylane_wires)])
+            for label, qubit in zip(
+                pennylane_wires.labels, qubits[: len(pennylane_wires)]
+            )
         }
         self.num_wires = len(self.wiring)
         self.active_reset = active_reset
@@ -170,8 +192,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         return timeout_args
 
     def define_wire_map(self, wires):
-        device_wires = Wires(self.wiring)
-        return OrderedDict(zip(wires, device_wires))
+        return OrderedDict(enumerate(range(self.num_wires)))
 
     def apply(self, operations, **kwargs):
         """Applies the given quantum operations."""
@@ -209,7 +230,11 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             # map the operation wires to the physical device qubits
             device_wires = self.map_wires(operation.wires)
 
-            if i > 0 and operation.name in ("QubitStateVector", "StatePrep", "BasisState"):
+            if i > 0 and operation.name in (
+                "QubitStateVector",
+                "StatePrep",
+                "BasisState",
+            ):
                 raise DeviceError(
                     f"Operation {operation.name} cannot be used after other Operations have already been applied "
                     f"on a {self.short_name} device."
@@ -218,7 +243,10 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             # Prepare for parametric compilation
             par = []
             for param in operation.data:
-                if getattr(param, "requires_grad", False) and operation.name != "BasisState":
+                if (
+                    getattr(param, "requires_grad", False)
+                    and operation.name != "BasisState"
+                ):
                     # Using the idx for trainable parameter objects to specify the
                     # corresponding symbolic parameter
                     parameter_string = "theta" + str(id(param))
@@ -260,7 +288,9 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             for region, value in self._parameter_map.items():
                 self.prog.write_memory(region_name=region, value=value)
             # Fetch the compiled program, or compile and store it if it doesn't exist
-            self._compiled_program = self._compiled_program_dict.get(self.circuit_hash, None)
+            self._compiled_program = self._compiled_program_dict.get(
+                self.circuit_hash, None
+            )
             if self._compiled_program is None:
                 self._compiled_program = self.compile()
                 self._compiled_program_dict[self.circuit_hash] = self._compiled_program

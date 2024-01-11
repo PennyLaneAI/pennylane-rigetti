@@ -28,48 +28,57 @@ class TestQPUIntegration(BaseTest):
     def test_load_qpu_device(self):
         """Test that the QPU device loads correctly"""
         device = TEST_QPU_LATTICES[0]
-        dev = qml.device("rigetti.qpu", device=device, load_qc=False)
-        qc = pyquil.get_qc(device)
-        num_wires = len(qc.qubits())
-        self.assertEqual(dev.num_wires, num_wires)
+        dev = qml.device("rigetti.qpu", wires=4, device=device, load_qc=False)
+        pyquil.get_qc(device)
+        self.assertEqual(dev.num_wires, 4)
         self.assertEqual(dev.shots, 1000)
         self.assertEqual(dev.short_name, "rigetti.qpu")
 
     def test_load_virtual_qpu_device(self):
         """Test that the QPU simulators load correctly"""
         device = np.random.choice(TEST_QPU_LATTICES)
-        qml.device("rigetti.qpu", device=device, load_qc=False)
+        qml.device("rigetti.qpu", wires=4, device=device, load_qc=False)
 
     def test_qpu_args(self):
         """Test that the QPU plugin requires correct arguments"""
         device = np.random.choice(TEST_QPU_LATTICES)
 
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
-            qml.device("rigetti.qpu")
+            qml.device("rigetti.qpu", wires=2)
 
-        with pytest.raises(ValueError, match="Number of shots must be a positive integer"):
-            qml.device("rigetti.qpu", device=device, shots=0)
+        with pytest.raises(
+            ValueError, match="Number of shots must be a positive integer"
+        ):
+            qml.device("rigetti.qpu", wires=2, device=device, shots=0)
 
-        with pytest.raises(ValueError, match="Readout error cannot be set on the physical QPU"):
-            qml.device("rigetti.qpu", device=device, load_qc=True, readout_error=[0.9, 0.75])
+        with pytest.raises(
+            ValueError, match="Readout error cannot be set on the physical QPU"
+        ):
+            qml.device(
+                "rigetti.qpu",
+                wires=2,
+                device=device,
+                load_qc=True,
+                readout_error=[0.9, 0.75],
+            )
 
-        dev_no_wires = qml.device("rigetti.qpu", device=device, shots=5, load_qc=False)
-        assert dev_no_wires.wires == Wires(range(4))
-
-        with pytest.raises(ValueError, match="Device has a fixed number of"):
-            qml.device("rigetti.qpu", device=device, shots=5, wires=100, load_qc=False)
+        with pytest.raises(ValueError, match="Wires must not exceed"):
+            qml.device("rigetti.qpu", device=device, shots=5, wires=2000, load_qc=False)
 
         dev_iterable_wires = qml.device(
             "rigetti.qpu", device=device, shots=5, wires=range(4), load_qc=False
         )
         assert dev_iterable_wires.wires == Wires(range(4))
 
-        with pytest.raises(ValueError, match="Device has a fixed number of"):
-            qml.device("rigetti.qpu", device=device, shots=5, wires=range(100), load_qc=False)
+        with pytest.raises(ValueError, match="Wires must not exceed"):
+            qml.device(
+                "rigetti.qpu", device=device, shots=5, wires=range(2000), load_qc=False
+            )
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize(
-        "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
+        "obs",
+        [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)],
     )
     def test_tensor_expval_parametric_compilation(self, obs):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
@@ -81,6 +90,7 @@ class TestQPUIntegration(BaseTest):
         p = np.pi / 8
         dev = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             shots=10000,
             load_qc=False,
@@ -88,6 +98,7 @@ class TestQPUIntegration(BaseTest):
         )
         dev_1 = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             shots=10000,
             load_qc=False,
@@ -116,7 +127,8 @@ class TestQPUIntegration(BaseTest):
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize(
-        "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
+        "obs",
+        [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)],
     )
     def test_tensor_expval_operator_estimation(self, obs, shots):
         """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
@@ -128,6 +140,7 @@ class TestQPUIntegration(BaseTest):
         p = np.pi / 7
         dev = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             shots=shots,
             load_qc=False,
@@ -136,6 +149,7 @@ class TestQPUIntegration(BaseTest):
         )
         dev_1 = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             shots=shots,
             load_qc=False,
@@ -169,6 +183,7 @@ class TestQPUIntegration(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             shots=shots,
             load_qc=False,
@@ -205,8 +220,9 @@ class TestQPUBasic(BaseTest):
         """Test that a warning is raised if parameter compilation and operator estimation are both turned on."""
         device = np.random.choice(TEST_QPU_LATTICES)
         with pytest.warns(Warning, match="Operator estimation is being turned off."):
-            dev = qml.device(
+            qml.device(
                 "rigetti.qpu",
+                wires=4,
                 device=device,
                 shots=1000,
                 load_qc=False,
@@ -218,6 +234,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
@@ -281,6 +298,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
@@ -344,6 +362,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             symmetrize_readout=SymmetrizationLevel.NONE,
@@ -370,6 +389,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             shots=10_000,
@@ -395,6 +415,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             shots=10_000,
@@ -424,6 +445,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
@@ -449,6 +471,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
@@ -475,6 +498,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
@@ -507,6 +531,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
@@ -546,6 +571,7 @@ class TestQPUBasic(BaseTest):
         device = np.random.choice(TEST_QPU_LATTICES)
         dev_qpu = qml.device(
             "rigetti.qpu",
+            wires=4,
             device=device,
             load_qc=False,
             readout_error=[0.9, 0.75],
@@ -578,7 +604,9 @@ class TestQPUBasic(BaseTest):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
         device = np.random.choice(TEST_QPU_LATTICES)
-        dev = plf.QVMDevice(device=device, shots=shots, compiler_timeout=100, execution_timeout=101)
+        dev = plf.QVMDevice(
+            device=device, shots=shots, compiler_timeout=100, execution_timeout=101
+        )
         assert dev.qc.compiler._timeout == 100
         assert dev.qc.qam._qvm_client.timeout == 101
 

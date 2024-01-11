@@ -47,7 +47,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -70,7 +70,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -86,7 +86,9 @@ class TestQVMBasic(BaseTest):
 
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(
-            res, np.array([np.cos(theta), np.cos(theta) * np.cos(phi)]), delta=3 / np.sqrt(shots)
+            res,
+            np.array([np.cos(theta), np.cos(theta) * np.cos(phi)]),
+            delta=3 / np.sqrt(shots),
         )
 
     def test_paulix_expectation(self, shots, qvm, compiler):
@@ -94,7 +96,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RY(theta, wires=[0])
@@ -109,7 +111,9 @@ class TestQVMBasic(BaseTest):
         res = np.array([dev.expval(O1.obs), dev.expval(O2.obs)])
         # below are the analytic expectation values for this circuit
         self.assertAllAlmostEqual(
-            res, np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]), delta=3 / np.sqrt(shots)
+            res,
+            np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]),
+            delta=3 / np.sqrt(shots),
         )
 
     def test_pauliy_expectation(self, shots, qvm, compiler):
@@ -117,7 +121,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -141,7 +145,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RY(theta, wires=[0])
@@ -157,7 +161,10 @@ class TestQVMBasic(BaseTest):
 
         # below are the analytic expectation values for this circuit
         expected = np.array(
-            [np.sin(theta) * np.sin(phi) + np.cos(theta), np.cos(theta) * np.cos(phi) + np.sin(phi)]
+            [
+                np.sin(theta) * np.sin(phi) + np.cos(theta),
+                np.cos(theta) * np.cos(phi) + np.sin(phi),
+            ]
         ) / np.sqrt(2)
         self.assertAllAlmostEqual(res, expected, delta=3 / np.sqrt(shots))
 
@@ -171,7 +178,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RY(theta, wires=[0])
@@ -190,13 +197,19 @@ class TestQVMBasic(BaseTest):
         a = H[0, 0]
         re_b = H[0, 1].real
         d = H[1, 1]
-        ev1 = ((a - d) * np.cos(theta) + 2 * re_b * np.sin(theta) * np.sin(phi) + a + d) / 2
-        ev2 = ((a - d) * np.cos(theta) * np.cos(phi) + 2 * re_b * np.sin(phi) + a + d) / 2
+        ev1 = (
+            (a - d) * np.cos(theta) + 2 * re_b * np.sin(theta) * np.sin(phi) + a + d
+        ) / 2
+        ev2 = (
+            (a - d) * np.cos(theta) * np.cos(phi) + 2 * re_b * np.sin(phi) + a + d
+        ) / 2
         expected = np.array([ev1, ev2])
 
         self.assertAllAlmostEqual(res, expected, delta=4 / np.sqrt(shots))
 
-    def test_multi_qubit_hermitian_expectation(self, shots, execution_timeout, qvm, compiler):
+    def test_multi_qubit_hermitian_expectation(
+        self, shots, execution_timeout, qvm, compiler
+    ):
         """Test that arbitrary multi-qubit Hermitian expectation values are correct"""
         theta = 0.432
         phi = 0.123
@@ -210,7 +223,12 @@ class TestQVMBasic(BaseTest):
             ]
         )
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=10 * shots, execution_timeout=execution_timeout)
+        dev = plf.QVMDevice(
+            device="2q-qvm",
+            wires=2,
+            shots=10 * shots,
+            execution_timeout=execution_timeout,
+        )
 
         with qml.tape.QuantumTape() as tape:
             qml.RY(theta, wires=[0])
@@ -236,7 +254,7 @@ class TestQVMBasic(BaseTest):
 
     def test_var(self, shots, qvm, compiler):
         """Tests for variance calculation"""
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
 
         phi = 0.543
         theta = 0.6543
@@ -250,13 +268,20 @@ class TestQVMBasic(BaseTest):
         dev._samples = dev.generate_samples()
 
         var = np.array([dev.var(O1.obs)])
-        expected = 0.25 * (3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi))
+        expected = 0.25 * (
+            3 - np.cos(2 * theta) - 2 * np.cos(theta) ** 2 * np.cos(2 * phi)
+        )
 
         self.assertAlmostEqual(var, expected, delta=3 / np.sqrt(shots))
 
     def test_var_hermitian(self, shots, execution_timeout, qvm, compiler):
         """Tests for variance calculation using an arbitrary Hermitian observable"""
-        dev = plf.QVMDevice(device="2q-qvm", shots=100 * shots, execution_timeout=execution_timeout)
+        dev = plf.QVMDevice(
+            device="2q-qvm",
+            wires=2,
+            shots=100 * shots,
+            execution_timeout=execution_timeout,
+        )
 
         phi = 0.543
         theta = 0.6543
@@ -311,7 +336,9 @@ class TestQVMBasic(BaseTest):
     )
     def test_apply(self, op, apply_unitary, shots, qvm, compiler):
         """Test the application of gates to a state"""
-        dev = plf.QVMDevice(device="3q-qvm", shots=shots, parametric_compilation=False)
+        dev = plf.QVMDevice(
+            device="3q-qvm", wires=3, shots=shots, parametric_compilation=False
+        )
 
         obs = qml.expval(qml.PauliZ(0))
 
@@ -348,7 +375,7 @@ class TestQVMBasic(BaseTest):
         """Tests if the samples returned by sample have
         the correct values
         """
-        dev = plf.QVMDevice(device="1q-qvm", shots=10)
+        dev = plf.QVMDevice(device="1q-qvm", wires=1, shots=10)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(1.5708, wires=[0])
@@ -372,7 +399,9 @@ class TestQVMBasic(BaseTest):
         shots = 1_000_000
         A = np.array([[1, 2j], [-2j, 0]])
 
-        dev = plf.QVMDevice(device="1q-qvm", shots=shots, execution_timeout=execution_timeout)
+        dev = plf.QVMDevice(
+            device="1q-qvm", wires=1, shots=shots, execution_timeout=execution_timeout
+        )
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -396,7 +425,10 @@ class TestQVMBasic(BaseTest):
 
         # the analytic variance is 0.25*(sin(theta)-4*cos(theta))^2
         assert np.allclose(
-            np.var(s1), 0.25 * (np.sin(theta) - 4 * np.cos(theta)) ** 2, atol=0.1, rtol=0
+            np.var(s1),
+            0.25 * (np.sin(theta) - 4 * np.cos(theta)) ** 2,
+            atol=0.1,
+            rtol=0,
         )
 
     def test_sample_values_hermitian_multi_qubit(self, qvm, execution_timeout, tol):
@@ -415,7 +447,9 @@ class TestQVMBasic(BaseTest):
             ]
         )
 
-        dev = plf.QVMDevice(device="2q-qvm", shots=shots, execution_timeout=execution_timeout)
+        dev = plf.QVMDevice(
+            device="2q-qvm", wires=2, shots=shots, execution_timeout=execution_timeout
+        )
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -449,37 +483,45 @@ class TestQVMBasic(BaseTest):
     def test_wires_argument(self):
         """Test that the wires argument gets processed correctly."""
 
-        dev_no_wires = plf.QVMDevice(device="2q-qvm", shots=5)
+        dev_no_wires = plf.QVMDevice(device="2q-qvm", wires=2, shots=5)
         assert dev_no_wires.wires == Wires(range(2))
-
-        with pytest.raises(ValueError, match="Device has a fixed number of"):
-            plf.QVMDevice(device="2q-qvm", shots=5, wires=1000)
 
         dev_iterable_wires = plf.QVMDevice(device="2q-qvm", shots=5, wires=range(2))
         assert dev_iterable_wires.wires == Wires(range(2))
 
-        with pytest.raises(ValueError, match="Device has a fixed number of"):
-            plf.QVMDevice(device="2q-qvm", shots=5, wires=range(1000))
+        with pytest.raises(ValueError, match="Wires must not exceed"):
+            plf.QVMDevice(device="2q-qvm", wires=3, shots=5)
+
+        with pytest.raises(ValueError, match="Wires must not exceed"):
+            plf.QVMDevice(device="2q-qvm", wires=Wires(range(3)), shots=5)
 
     @pytest.mark.parametrize("shots", list(range(0, -10, -1)))
     def test_raise_error_if_shots_is_not_positive(self, shots):
         """Test that instantiating a QVMDevice if the number of shots is not a postivie
         integer raises an error"""
-        with pytest.raises(ValueError, match="Number of shots must be a positive integer."):
-            dev = plf.QVMDevice(device="2q-qvm", shots=shots)
+        with pytest.raises(
+            ValueError, match="Number of shots must be a positive integer."
+        ):
+            plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
 
     def test_raise_error_if_shots_is_none(self, shots):
         """Test that instantiating a QVMDevice to be used for analytic computations raises an error"""
         with pytest.raises(
             ValueError, match="QVM device cannot be used for analytic computations."
         ):
-            dev = plf.QVMDevice(device="2q-qvm", shots=None)
+            plf.QVMDevice(device="2q-qvm", wires=2, shots=None)
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_timeout_set_correctly(self, shots, device):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
-        dev = plf.QVMDevice(device=device, shots=shots, compiler_timeout=100, execution_timeout=101)
+        dev = plf.QVMDevice(
+            device=device,
+            wires=2,
+            shots=shots,
+            compiler_timeout=100,
+            execution_timeout=101,
+        )
         assert dev.qc.compiler._timeout == 100
         assert dev.qc.qam._qvm_client.timeout == 101
 
@@ -487,7 +529,7 @@ class TestQVMBasic(BaseTest):
     def test_timeout_default(self, shots, device):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
-        dev = plf.QVMDevice(device=device, shots=shots)
+        dev = plf.QVMDevice(device=device, wires=2, shots=shots)
         qc = pyquil.get_qc(device, as_qvm=True)
 
         # Check that the timeouts are equal (it has not been changed as a side effect of
@@ -497,7 +539,7 @@ class TestQVMBasic(BaseTest):
 
     def test_compiled_program_stored(self, qvm, monkeypatch):
         """Test that QVM device stores the latest compiled program."""
-        dev = qml.device("rigetti.qvm", device="2q-qvm")
+        dev = qml.device("rigetti.qvm", wires=2, device="2q-qvm")
 
         assert dev.compiled_program is None
 
@@ -508,8 +550,8 @@ class TestQVMBasic(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RX(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.expval(qml.Identity(wires=[0]))
-            O2 = qml.expval(qml.Identity(wires=[1]))
+            qml.expval(qml.Identity(wires=[0]))
+            qml.expval(qml.Identity(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -519,7 +561,7 @@ class TestQVMBasic(BaseTest):
 
     def test_stored_compiled_program_correct(self, qvm, monkeypatch):
         """Test that QVM device stores the latest compiled program."""
-        dev = qml.device("rigetti.qvm", device="2q-qvm")
+        dev = qml.device("rigetti.qvm", wires=2, device="2q-qvm")
 
         assert dev.compiled_program is None
 
@@ -528,7 +570,7 @@ class TestQVMBasic(BaseTest):
         with qml.tape.QuantumTape() as tape:
             qml.RZ(theta, wires=[0])
             qml.CZ(wires=[0, 1])
-            O1 = qml.expval(qml.PauliZ(wires=[0]))
+            qml.expval(qml.PauliZ(wires=[0]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -542,7 +584,7 @@ class TestParametricCompilation(BaseTest):
 
     def test_compiled_program_was_stored_in_dict(self, qvm, mock_qvm, monkeypatch):
         """Test that QVM device stores the compiled program correctly in a dictionary"""
-        dev = qml.device("rigetti.qvm", device="2q-qvm")
+        dev = qml.device("rigetti.qvm", wires=2, device="2q-qvm")
         theta = 0.432
         phi = 0.123
 
@@ -550,8 +592,8 @@ class TestParametricCompilation(BaseTest):
             qml.RX(theta, wires=[0])
             qml.RX(phi, wires=[1])
             qml.CNOT(wires=[0, 1])
-            O1 = qml.expval(qml.Identity(wires=[0]))
-            O2 = qml.expval(qml.Identity(wires=[1]))
+            qml.expval(qml.Identity(wires=[0]))
+            qml.expval(qml.Identity(wires=[1]))
 
         dev.apply(tape.operations, rotations=tape.diagonalizing_gates)
 
@@ -576,7 +618,9 @@ class TestParametricCompilation(BaseTest):
     ):
         """Tests that a program containing numeric and symbolic variables as
         well is only compiled once."""
-        dev = qml.device("rigetti.qvm", device="2q-qvm", execution_timeout=execution_timeout)
+        dev = qml.device(
+            "rigetti.qvm", device="2q-qvm", wires=2, execution_timeout=execution_timeout
+        )
 
         param1 = np.array(1, requires_grad=False)
         param2 = np.array(2, requires_grad=True)
@@ -610,7 +654,9 @@ class TestParametricCompilation(BaseTest):
     def test_apply_qubitstatesvector_raises_an_error_if_not_first(self, op):
         """Test that there is an error raised when the QubitStateVector or StatPrep is not
         applied as the first operation."""
-        dev = qml.device("rigetti.qvm", device="2q-qvm", parametric_compilation=True)
+        dev = qml.device(
+            "rigetti.qvm", device="2q-qvm", wires=2, parametric_compilation=True
+        )
 
         operation = op(np.array([1, 0]), wires=[0])
         queue = [qml.PauliX(0), operation]
@@ -630,7 +676,7 @@ class TestQVMIntegration(BaseTest):
 
     def test_load_qvm_device(self, qvm):
         """Test that the QVM device loads correctly"""
-        dev = qml.device("rigetti.qvm", device="2q-qvm")
+        dev = qml.device("rigetti.qvm", wires=2, device="2q-qvm")
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 1000)
         self.assertEqual(dev.short_name, "rigetti.qvm")
@@ -638,28 +684,36 @@ class TestQVMIntegration(BaseTest):
     def test_load_qvm_device_from_topology(self, qvm):
         """Test that the QVM device, from an input topology, loads correctly"""
         topology = nx.complete_graph(2)
-        dev = qml.device("rigetti.qvm", device=topology)
+        dev = qml.device("rigetti.qvm", wires=2, device=topology)
         self.assertEqual(dev.num_wires, 2)
         self.assertEqual(dev.shots, 1000)
         self.assertEqual(dev.short_name, "rigetti.qvm")
 
     def test_load_virtual_qpu_device(self, qvm):
         """Test that the QPU simulators load correctly"""
-        qml.device("rigetti.qvm", device=np.random.choice(TEST_QPU_LATTICES))
+        qml.device("rigetti.qvm", wires=2, device=np.random.choice(TEST_QPU_LATTICES))
 
     def test_qvm_args(self):
         """Test that the QVM plugin requires correct arguments"""
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
-            qml.device("rigetti.qvm")
+            qml.device(
+                "rigetti.qvm",
+                wires=2,
+            )
 
-        with pytest.raises(ValueError, match="Number of shots must be a positive integer"):
-            qml.device("rigetti.qvm", "2q-qvm", shots=0)
+        with pytest.raises(
+            ValueError, match="Number of shots must be a positive integer"
+        ):
+            qml.device("rigetti.qvm", "2q-qvm", wires=2, shots=0)
 
-    def test_qubit_unitary(self, shots, compiler_timeout, execution_timeout, qvm, compiler):
+    def test_qubit_unitary(
+        self, shots, compiler_timeout, execution_timeout, qvm, compiler
+    ):
         """Test that an arbitrary unitary operation works"""
         dev1 = qml.device(
             "rigetti.qvm",
             device="3q-qvm",
+            wires=3,
             shots=shots,
             compiler_timeout=compiler_timeout,
             execution_timeout=execution_timeout,
@@ -668,6 +722,7 @@ class TestQVMIntegration(BaseTest):
         dev2 = qml.device(
             "rigetti.qvm",
             device="9q-square-qvm",
+            wires=9,
             shots=shots,
             compiler_timeout=compiler_timeout,
             execution_timeout=execution_timeout,
@@ -703,7 +758,7 @@ class TestQVMIntegration(BaseTest):
         As the results coming from the qvm are stochastic, a constraint of 2 out of 5 runs was added.
         """
         shots = 100_000
-        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS)
+        dev = qml.device("rigetti.qvm", wires=2, device=device, shots=QVM_SHOTS)
 
         a = 0.543
         b = 0.123
@@ -717,7 +772,9 @@ class TestQVMIntegration(BaseTest):
             qml.Rot(x, y, z, wires=0)
             return qml.expval(qml.PauliZ(0))
 
-        self.assertAlmostEqual(circuit(a, b, c), np.cos(a) * np.sin(b), delta=3 / np.sqrt(shots))
+        self.assertAlmostEqual(
+            circuit(a, b, c), np.cos(a) * np.sin(b), delta=3 / np.sqrt(shots)
+        )
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
@@ -726,7 +783,7 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS)
+        dev = qml.device("rigetti.qvm", wires=2, device=device, shots=QVM_SHOTS)
 
         @qml.qnode(dev)
         def circuit():
@@ -743,7 +800,7 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS)
+        dev = qml.device("rigetti.qvm", wires=2, device=device, shots=QVM_SHOTS)
 
         @qml.qnode(dev)
         def circuit():
@@ -760,7 +817,7 @@ class TestQVMIntegration(BaseTest):
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 5 runs was added.
         """
-        dev = qml.device("rigetti.qvm", device=device, shots=QVM_SHOTS)
+        dev = qml.device("rigetti.qvm", wires=2, device=device, shots=QVM_SHOTS)
 
         @qml.qnode(dev)
         def circuit():
@@ -773,7 +830,7 @@ class TestQVMIntegration(BaseTest):
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_stored(self, qvm, device):
         """Test that QVM device stores the compiled program correctly"""
-        dev = qml.device("rigetti.qvm", device=device, timeout=100)
+        dev = qml.device("rigetti.qvm", wires=2, device=device, timeout=100)
 
         assert len(dev._compiled_program_dict.items()) == 0
 
@@ -803,7 +860,7 @@ class TestQVMIntegration(BaseTest):
         self, qvm, device, statements
     ):
         """Test that QVM device stores the compiled program when the QNode is mutated correctly"""
-        dev = qml.device("rigetti.qvm", device=device, timeout=100)
+        dev = qml.device("rigetti.qvm", wires=2, device=device, timeout=100)
 
         assert len(dev._compiled_program_dict.items()) == 0
 
@@ -830,7 +887,7 @@ class TestQVMIntegration(BaseTest):
     def test_compiled_program_was_stored_mutable_qnode_with_loop(self, qvm, device):
         """Test that QVM device stores the compiled program when the QNode is
         mutated correctly"""
-        dev = qml.device("rigetti.qvm", device=device, timeout=80)
+        dev = qml.device("rigetti.qvm", wires=2, device=device, timeout=80)
 
         assert len(dev._compiled_program_dict.items()) == 0
 
@@ -851,7 +908,7 @@ class TestQVMIntegration(BaseTest):
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_compiled_program_was_used(self, qvm, device, monkeypatch):
         """Test that QVM device used the compiled program correctly, after it was stored"""
-        dev = qml.device("rigetti.qvm", device=device, timeout=100)
+        dev = qml.device("rigetti.qvm", wires=2, device=device, timeout=100)
 
         shape = qml.StronglyEntanglingLayers.shape(n_layers=4, n_wires=dev.num_wires)
         params = np.random.random(size=shape)
@@ -866,7 +923,9 @@ class TestQVMIntegration(BaseTest):
 
         call_history = []
         with monkeypatch.context() as m:
-            m.setattr(QuantumComputer, "compile", lambda self, prog: call_history.append(prog))
+            m.setattr(
+                QuantumComputer, "compile", lambda self, prog: call_history.append(prog)
+            )
 
             for i in range(5):
                 circuit(params)
@@ -877,12 +936,14 @@ class TestQVMIntegration(BaseTest):
 
     @flaky(max_runs=10, min_passes=1)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
-    def test_compiled_program_was_correct_compared_with_default_qubit(self, qvm, device, tol):
+    def test_compiled_program_was_correct_compared_with_default_qubit(
+        self, qvm, device, tol
+    ):
         """Test that QVM device stores the compiled program correctly by comparing it with default.qubit.
 
         As the results coming from the qvm are stochastic, a constraint of 1 out of 5 runs was added.
         """
-        dev = qml.device("rigetti.qvm", device=device, timeout=100)
+        dev = qml.device("rigetti.qvm", wires=2, device=device, timeout=100)
 
         shape = qml.StronglyEntanglingLayers.shape(n_layers=4, n_wires=dev.num_wires)
         params = np.random.random(size=shape)
@@ -904,7 +965,9 @@ class TestQVMIntegration(BaseTest):
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
-    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(self, device, qvm, compiler):
+    def test_2q_gate_pauliz_pauliz_tensor_parametric_compilation_off(
+        self, device, qvm, compiler
+    ):
         """Test that the PauliZ tensor PauliZ observable works correctly, when parametric compilation
         was turned off.
 
@@ -912,7 +975,11 @@ class TestQVMIntegration(BaseTest):
         """
 
         dev = qml.device(
-            "rigetti.qvm", device=device, shots=QVM_SHOTS, parametric_compilation=False
+            "rigetti.qvm",
+            wires=2,
+            device=device,
+            shots=QVM_SHOTS,
+            parametric_compilation=False,
         )
 
         @qml.qnode(dev)
