@@ -83,9 +83,7 @@ class QVMDevice(QuantumComputerDevice):
                 noisy=self.noisy,
                 client_configuration=client_configuration,
                 qvm_type="qvm",
-                compiler_timeout=kwargs.get(
-                    "compiler_timeout", 10.0
-                ),  # 10.0 is the pyQuil default
+                compiler_timeout=kwargs.get("compiler_timeout", 10.0),  # 10.0 is the pyQuil default
                 execution_timeout=kwargs.get(
                     "execution_timeout", 10.0
                 ),  # 10.0 is the pyQuil default

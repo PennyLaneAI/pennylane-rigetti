@@ -110,9 +110,7 @@ class QPUDevice(QuantumComputerDevice):
         self.calibrate_readout = calibrate_readout
         self._skip_generate_samples = False
 
-        super().__init__(
-            device, wires=wires, shots=shots, active_reset=active_reset, **kwargs
-        )
+        super().__init__(device, wires=wires, shots=shots, active_reset=active_reset, **kwargs)
 
     def get_qc(self, device, **kwargs) -> QuantumComputer:
         return get_qc(device, as_qvm=self.as_qvm, **kwargs)

@@ -46,14 +46,10 @@ class TestQPUIntegration(BaseTest):
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
             qml.device("rigetti.qpu", wires=2)
 
-        with pytest.raises(
-            ValueError, match="Number of shots must be a positive integer"
-        ):
+        with pytest.raises(ValueError, match="Number of shots must be a positive integer"):
             qml.device("rigetti.qpu", wires=2, device=device, shots=0)
 
-        with pytest.raises(
-            ValueError, match="Readout error cannot be set on the physical QPU"
-        ):
+        with pytest.raises(ValueError, match="Readout error cannot be set on the physical QPU"):
             qml.device(
                 "rigetti.qpu",
                 wires=2,
@@ -71,9 +67,7 @@ class TestQPUIntegration(BaseTest):
         assert dev_iterable_wires.wires == Wires(range(4))
 
         with pytest.raises(ValueError, match="Wires must not exceed"):
-            qml.device(
-                "rigetti.qpu", device=device, shots=5, wires=range(2000), load_qc=False
-            )
+            qml.device("rigetti.qpu", device=device, shots=5, wires=range(2000), load_qc=False)
 
     @flaky(max_runs=10, min_passes=3)
     @pytest.mark.parametrize(
@@ -604,9 +598,7 @@ class TestQPUBasic(BaseTest):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
         device = np.random.choice(TEST_QPU_LATTICES)
-        dev = plf.QVMDevice(
-            device=device, shots=shots, compiler_timeout=100, execution_timeout=101
-        )
+        dev = plf.QVMDevice(device=device, shots=shots, compiler_timeout=100, execution_timeout=101)
         assert dev.qc.compiler._timeout == 100
         assert dev.qc.qam._qvm_client.timeout == 101
 

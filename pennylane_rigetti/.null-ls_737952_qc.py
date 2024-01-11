@@ -44,6 +44,10 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
     Args:
         device (str): the name of the device to initialise.
+        wires (Union[int, Iterable[Number, str]]): Number of qubits represented by the device, or an iterable that contains
+            unique labels for the qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``). When an integer is provided, qubits
+            are addressed as consecutive integers ``[0, 1, n]`` and mapped to the first available qubits on the device. `wires` must
+            be provided for QPU devices. If not provided for a QVM device, then the number of wires is inferred from the QVM.
         shots (int): number of circuit evaluations/random samples used
             to estimate expectation values of observables.
         active_reset (bool): whether to actively reset qubits instead of waiting for
@@ -53,10 +57,6 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
     Keyword args:
         compiler_timeout (int): number of seconds to wait for a response from quilc (default 10).
-        wires (Optional[Union[int, Iterable[Number, str]]]): Number of qubits represented by the device, or an iterable that contains
-            unique labels for the qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``). When an integer is provided, qubits
-            are addressed as consecutive integers ``[0, 1, n]`` and mapped to the first available qubits on the device. `wires` must
-            be provided for QPU devices. If not provided for a QVM device, then the number of wires is inferred from the QVM.
         execution_timeout (int): number of seconds to wait for a response from the QVM (default 10).
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
@@ -127,8 +127,11 @@ class QuantumComputerDevice(RigettiDevice, ABC):
                 "qubits."
             )
 
-        self.num_wires = len(qubits)
-        self._qubits = qubits
+        self.wiring = {
+            label: qubit
+            for label, qubit in zip(pennylane_wires.labels, qubits[: len(pennylane_wires)])
+        }
+        self.num_wires = len(self.wiring)
         self.active_reset = active_reset
 
         super().__init__(pennylane_wires, shots)
@@ -201,7 +204,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         rotations = kwargs.get("rotations", [])
         self.prog += self.apply_rotations(rotations)
 
-        qubits = self._qubits
+        qubits = self.wiring.values()
         ro = self.prog.declare("ro", "BIT", len(qubits))
         for i, q in enumerate(qubits):
             self.prog.inst(MEASURE(q, ro[i]))
@@ -215,7 +218,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             operations (List[pennylane.Operation]): quantum operations that need to be applied
 
         Returns:
-            pyquil.Program(): a pyQuil Program with the given operations
+            pyquil.Prgram(): a pyQuil Program with the given operations
         """
         prog = Program()
         # Apply the circuit operations
