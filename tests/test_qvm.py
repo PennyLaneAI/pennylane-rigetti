@@ -47,7 +47,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -70,7 +70,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -96,7 +96,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RY(theta, wires=[0])
@@ -121,7 +121,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -145,7 +145,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RY(theta, wires=[0])
@@ -178,7 +178,7 @@ class TestQVMBasic(BaseTest):
         theta = 0.432
         phi = 0.123
 
-        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
         with qml.tape.QuantumTape() as tape:
             qml.RY(theta, wires=[0])
@@ -219,7 +219,6 @@ class TestQVMBasic(BaseTest):
 
         dev = plf.QVMDevice(
             device="2q-qvm",
-            wires=2,
             shots=10 * shots,
             execution_timeout=execution_timeout,
         )
@@ -248,7 +247,7 @@ class TestQVMBasic(BaseTest):
 
     def test_var(self, shots, qvm, compiler):
         """Tests for variance calculation"""
-        dev = plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots)
 
         phi = 0.543
         theta = 0.6543
@@ -270,7 +269,6 @@ class TestQVMBasic(BaseTest):
         """Tests for variance calculation using an arbitrary Hermitian observable"""
         dev = plf.QVMDevice(
             device="2q-qvm",
-            wires=2,
             shots=100 * shots,
             execution_timeout=execution_timeout,
         )
@@ -328,7 +326,7 @@ class TestQVMBasic(BaseTest):
     )
     def test_apply(self, op, apply_unitary, shots, qvm, compiler):
         """Test the application of gates to a state"""
-        dev = plf.QVMDevice(device="3q-qvm", wires=3, shots=shots, parametric_compilation=False)
+        dev = plf.QVMDevice(device="3q-qvm", shots=shots, parametric_compilation=False)
 
         obs = qml.expval(qml.PauliZ(0))
 
@@ -365,7 +363,7 @@ class TestQVMBasic(BaseTest):
         """Tests if the samples returned by sample have
         the correct values
         """
-        dev = plf.QVMDevice(device="1q-qvm", wires=1, shots=10)
+        dev = plf.QVMDevice(device="1q-qvm", shots=10)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(1.5708, wires=[0])
@@ -390,7 +388,7 @@ class TestQVMBasic(BaseTest):
         A = np.array([[1, 2j], [-2j, 0]])
 
         dev = plf.QVMDevice(
-            device="1q-qvm", wires=1, shots=shots, execution_timeout=execution_timeout
+            device="1q-qvm", shots=shots, execution_timeout=execution_timeout
         )
 
         with qml.tape.QuantumTape() as tape:
@@ -438,7 +436,7 @@ class TestQVMBasic(BaseTest):
         )
 
         dev = plf.QVMDevice(
-            device="2q-qvm", wires=2, shots=shots, execution_timeout=execution_timeout
+            device="2q-qvm", shots=shots, execution_timeout=execution_timeout
         )
 
         with qml.tape.QuantumTape() as tape:
@@ -473,7 +471,7 @@ class TestQVMBasic(BaseTest):
     def test_wires_argument(self):
         """Test that the wires argument gets processed correctly."""
 
-        dev_no_wires = plf.QVMDevice(device="2q-qvm", wires=2, shots=5)
+        dev_no_wires = plf.QVMDevice(device="2q-qvm", shots=5)
         assert dev_no_wires.wires == Wires(range(2))
 
         dev_iterable_wires = plf.QVMDevice(device="2q-qvm", shots=5, wires=range(2))
@@ -490,14 +488,14 @@ class TestQVMBasic(BaseTest):
         """Test that instantiating a QVMDevice if the number of shots is not a postivie
         integer raises an error"""
         with pytest.raises(ValueError, match="Number of shots must be a positive integer."):
-            plf.QVMDevice(device="2q-qvm", wires=2, shots=shots)
+            plf.QVMDevice(device="2q-qvm", shots=shots)
 
     def test_raise_error_if_shots_is_none(self, shots):
         """Test that instantiating a QVMDevice to be used for analytic computations raises an error"""
         with pytest.raises(
             ValueError, match="QVM device cannot be used for analytic computations."
         ):
-            plf.QVMDevice(device="2q-qvm", wires=2, shots=None)
+            plf.QVMDevice(device="2q-qvm", shots=None)
 
     @pytest.mark.parametrize("device", ["2q-qvm", np.random.choice(TEST_QPU_LATTICES)])
     def test_timeout_set_correctly(self, shots, device):
@@ -505,7 +503,6 @@ class TestQVMBasic(BaseTest):
         is set correctly when passing a value as keyword argument"""
         dev = plf.QVMDevice(
             device=device,
-            wires=2,
             shots=shots,
             compiler_timeout=100,
             execution_timeout=101,
@@ -517,7 +514,7 @@ class TestQVMBasic(BaseTest):
     def test_timeout_default(self, shots, device):
         """Test that the timeout attrbiute for the QuantumComputer stored by the QVMDevice
         is set correctly when passing a value as keyword argument"""
-        dev = plf.QVMDevice(device=device, wires=2, shots=shots)
+        dev = plf.QVMDevice(device=device, shots=shots)
         qc = pyquil.get_qc(device, as_qvm=True)
 
         # Check that the timeouts are equal (it has not been changed as a side effect of
