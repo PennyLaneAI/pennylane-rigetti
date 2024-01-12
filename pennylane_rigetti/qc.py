@@ -106,23 +106,27 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             else:
                 raise ValueError("Wires must be specified for a QPU device. Got None for wires.")
 
-        try: 
-            if isinstance(wires, int):
-                wires = dict(zip(range(wires), qubits[:wires], strict = True))
-            elif isinstance(wires, Iterable):
-                wires = dict(zip(wires, qubits[:len(wires)], strict = True))
-            else:
+        if isinstance(wires, int):
+            if wires > len(qubits):
                 raise ValueError(
-                    "Wires for a device must be an integer or an iterable of numbers or strings."
+                    "Wires must not exceed available qubits on the device. ",
+                    f"The requested device only has {len(qubits)} qubits, received {wires}.",
                 )
-        except ValueError:
+            wires = dict(zip(range(wires), qubits[:wires]))
+        elif isinstance(wires, Iterable):
+            if len(wires) > len(qubits):
+                raise ValueError(
+                    "Wires must not exceed available qubits on the device. ",
+                    f"The requested device only has {len(qubits)} qubits, received {len(wires)}.",
+                )
+            wires = dict(zip(wires, qubits[: len(wires)]))
+        else:
             raise ValueError(
-                "Wires must not exceed available qubits on the device. ", 
-                f"The requested device only has {len(qubits)} qubits."
+                "Wires for a device must be an integer or an iterable of numbers or strings."
             )
 
         self.num_wires = len(qubits)
-        self._qubits = qubits[:len(wires)]
+        self._qubits = qubits[: len(wires)]
         self.active_reset = active_reset
         self.wiring = wires
 

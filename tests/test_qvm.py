@@ -387,9 +387,7 @@ class TestQVMBasic(BaseTest):
         shots = 1_000_000
         A = np.array([[1, 2j], [-2j, 0]])
 
-        dev = plf.QVMDevice(
-            device="1q-qvm", shots=shots, execution_timeout=execution_timeout
-        )
+        dev = plf.QVMDevice(device="1q-qvm", shots=shots, execution_timeout=execution_timeout)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
@@ -435,9 +433,7 @@ class TestQVMBasic(BaseTest):
             ]
         )
 
-        dev = plf.QVMDevice(
-            device="2q-qvm", shots=shots, execution_timeout=execution_timeout
-        )
+        dev = plf.QVMDevice(device="2q-qvm", shots=shots, execution_timeout=execution_timeout)
 
         with qml.tape.QuantumTape() as tape:
             qml.RX(theta, wires=[0])
