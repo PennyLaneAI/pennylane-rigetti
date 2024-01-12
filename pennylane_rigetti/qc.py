@@ -20,15 +20,13 @@ Code details
 """
 
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from typing import Dict
-from pennylane.queuing import OrderedDict
 from pennylane.utils import Iterable
 from pennylane import DeviceError, numpy as np
-from pennylane.wires import Wires
-
 
 from pyquil import Program
-from pyquil.api import QVM, QPU, QAMExecutionResult, QuantumComputer, QuantumExecutable
+from pyquil.api import QPU, QAMExecutionResult, QuantumComputer, QuantumExecutable
 from pyquil.gates import RESET, MEASURE
 from pyquil.quil import Pragma
 
@@ -108,30 +106,27 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             else:
                 raise ValueError("Wires must be specified for a QPU device. Got None for wires.")
 
-        # Interpret wires as Pennylane would, and use the labels to map to actual qubits on the device.
-        if isinstance(wires, int):
-            pennylane_wires = Wires(list(range(wires)))
-        elif isinstance(wires, Iterable):
-            pennylane_wires = Wires(wires)
-        elif isinstance(self.qc.qam, QVM):
-            pennylane_wires = Wires(len(qubits))
-        else:
+        try: 
+            if isinstance(wires, int):
+                wires = dict(zip(range(wires), qubits[:wires], strict = True))
+            elif isinstance(wires, Iterable):
+                wires = dict(zip(wires, qubits[:len(wires)], strict = True))
+            else:
+                raise ValueError(
+                    "Wires for a device must be an integer or an iterable of numbers or strings."
+                )
+        except ValueError:
             raise ValueError(
-                "Wires for a device must be an integer or an iterable of numbers or strings."
-            )
-
-        if len(pennylane_wires) > len(qubits):
-            raise ValueError(
-                "Wires must not exceed available qubits on the device. Got "
-                f"{len(pennylane_wires)} wires, but the device only has {len(qubits)} "
-                "qubits."
+                "Wires must not exceed available qubits on the device. ", 
+                f"The requested device only has {len(qubits)} qubits."
             )
 
         self.num_wires = len(qubits)
-        self._qubits = qubits
+        self._qubits = qubits[:len(wires)]
         self.active_reset = active_reset
+        self.wiring = wires
 
-        super().__init__(pennylane_wires, shots)
+        super().__init__(wires, shots)
 
     @abstractmethod
     def get_qc(self, device, **kwargs) -> QuantumComputer:
@@ -185,7 +180,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         return timeout_args
 
     def define_wire_map(self, wires):
-        return OrderedDict(enumerate(range(self.num_wires)))
+        return OrderedDict(zip(range(len(self._qubits)), self._qubits))
 
     def apply(self, operations, **kwargs):
         """Applies the given quantum operations."""
