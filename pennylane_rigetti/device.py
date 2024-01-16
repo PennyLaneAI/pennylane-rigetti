@@ -63,7 +63,7 @@ from pyquil.gates import (
 )
 
 from pennylane import QubitDevice, DeviceError
-from pennylane.wires import Wires
+from pennylane.wires import Wires, WireError
 
 from ._version import __version__
 
@@ -199,14 +199,37 @@ class RigettiDevice(QubitDevice):
         """View the last evaluated Quil program"""
         return self.prog
 
-    def define_wire_map(self, wires):
-        if hasattr(self, "wiring"):
-            device_wires = Wires(self.wiring)
-        else:
-            # if no wiring given, use consecutive wire labels
-            device_wires = Wires(range(self.num_wires))
+    def map_wires_to_backend(self, wires):
+        """This is a plugin-specific method for Rigetti that maps the wire
+        labels as provided by the user on device initialization (and used
+        in defining PennyLane circuits) to the backend qubit labels. This
+        mapping, should it exist, is stored in the self.wiring object.
 
-        return OrderedDict(zip(wires, device_wires))
+        If no hardware wire labels exist (e.g. simulator backends), this
+        method will map to consecutive wire ordering. Mapping from the
+        user-provided labels to consecutive integers is already included in
+        the map_wires function of the PennyLane device base class.
+
+        **Example**
+
+        A device created with wires ["a", "b", "c"] on a hardware backend with
+        qubits [100, 101, 102...] will have a self.wiring of {"a":100, "b":101, "c":102},
+        which will be used to map the wires from the PennyLane circuit to the backend.
+
+        If the backend doesn't have self.wiring, this will be mapped according to the
+        wire_map, {"a":0, "b":1, "c":2}, instead"""
+        if hasattr(self, "wiring"):
+            backend_wire_map = self.wiring
+        else:
+            backend_wire_map = self.wire_map
+        try:
+            mapped_wires = wires.map(backend_wire_map)
+        except WireError as e:
+            raise WireError(
+                f"Did not find some of the wires {wires} on device with wires {self.wires}."
+            ) from e
+
+        return mapped_wires
 
     def apply(self, operations, **kwargs):
         self.prog += self.apply_circuit_operations(operations)
@@ -227,9 +250,9 @@ class RigettiDevice(QubitDevice):
         rotation_operations = Program()
         for operation in rotations:
             # map the ops' wires to the wire labels used by the device
-            device_wires = self.map_wires(operation.wires)
+            backend_wires = self.map_wires_to_backend(operation.wires)
             par = operation.parameters
-            rotation_operations += self._operation_map[operation.name](*par, *device_wires.labels)
+            rotation_operations += self._operation_map[operation.name](*par, *backend_wires.labels)
 
         return rotation_operations
 
@@ -245,7 +268,7 @@ class RigettiDevice(QubitDevice):
         prog = Program()
         for i, operation in enumerate(operations):
             # map the ops' wires to the wire labels used by the device
-            device_wires = self.map_wires(operation.wires)
+            backend_wires = self.map_wires_to_backend(operation.wires)
             par = operation.parameters
 
             if isinstance(par, list) and par:
@@ -261,7 +284,7 @@ class RigettiDevice(QubitDevice):
                     f"been applied on a {short_name} device."
                 )
 
-            prog += self._operation_map[operation.name](*par, *device_wires.labels)
+            prog += self._operation_map[operation.name](*par, *backend_wires.labels)
 
         return prog
 

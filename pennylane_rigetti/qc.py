@@ -183,8 +183,6 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
         return timeout_args
 
-    def define_wire_map(self, wires):
-        return OrderedDict(zip(range(len(self._qubits)), self._qubits))
 
     def apply(self, operations, **kwargs):
         """Applies the given quantum operations."""
@@ -220,7 +218,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         # Apply the circuit operations
         for i, operation in enumerate(operations):
             # map the operation wires to the physical device qubits
-            device_wires = self.map_wires(operation.wires)
+            backend_wires = self.map_wires_to_backend(operation.wires)
 
             if i > 0 and operation.name in (
                 "QubitStateVector",
@@ -255,7 +253,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
                 else:
                     par.append(param)
 
-            prog += self._operation_map[operation.name](*par, *device_wires.labels)
+            prog += self._operation_map[operation.name](*par, *backend_wires.labels)
 
         return prog
 
