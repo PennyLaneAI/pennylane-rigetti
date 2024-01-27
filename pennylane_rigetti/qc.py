@@ -20,7 +20,6 @@ Code details
 """
 
 from abc import ABC, abstractmethod
-from collections import OrderedDict
 from typing import Dict
 from pennylane.utils import Iterable
 from pennylane import DeviceError, numpy as np
@@ -59,6 +58,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
+
     version = __version__
     author = "Rigetti Computing Inc."
 
@@ -182,7 +182,6 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             timeout_args["execution_timeout"] = kwargs["execution_timeout"]
 
         return timeout_args
-
 
     def apply(self, operations, **kwargs):
         """Applies the given quantum operations."""

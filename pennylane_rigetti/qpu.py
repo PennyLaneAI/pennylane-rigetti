@@ -19,6 +19,7 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
+
 import warnings
 
 import numpy as np
@@ -72,6 +73,7 @@ class QPUDevice(QuantumComputerDevice):
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
+
     name = "Rigetti QPU Device"
     short_name = "rigetti.qpu"
 
