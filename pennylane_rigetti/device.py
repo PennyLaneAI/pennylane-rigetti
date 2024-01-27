@@ -34,8 +34,6 @@ import uuid
 
 import numpy as np
 
-from collections import OrderedDict
-
 from pyquil import Program
 from pyquil.quil import DefGate
 from pyquil.gates import (
@@ -64,7 +62,7 @@ from pyquil.gates import (
 )
 
 from pennylane import QubitDevice, DeviceError
-from pennylane.wires import Wires, WireError
+from pennylane.wires import WireError
 
 from ._version import __version__
 
