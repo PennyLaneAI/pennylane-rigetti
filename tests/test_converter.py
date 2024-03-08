@@ -1083,7 +1083,7 @@ class TestIntegration:
         program += g.RZ(0.34, 1)
 
         with OperationRecorder() as rec:
-            qml.load(program, format="pyquil_program")(wires=range(5))
+            qml.from_pyquil(program)(wires=range(5))
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -1121,7 +1121,7 @@ class TestIntegration:
         )
 
         with OperationRecorder() as rec:
-            qml.load(quil_str, format="quil")(wires=range(5))
+            qml.from_quil(quil_str)(wires=range(5))
 
         # The wires should be assigned as
         # 0  1  2  3  7
@@ -1148,7 +1148,7 @@ class TestIntegration:
         cur_dir = os.path.dirname(os.path.abspath(__file__))
 
         with OperationRecorder() as rec:
-            qml.load(os.path.join(cur_dir, "simple_program.quil"), format="quil_file")(
+            qml.from_quil_file(os.path.join(cur_dir, "simple_program.quil"))(
                 wires=range(5)
             )
 
@@ -1182,7 +1182,7 @@ class TestIntegration:
         program += g.RX(delta, 0)
         program += g.CNOT(0, 1)
 
-        loader = qml.load(program, format="pyquil_program")
+        loader = qml.from_pyquil(program)
         dev = qml.device("default.qubit", wires=2)
 
         @qml.qnode(dev)
@@ -1211,7 +1211,7 @@ class TestIntegration:
         """
         )
 
-        loader = qml.load(quil_str, format="quil")
+        loader = qml.from_quil(quil_str)
         dev = qml.device("default.qubit", wires=2)
 
         @qml.qnode(dev)
@@ -1240,7 +1240,7 @@ class TestIntegration:
         """
         )
 
-        loader = qml.load(quil_str, format="quil")
+        loader = qml.from_quil(quil_str)
         dev = qml.device("default.qubit", wires=2)
 
         @qml.qnode(dev)
@@ -1278,7 +1278,7 @@ class TestIntegration:
         program += g.CNOT(1, 2)
 
         # Convert to a PennyLane circuit
-        program_pl = qml.load(program, format="pyquil_program")
+        program_pl = qml.from_pyquil(program)
 
         dev = qml.device("default.qubit", wires=3)
 
