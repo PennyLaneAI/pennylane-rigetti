@@ -19,6 +19,7 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
+
 import networkx as nx
 from pyquil import get_qc
 from pyquil.api import QuantumComputer, QuantumExecutable
@@ -62,6 +63,7 @@ class QVMDevice(QuantumComputerDevice):
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
+
     name = "Rigetti QVM Device"
     short_name = "rigetti.qvm"
 

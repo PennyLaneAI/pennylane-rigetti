@@ -1,6 +1,7 @@
 """
 Unit tests for the abstract RigettiDevice class
 """
+
 from unittest.mock import patch
 import pytest
 

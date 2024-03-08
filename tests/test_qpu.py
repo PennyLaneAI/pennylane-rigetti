@@ -1,6 +1,7 @@
 """
 Unit tests for the QPU device.
 """
+
 import logging
 
 import numpy as np
