@@ -21,6 +21,7 @@ Operations
 Code details
 ~~~~~~~~~~~~
 """
+
 import pennylane as qml
 from pennylane.operation import Operation
 
@@ -53,6 +54,7 @@ class CPHASE(Operation):
             gets applied
         wires (int): the subsystem the gate acts on
     """
+
     num_params = 2
     num_wires = 2
     par_domain = "R"
