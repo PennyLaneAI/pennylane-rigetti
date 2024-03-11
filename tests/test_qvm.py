@@ -1,6 +1,7 @@
 """
 Unit tests for the QVM simulator device.
 """
+
 import logging
 
 import networkx as nx

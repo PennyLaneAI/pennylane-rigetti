@@ -61,6 +61,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
+
     version = __version__
     author = "Rigetti Computing Inc."
 

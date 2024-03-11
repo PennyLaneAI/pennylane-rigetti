@@ -1,6 +1,7 @@
 """
 Unit tests for the wavefunction simulator device.
 """
+
 import logging
 
 import pytest
