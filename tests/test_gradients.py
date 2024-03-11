@@ -13,7 +13,7 @@ def test_simulator_qvm_default_agree(tol, qvm, compiler):
 
     dev1 = qml.device("default.qubit", wires=w)
     dev2 = qml.device("rigetti.wavefunction", wires=w)
-    dev3 = qml.device("rigetti.qvm", device="9q-square-qvm", shots=5000)
+    dev3 = qml.device("rigetti.qvm", wires=9, device="9q-square-qvm", shots=5000)
 
     in_state = np.zeros([w], dtype=np.int64, requires_grad=False)
     in_state[0] = 1
@@ -57,7 +57,7 @@ def test_gradient_with_custom_operator(qvm, compiler):
     w = 9
 
     dev2 = qml.device("rigetti.wavefunction", wires=w)
-    dev3 = qml.device("rigetti.qvm", device="9q-square-qvm", shots=5000)
+    dev3 = qml.device("rigetti.qvm", wires=9, device="9q-square-qvm", shots=5000)
 
     def func(x, y):
         """Reference QNode"""
