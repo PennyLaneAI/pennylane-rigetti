@@ -1148,9 +1148,7 @@ class TestIntegration:
         cur_dir = os.path.dirname(os.path.abspath(__file__))
 
         with OperationRecorder() as rec:
-            qml.from_quil_file(os.path.join(cur_dir, "simple_program.quil"))(
-                wires=range(5)
-            )
+            qml.from_quil_file(os.path.join(cur_dir, "simple_program.quil"))(wires=range(5))
 
         # The wires should be assigned as
         # 0  1  2  3  7

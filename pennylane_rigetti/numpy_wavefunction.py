@@ -41,7 +41,7 @@ class NumpyWavefunctionDevice(RigettiDevice):
     name = "pyQVM NumpyWavefunction Simulator Device"
     short_name = "rigetti.numpy_wavefunction"
 
-    observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
+    observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity", "Prod"}
 
     def __init__(self, wires, *, shots=None):
         super().__init__(wires, shots)

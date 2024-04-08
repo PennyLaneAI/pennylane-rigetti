@@ -25,6 +25,7 @@ import warnings
 import numpy as np
 from pennylane.measurements import Expectation
 from pennylane.operation import Tensor
+from pennylane.ops import Prod
 from pennylane.tape import QuantumTape
 from pyquil import get_qc
 from pyquil.api import QuantumComputer
@@ -141,7 +142,7 @@ class QPUDevice(QuantumComputerDevice):
                 pauli_obs = sZ(wire)
 
             # Multi-qubit observable
-            elif len(device_wires) > 1 and isinstance(observable, Tensor):
+            elif len(device_wires) > 1 and isinstance(observable, (Tensor, Prod)):
                 # All observables are rotated to be measured in the Z-basis, so we just need to
                 # check which wires exist in the observable, map them to physical qubits, and measure
                 # the product of PauliZ operators on those qubits
