@@ -60,7 +60,7 @@ class WavefunctionDevice(RigettiDevice):
     name = "Rigetti Wavefunction Simulator Device"
     short_name = "rigetti.wavefunction"
 
-    observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
+    observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity", "Prod"}
 
     def __init__(self, wires, *, shots=None):
         super().__init__(wires, shots)
