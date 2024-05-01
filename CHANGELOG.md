@@ -1,20 +1,15 @@
-# Release 0.35.0-dev
+# Release 0.36.0
 
 ### New features since last release
 
-### Improvements 🛠
-
-### Breaking changes 💔
-
-### Deprecations 👋
-
-### Documentation 📝
-
-### Bug fixes 🐛
+* Added support for the `Prod` observable.
+  [(#155)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/155)
 
 ### Contributors ✍️
 
 This release contains contributions from (in alphabetical order):
+
+Astral Cai
 
 ---
 # Release 0.34.0
