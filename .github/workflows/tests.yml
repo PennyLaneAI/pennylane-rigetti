@@ -75,8 +75,8 @@ jobs:
       - name: Install plugin and test requirements
         run: |
           python -m pip install --upgrade pip
-          pip install '.[test]'
           pip install --upgrade git+https://github.com/PennyLaneAI/pennylane.git#egg=pennylane
+          pip install '.[test]'
 
       - name: Run tests
         run: |
