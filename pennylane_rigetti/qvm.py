@@ -52,9 +52,8 @@ class QVMDevice(QuantumComputerDevice):
             If a list of integers is passed, the circuit evaluations are batched over the list of shots.
         wires (Iterable[Number, str]): Iterable that contains unique labels for the
             qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``).
-            The number of labels must match the number of qubits accessible on the backend.
-            If not provided, qubits are addressed as consecutive integers [0, 1, ...], and their number
-            is inferred from the backend.
+            The number of labels must match the number of qubits accessible for the selected QMV.
+            If not provided, qubits are addressed as consecutive integers [0, 1, ...], and their number is inferred from the QVM.
         noisy (bool): set to ``True`` to add noise models to your QVM.
 
     Keyword args:
@@ -67,7 +66,7 @@ class QVMDevice(QuantumComputerDevice):
     name = "Rigetti QVM Device"
     short_name = "rigetti.qvm"
 
-    def __init__(self, device, *, shots=1000, wires=None, noisy=False, **kwargs):
+    def __init__(self, device, *, wires=None, shots=1000, noisy=False, **kwargs):
         if shots is None:
             raise ValueError("QVM device cannot be used for analytic computations.")
 

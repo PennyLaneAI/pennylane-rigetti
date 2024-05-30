@@ -20,7 +20,7 @@ import sys, os, re
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("_ext"))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath('.')), 'doc'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(".")), "doc"))
 
 # -- General configuration ------------------------------------------------
 
@@ -39,8 +39,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.inheritance_diagram",
     "sphinx.ext.intersphinx",
-    'sphinx.ext.viewcode',
-    "sphinx_automodapi.automodapi"
+    "sphinx.ext.viewcode",
+    "sphinx_automodapi.automodapi",
 ]
 
 autosummary_generate = True
@@ -50,6 +50,7 @@ automodsumm_inherited_members = True
 
 # Add any paths that contain templates here, relative to this directory.
 from pennylane_sphinx_theme import templates_dir
+
 templates_path = [templates_dir()]
 
 # The suffix(es) of source filenames.
@@ -111,7 +112,7 @@ todo_include_todos = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = "sphinx_rtd_theme"
+# html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -135,12 +136,12 @@ todo_include_todos = True
 # The name of an image file (relative to this directory) to use as a favicon of
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = '_static/favicon.ico'
+html_favicon = "_static/favicon.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -220,7 +221,7 @@ html_static_path = ['_static']
 htmlhelp_basename = "PennyLane-Rigettidoc"
 
 # # -- Xanadu theme ---------------------------------------------------------
-html_theme = 'pennylane'
+html_theme = "pennylane"
 
 # Register the theme as an extension to generate a sitemap.xml
 # extensions.append("guzzle_sphinx_theme")
@@ -229,16 +230,15 @@ html_theme = 'pennylane'
 html_theme_options = {
     "navbar_name": "PennyLane-Rigetti",
     "extra_copyrights": [
-        "TensorFlow, the TensorFlow logo, and any related marks are trademarks "
-        "of Google Inc."
+        "TensorFlow, the TensorFlow logo, and any related marks are trademarks " "of Google Inc."
     ],
     "toc_overview": True,
     "navbar_active_link": 3,
-    "google_analytics_tracking_id": "G-C480Z9JL0D"
+    "google_analytics_tracking_id": "G-C480Z9JL0D",
 }
 
-edit_on_github_project = 'PennyLaneAI/pennylane-rigetti'
-edit_on_github_branch = 'master/doc'
+edit_on_github_project = "PennyLaneAI/pennylane-rigetti"
+edit_on_github_branch = "master/doc"
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -263,7 +263,13 @@ latex_additional_files = ["macros.tex"]
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "PennyLane-Rigetti.tex", "PennyLane-Rigetti Documentation", "Xanadu Inc.", "manual"),
+    (
+        master_doc,
+        "PennyLane-Rigetti.tex",
+        "PennyLane-Rigetti Documentation",
+        "Xanadu Inc.",
+        "manual",
+    ),
 ]
 
 
@@ -295,10 +301,10 @@ texinfo_documents = [
 # ============================================================
 
 # the order in which autodoc lists the documented members
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 # inheritance_diagram graphviz attributes
-inheritance_node_attrs = dict(color='lightskyblue1', style='filled')
+inheritance_node_attrs = dict(color="lightskyblue1", style="filled")
 
-#autodoc_default_flags = ['members']
+# autodoc_default_flags = ['members']
 autosummary_generate = True

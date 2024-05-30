@@ -8,8 +8,6 @@ import numpy as np
 import pennylane as qml
 import pytest
 from conftest import U2, BaseTest, H, I, U, Z, test_operation_map
-from pennylane.circuit_graph import CircuitGraph
-from pennylane.tape import QuantumTape
 
 import pennylane_rigetti as plf
 
@@ -59,7 +57,9 @@ class TestPyQVMBasic(BaseTest):
         res = circuit()
         # below are the analytic expectation values for this circuit
         assert np.allclose(
-            res, np.array([np.cos(theta), np.cos(theta) * np.cos(phi)]), atol=3 / np.sqrt(shots)
+            res,
+            np.array([np.cos(theta), np.cos(theta) * np.cos(phi)]),
+            atol=3 / np.sqrt(shots),
         )
 
     def test_paulix_expectation(self, shots):
@@ -79,7 +79,9 @@ class TestPyQVMBasic(BaseTest):
         res = circuit()
         # below are the analytic expectation values for this circuit
         assert np.allclose(
-            res, np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]), atol=3 / np.sqrt(shots)
+            res,
+            np.array([np.sin(theta) * np.sin(phi), np.sin(phi)]),
+            atol=3 / np.sqrt(shots),
         )
 
     def test_pauliy_expectation(self, shots):
@@ -121,7 +123,10 @@ class TestPyQVMBasic(BaseTest):
 
         # below are the analytic expectation values for this circuit
         expected = np.array(
-            [np.sin(theta) * np.sin(phi) + np.cos(theta), np.cos(theta) * np.cos(phi) + np.sin(phi)]
+            [
+                np.sin(theta) * np.sin(phi) + np.cos(theta),
+                np.cos(theta) * np.cos(phi) + np.sin(phi),
+            ]
         ) / np.sqrt(2)
         assert np.allclose(res, expected, atol=3 / np.sqrt(shots))
 
@@ -288,8 +293,8 @@ class TestQVMIntegration(BaseTest):
 
     def test_qubit_unitary(self, shots):
         """Test that an arbitrary unitary operation works"""
-        dev1 = qml.device("rigetti.qvm", device="3q-pyqvm", shots=shots)
-        dev2 = qml.device("rigetti.qvm", device="9q-square-pyqvm", shots=shots)
+        dev1 = qml.device("rigetti.qvm", wires=3, device="3q-pyqvm", shots=shots)
+        dev2 = qml.device("rigetti.qvm", wires=9, device="9q-square-pyqvm", shots=shots)
 
         def circuit():
             """Reference QNode"""
@@ -307,11 +312,11 @@ class TestQVMIntegration(BaseTest):
         assert np.allclose(circuit1(), np.vdot(out_state, obs @ out_state), atol=3 / np.sqrt(shots))
         assert np.allclose(circuit2(), np.vdot(out_state, obs @ out_state), atol=3 / np.sqrt(shots))
 
-    @pytest.mark.parametrize("device", ["2q-pyqvm"])
+    @pytest.mark.parametrize("device", ["3q-pyqvm"])
     def test_one_qubit_wavefunction_circuit(self, device, shots):
         """Test that the wavefunction plugin provides correct result for simple circuit."""
         shots = 10000
-        dev = qml.device("rigetti.qvm", device=device, shots=shots)
+        dev = qml.device("rigetti.qvm", wires=3, device=device, shots=shots)
 
         a = 0.543
         b = 0.123

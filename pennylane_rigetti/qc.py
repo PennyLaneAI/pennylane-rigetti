@@ -21,15 +21,13 @@ Code details
 
 from abc import ABC, abstractmethod
 from typing import Dict
-from collections import OrderedDict
+from pennylane.utils import Iterable
+from pennylane import DeviceError, numpy as np
 
 from pyquil import Program
-from pyquil.api import QAMExecutionResult, QuantumComputer, QuantumExecutable
+from pyquil.api import QPU, QAMExecutionResult, QuantumComputer, QuantumExecutable
 from pyquil.gates import RESET, MEASURE
 from pyquil.quil import Pragma
-
-from pennylane import DeviceError, numpy as np
-from pennylane.wires import Wires
 
 from .device import RigettiDevice
 from ._version import __version__
@@ -45,11 +43,6 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         device (str): the name of the device to initialise.
         shots (int): number of circuit evaluations/random samples used
             to estimate expectation values of observables.
-         wires (Iterable[Number, str]): Iterable that contains unique labels for the
-            qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``).
-            The number of labels must match the number of qubits accessible on the backend.
-            If not provided, qubits are addressed as consecutive integers ``[0, 1, ...]``, and their number
-            is inferred from the backend.
         active_reset (bool): whether to actively reset qubits instead of waiting for
             for qubits to decay to the ground state naturally.
             Setting this to ``True`` results in a significantly faster expectation value
@@ -57,6 +50,10 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
     Keyword args:
         compiler_timeout (int): number of seconds to wait for a response from quilc (default 10).
+        wires (Optional[Union[int, Iterable[Number, str]]]): Number of qubits represented by the device, or an iterable that contains
+            unique labels for the qubits as numbers or strings (i.e., ``['q1', ..., 'qN']``). When an integer is provided, qubits
+            are addressed as consecutive integers ``[0, 1, n]`` and mapped to the first available qubits on the device. `wires` must
+            be provided for QPU devices. If not provided for a QVM device, then the number of wires is inferred from the QVM.
         execution_timeout (int): number of seconds to wait for a response from the QVM (default 10).
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
@@ -65,7 +62,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
     version = __version__
     author = "Rigetti Computing Inc."
 
-    def __init__(self, device, *, shots=1000, wires=None, active_reset=False, **kwargs):
+    def __init__(self, device, *, wires=None, shots=1000, active_reset=False, **kwargs):
         if shots is not None and shots <= 0:
             raise ValueError("Number of shots must be a positive integer or None.")
 
@@ -95,27 +92,43 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
         self.qc = self.get_qc(device, **timeout_args)
 
-        self.num_wires = len(self.qc.qubits())
+        qubits = sorted(
+            [
+                qubit.id
+                for qubit in self.qc.quantum_processor.to_compiler_isa().qubits.values()
+                if qubit.dead is False
+            ]
+        )
 
         if wires is None:
-            # infer the number of modes from the device specs
-            # and use consecutive integer wire labels
-            wires = range(self.num_wires)
+            if not isinstance(self.qc.qam, QPU):
+                wires = len(qubits)
+            else:
+                raise ValueError("Wires must be specified for a QPU device. Got None for wires.")
 
         if isinstance(wires, int):
+            if wires > len(qubits):
+                raise ValueError(
+                    "Wires must not exceed available qubits on the device. ",
+                    f"The requested device only has {len(qubits)} qubits, received {wires}.",
+                )
+            wires = dict(zip(range(wires), qubits[:wires]))
+        elif isinstance(wires, Iterable):
+            if len(wires) > len(qubits):
+                raise ValueError(
+                    "Wires must not exceed available qubits on the device. ",
+                    f"The requested device only has {len(qubits)} qubits, received {len(wires)}.",
+                )
+            wires = dict(zip(wires, qubits[: len(wires)]))
+        else:
             raise ValueError(
-                f"Device has a fixed number of {self.num_wires} qubits. The wires argument can only be used "
-                "to specify an iterable of wire labels."
+                "Wires for a device must be an integer or an iterable of numbers or strings."
             )
 
-        if self.num_wires != len(wires):
-            raise ValueError(
-                f"Device has a fixed number of {self.num_wires} qubits and "
-                f"cannot be created with {len(wires)} wires."
-            )
-
-        self.wiring = dict(enumerate(self.qc.qubits()))
+        self.num_wires = len(qubits)
+        self._qubits = qubits[: len(wires)]
         self.active_reset = active_reset
+        self.wiring = wires
 
         super().__init__(wires, shots)
 
@@ -170,21 +183,11 @@ class QuantumComputerDevice(RigettiDevice, ABC):
 
         return timeout_args
 
-    def define_wire_map(self, wires):
-        if hasattr(self, "wiring"):
-            device_wires = Wires(self.wiring)
-        else:
-            # if no wiring given, use consecutive wire labels
-            device_wires = Wires(range(self.num_wires))
-
-        return OrderedDict(zip(wires, device_wires))
-
     def apply(self, operations, **kwargs):
         """Applies the given quantum operations."""
-        prag = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
+        self.prog = Program(Pragma("INITIAL_REWIRING", ['"PARTIAL"']))
         if self.active_reset:
-            prag += RESET()
-        self.prog = prag + self.prog
+            self.prog += RESET()
 
         if self.parametric_compilation:
             self.prog += self.apply_parametric_operations(operations)
@@ -194,7 +197,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
         rotations = kwargs.get("rotations", [])
         self.prog += self.apply_rotations(rotations)
 
-        qubits = sorted(self.wiring.values())
+        qubits = self._qubits
         ro = self.prog.declare("ro", "BIT", len(qubits))
         for i, q in enumerate(qubits):
             self.prog.inst(MEASURE(q, ro[i]))
@@ -208,15 +211,19 @@ class QuantumComputerDevice(RigettiDevice, ABC):
             operations (List[pennylane.Operation]): quantum operations that need to be applied
 
         Returns:
-            pyquil.Prgram(): a pyQuil Program with the given operations
+            pyquil.Program(): a pyQuil Program with the given operations
         """
         prog = Program()
         # Apply the circuit operations
         for i, operation in enumerate(operations):
             # map the operation wires to the physical device qubits
-            device_wires = self.map_wires(operation.wires)
+            backend_wires = self.map_wires_to_backend(operation.wires)
 
-            if i > 0 and operation.name in ("QubitStateVector", "StatePrep", "BasisState"):
+            if i > 0 and operation.name in (
+                "QubitStateVector",
+                "StatePrep",
+                "BasisState",
+            ):
                 raise DeviceError(
                     f"Operation {operation.name} cannot be used after other Operations have already been applied "
                     f"on a {self.short_name} device."
@@ -245,7 +252,7 @@ class QuantumComputerDevice(RigettiDevice, ABC):
                 else:
                     par.append(param)
 
-            prog += self._operation_map[operation.name](*par, *device_wires.labels)
+            prog += self._operation_map[operation.name](*par, *backend_wires.labels)
 
         return prog
 
