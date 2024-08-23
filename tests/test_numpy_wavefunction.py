@@ -258,7 +258,7 @@ class TestWavefunctionIntegration(BaseTest):
         """Test that the wavefunction device loads correctly"""
         dev = qml.device("rigetti.numpy_wavefunction", wires=2)
         self.assertEqual(dev.num_wires, 2)
-        self.assertEqual(dev.shots, None)
+        assert not dev.shots
         self.assertEqual(dev.short_name, "rigetti.numpy_wavefunction")
 
     def test_program_property(self):

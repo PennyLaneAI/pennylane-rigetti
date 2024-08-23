@@ -241,7 +241,7 @@ class TestWavefunctionIntegration(BaseTest):
         """Test that the wavefunction device loads correctly"""
         dev = qml.device("rigetti.wavefunction", wires=2)
         self.assertEqual(dev.num_wires, 2)
-        self.assertEqual(dev.shots, None)
+        assert not dev.shots
         self.assertEqual(dev.short_name, "rigetti.wavefunction")
 
     def test_program_property(self, qvm, compiler):
@@ -302,7 +302,7 @@ class TestWavefunctionIntegration(BaseTest):
     def test_invalid_qubit_unitary(self):
         """Test that an invalid unitary operation is not allowed"""
         dev = qml.device("rigetti.wavefunction", wires=3)
-        dev.shots = 1
+        dev.target_device.shots = 1
 
         def circuit(Umat):
             """Test QNode"""
