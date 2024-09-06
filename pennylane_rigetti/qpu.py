@@ -19,11 +19,13 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
+
 import warnings
 
 import numpy as np
 from pennylane.measurements import Expectation
 from pennylane.operation import Tensor
+from pennylane.ops import Prod
 from pennylane.tape import QuantumTape
 from pyquil import get_qc
 from pyquil.api import QuantumComputer
@@ -74,6 +76,7 @@ class QPUDevice(QuantumComputerDevice):
         parametric_compilation (bool): a boolean value of whether or not to use parametric
             compilation.
     """
+
     name = "Rigetti QPU Device"
     short_name = "rigetti.qpu"
 
@@ -139,7 +142,7 @@ class QPUDevice(QuantumComputerDevice):
                 pauli_obs = sZ(wire)
 
             # Multi-qubit observable
-            elif len(device_wires) > 1 and isinstance(observable, Tensor):
+            elif len(device_wires) > 1 and isinstance(observable, (Tensor, Prod)):
                 # All observables are rotated to be measured in the Z-basis, so we just need to
                 # check which wires exist in the observable, map them to physical qubits, and measure
                 # the product of PauliZ operators on those qubits
@@ -191,7 +194,7 @@ class QPUDevice(QuantumComputerDevice):
 
     def execute(self, circuit: QuantumTape, **kwargs):
         self._skip_generate_samples = (
-            all(obs.return_type == Expectation for obs in circuit.observables)
+            all(mp.return_type is Expectation for mp in circuit.measurements)
             and not self.parametric_compilation
         )
 

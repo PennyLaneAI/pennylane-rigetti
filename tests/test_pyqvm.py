@@ -1,6 +1,7 @@
 """
 Unit tests for the pyQVM simulator device.
 """
+
 import logging
 
 import numpy as np

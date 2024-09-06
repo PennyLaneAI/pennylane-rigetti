@@ -26,6 +26,7 @@ Classes
 Code details
 ~~~~~~~~~~~~
 """
+
 import numpy as np
 
 from pyquil.api import WavefunctionSimulator
@@ -55,10 +56,11 @@ class WavefunctionDevice(RigettiDevice):
         shots (int): Number of circuit evaluations/random samples used
             to estimate expectation values of observables.
     """
+
     name = "Rigetti Wavefunction Simulator Device"
     short_name = "rigetti.wavefunction"
 
-    observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity"}
+    observables = {"PauliX", "PauliY", "PauliZ", "Hadamard", "Hermitian", "Identity", "Prod"}
 
     def __init__(self, wires, *, shots=None):
         super().__init__(wires, shots)

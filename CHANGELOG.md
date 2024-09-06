@@ -1,3 +1,50 @@
+# Release 0.37.0-dev
+
+### New features since last release
+
+### Improvements 🛠
+
+### Breaking changes 💔
+
+### Deprecations 👋
+
+### Documentation 📝
+
+### Bug fixes 🐛
+
+### Contributors ✍️
+
+This release contains contributions from (in alphabetical order):
+
+---
+# Release 0.36.0
+
+### New features since last release
+
+* Added support for the `Prod` observable.
+  [(#155)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/155)
+
+### Contributors ✍️
+
+This release contains contributions from (in alphabetical order):
+
+Astral Cai
+
+---
+# Release 0.34.0
+
+### Improvements 🛠
+
+* Use `tape.measurements` instead of `tape.observables` to identify the type of measurement process
+  [(#146)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/146)
+
+### Contributors ✍️
+
+This release contains contributions from (in alphabetical order):
+
+Matthew Silverman
+
+---
 # Release 0.33.0
 
 ### Improvements 🛠

@@ -1,6 +1,7 @@
 """
 Unit tests for the QVM simulator device.
 """
+
 import logging
 
 import networkx as nx
@@ -632,7 +633,7 @@ class TestQVMIntegration(BaseTest):
         """Test that the QVM device loads correctly"""
         dev = qml.device("rigetti.qvm", device="2q-qvm")
         self.assertEqual(dev.num_wires, 2)
-        self.assertEqual(dev.shots, 1000)
+        self.assertEqual(dev.shots.total_shots, 1000)
         self.assertEqual(dev.short_name, "rigetti.qvm")
 
     def test_load_qvm_device_from_topology(self, qvm):
@@ -640,7 +641,7 @@ class TestQVMIntegration(BaseTest):
         topology = nx.complete_graph(2)
         dev = qml.device("rigetti.qvm", device=topology)
         self.assertEqual(dev.num_wires, 2)
-        self.assertEqual(dev.shots, 1000)
+        self.assertEqual(dev.shots.total_shots, 1000)
         self.assertEqual(dev.short_name, "rigetti.qvm")
 
     def test_load_virtual_qpu_device(self, qvm):

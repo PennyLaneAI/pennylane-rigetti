@@ -1,6 +1,7 @@
 """
 Unit tests for the QPU device.
 """
+
 import logging
 
 import numpy as np
@@ -32,7 +33,7 @@ class TestQPUIntegration(BaseTest):
         qc = pyquil.get_qc(device)
         num_wires = len(qc.qubits())
         self.assertEqual(dev.num_wires, num_wires)
-        self.assertEqual(dev.shots, 1000)
+        self.assertEqual(dev.shots.total_shots, 1000)
         self.assertEqual(dev.short_name, "rigetti.qpu")
 
     def test_load_virtual_qpu_device(self):

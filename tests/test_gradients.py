@@ -1,6 +1,7 @@
 """
 Integration tests for quantum gradient computations.
 """
+
 import pennylane as qml
 from pennylane import numpy as np
 
@@ -60,7 +61,7 @@ def test_gradient_with_custom_operator(qvm, compiler):
 
     def func(x, y):
         """Reference QNode"""
-        qml.BasisState(np.array([1, 1], requires_grad=False), wires=0)
+        qml.BasisState(np.array([1, 1], requires_grad=False), wires=[0, 1])
         qml.RY(x, wires=0)
         qml.RX(y, wires=1)
         qml.PSWAP(np.array(0.432, requires_grad=False), wires=[0, 1])
