@@ -63,7 +63,8 @@ from pyquil.gates import (
     PSWAP,
 )
 
-from pennylane import QubitDevice, DeviceError
+from pennylane import DeviceError
+from pennylane.devices import QubitDevice
 from pennylane.wires import Wires
 
 from ._version import __version__
