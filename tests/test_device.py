@@ -126,14 +126,13 @@ class TestMatVecProduct:
         ):
             dev.apply(queue)
 
-    @pytest.mark.parametrize("op", [qml.StatePrep, qml.QubitStateVector])
-    def test_apply_statesvector_raises_an_error_if_not_first(self, op):
-        """Test that there is an error raised when the QubitStateVector or StatePrep op is not
+    def test_apply_statesvector_raises_an_error_if_not_first(self):
+        """Test that there is an error raised when the StatePrep op is not
         applied as the first operation."""
         wires = 1
         dev = RigettiDevice(wires=wires, shots=1)
 
-        operation = op(np.array([1, 0]), wires=list(range(wires)))
+        operation = qml.StatePrep(np.array([1, 0]), wires=list(range(wires)))
         queue = [qml.PauliX(0), operation]
         with pytest.raises(
             qml.DeviceError,
