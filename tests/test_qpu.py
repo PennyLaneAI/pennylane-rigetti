@@ -10,7 +10,6 @@ import pyquil
 import pytest
 from conftest import BaseTest
 from flaky import flaky
-from pennylane.operation import Tensor
 from pennylane.wires import Wires
 from pyquil.experiment import SymmetrizationLevel
 
@@ -72,9 +71,9 @@ class TestQPUIntegration(BaseTest):
     @pytest.mark.parametrize(
         "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
     )
-    def test_tensor_expval_parametric_compilation(self, obs):
-        """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
-        turned on.
+    def test_prod_expval_parametric_compilation(self, obs):
+        """Test the QPU expval method for Prod observables made up of a single observable when
+        parametric compilation is turned on.
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
         """
@@ -101,16 +100,16 @@ class TestQPUIntegration(BaseTest):
             qml.CNOT(wires=[2, 3])
 
         @qml.qnode(dev)
-        def circuit_tensor(param):
+        def circuit_prod(param):
             template(param)
-            return qml.expval(Tensor(obs))
+            return qml.expval(qml.prod(obs))
 
         @qml.qnode(dev_1)
         def circuit_obs(param):
             template(param)
             return qml.expval(obs)
 
-        res = circuit_tensor(p)
+        res = circuit_prod(p)
         exp = circuit_obs(p)
 
         assert np.allclose(res, exp, atol=2e-2)
@@ -119,9 +118,9 @@ class TestQPUIntegration(BaseTest):
     @pytest.mark.parametrize(
         "obs", [qml.PauliX(0), qml.PauliZ(0), qml.PauliY(0), qml.Hadamard(0), qml.Identity(0)]
     )
-    def test_tensor_expval_operator_estimation(self, obs, shots):
-        """Test the QPU expval method for Tensor observables made up of a single observable when parametric compilation is
-        turned off allowing operator estimation.
+    def test_prod_expval_operator_estimation(self, obs, shots):
+        """Test the QPU expval method for Prod observables made up of a single observable when
+        parametric compilation is turned off allowing operator estimation.
 
         As the results coming from the qvm are stochastic, a constraint of 3 out of 10 runs was added.
         """
@@ -150,16 +149,16 @@ class TestQPUIntegration(BaseTest):
             qml.CNOT(wires=[2, 3])
 
         @qml.qnode(dev)
-        def circuit_tensor(param):
+        def circuit_prod(param):
             template(param)
-            return qml.expval(Tensor(obs))
+            return qml.expval(qml.prod(obs))
 
         @qml.qnode(dev_1)
         def circuit_obs(param):
             template(param)
             return qml.expval(obs)
 
-        res = circuit_tensor(p)
+        res = circuit_prod(p)
         exp = circuit_obs(p)
 
         assert np.allclose(res, exp, atol=2e-2)
