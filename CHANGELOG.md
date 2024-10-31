@@ -12,9 +12,14 @@
 
 ### Bug fixes 🐛
 
+* Fix deprecated import path for `QubitDevice`.
+  [(#162)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/162)
+
 ### Contributors ✍️
 
 This release contains contributions from (in alphabetical order):
+
+Astral Cai
 
 ---
 # Release 0.36.0
