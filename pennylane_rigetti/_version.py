@@ -2,4 +2,4 @@
    Version number (convention major.minor.patch[-label])
 """
 
-__version__ = "0.37.0-dev"
+__version__ = "0.39.0"
