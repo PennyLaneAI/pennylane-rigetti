@@ -1,5 +1,10 @@
 # Release 0.39.0
 
+### Breaking changes 💔
+
+* Support for Python 3.9 has been removed, and support for Python 3.12 has been added.
+  [(#167)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/167)
+
 ### Bug fixes 🐛
 
 * Fix deprecated import path for `QubitDevice`.
@@ -10,6 +15,7 @@
 This release contains contributions from (in alphabetical order):
 
 Astral Cai
+Mudit Pandey
 
 ---
 # Release 0.36.0
