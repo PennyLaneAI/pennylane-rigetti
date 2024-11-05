@@ -6,7 +6,7 @@
   [(#167)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/167)
 
 * Upgrade minimum supported version of PennyLane to 0.38.0.
-  [(#)]()
+  [(#168)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/168)
 
 ### Bug fixes 🐛
 
