@@ -181,7 +181,7 @@ class RigettiDevice(QubitDevice):
             For simulator devices, 0 means the exact EV is returned.
     """
 
-    pennylane_requires = ">=0.18"
+    pennylane_requires = ">=0.38"
     version = __version__
     author = "Rigetti Computing Inc."
 

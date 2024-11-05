@@ -5,6 +5,9 @@
 * Support for Python 3.9 has been removed, and support for Python 3.12 has been added.
   [(#167)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/167)
 
+* Upgrade minimum supported version of PennyLane to 0.38.0.
+  [(#)]()
+
 ### Bug fixes 🐛
 
 * Fix deprecated import path for `QubitDevice`.

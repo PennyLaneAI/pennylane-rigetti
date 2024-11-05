@@ -1,5 +1,5 @@
 numpy>=1.21
 networkx>=2.5,<3.0
-pennylane>=0.32
+pennylane>=0.38
 pyquil>=3.0.0,<4.0.0
 qcs-api-client>=0.20.13,<0.22.0
