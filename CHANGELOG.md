@@ -6,6 +6,10 @@
 
 ### Breaking changes 💔
 
+* Support for the `pennylane.operation.Tensor` observable is removed. This observable was deprecated,
+  and is fully removed in PennyLane 0.40.
+  [(#170)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/170)
+
 ### Deprecations 👋
 
 ### Documentation 📝
