@@ -1,8 +1,4 @@
-# Release 0.40.0-dev
-
-### New features since last release
-
-### Improvements 🛠
+# Release 0.40.0
 
 ### Breaking changes 💔
 
@@ -10,15 +6,11 @@
   and is fully removed in PennyLane 0.40.
   [(#170)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/170)
 
-### Deprecations 👋
-
-### Documentation 📝
-
-### Bug fixes 🐛
-
 ### Contributors ✍️
 
 This release contains contributions from (in alphabetical order):
+
+Lillian Frederiksen
 
 ---
 # Release 0.39.0
