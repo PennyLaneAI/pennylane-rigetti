@@ -1,24 +1,18 @@
-# Release 0.40.0-dev
-
-### New features since last release
-
-### Improvements 🛠
+# Release 0.40.0
 
 ### Breaking changes 💔
+
+* The PennyLane-Rigetti plugin is only compatible with PennyLane v0.40 or below. To use Rigetti hardware with newer versions of PennyLane please use the [PennyLane-Braket plugin](https://amazon-braket-pennylane-plugin-python.readthedocs.io/en/stable/index.html) instead.
 
 * Support for the `pennylane.operation.Tensor` observable is removed. This observable was deprecated,
   and is fully removed in PennyLane 0.40.
   [(#170)](https://github.com/PennyLaneAI/pennylane-rigetti/pull/170)
 
-### Deprecations 👋
-
-### Documentation 📝
-
-### Bug fixes 🐛
-
 ### Contributors ✍️
 
 This release contains contributions from (in alphabetical order):
+
+Lillian Frederiksen
 
 ---
 # Release 0.39.0

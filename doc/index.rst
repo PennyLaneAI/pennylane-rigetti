@@ -1,6 +1,9 @@
 PennyLane-Rigetti Plugin
 #######################
 
+.. warning:: 
+    The PennyLane-Rigetti plugin is only compatible with PennyLane v0.40 or below. To use Rigetti hardware with newer versions of PennyLane please use the `PennyLane-Braket plugin <https://amazon-braket-pennylane-plugin-python.readthedocs.io/en/stable/index.html>`__ instead.
+
 :Release: |release|
 
 .. include:: ../README.rst
