@@ -23,7 +23,7 @@ Code details
 import warnings
 
 import numpy as np
-from pennylane.measurements import Expectation
+from pennylane.measurements import ExpectationMP
 from pennylane.ops import Prod
 from pennylane.tape import QuantumTape
 from pyquil import get_qc
@@ -193,7 +193,7 @@ class QPUDevice(QuantumComputerDevice):
 
     def execute(self, circuit: QuantumTape, **kwargs):
         self._skip_generate_samples = (
-            all(mp.return_type is Expectation for mp in circuit.measurements)
+            all(isinstance(mp, ExpectationMP) for mp in circuit.measurements)
             and not self.parametric_compilation
         )
 
