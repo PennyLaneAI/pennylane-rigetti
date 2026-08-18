@@ -1,4 +1,4 @@
-PennyLane Rigetti Plugin
+PennyLane Rigetti Plugin 
 ########################
 
 .. warning::
